@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز الخدمات الرقمية — El Bayadh</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .flyer {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border: 3px solid #0066cc;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .header {
+            background: #0066cc;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .header h2 {
+            font-size: 20px;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+        .services {
+            padding: 20px;
+        }
+        .service-group {
+            margin-bottom: 20px;
+        }
+        .service-group h3 {
+            font-size: 18px;
+            color: #0066cc;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5px;
+        }
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+        .service-item:last-child {
+            border-bottom: none;
+        }
+        .benefits {
+            background: #d4edda;
+            padding: 20px;
+            text-align: center;
+        }
+        .benefits h3 {
+            font-size: 20px;
+            color: #155724;
+            margin-bottom: 15px;
+        }
+        .benefit-item {
+            font-size: 16px;
+            margin: 8px 0;
+            color: #155724;
+        }
+        .contact {
+            background: #0066cc;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .contact h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .contact-item {
+            font-size: 16px;
+            margin: 8px 0;
+        }
+        .whatsapp {
+            color: #25d366;
+            font-weight: bold;
+        }
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            .flyer {
+                border: 2px solid black;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flyer">
+        <div class="header">
+            <h1>مركز الخدمات الرقمية</h1>
+            <h2>جميع إدارياتك في مكان واحد!</h2>
+        </div>
+
+        <div class="services">
+            <div class="service-group">
+                <h3>الخدمات الإدارية</h3>
+                <div class="service-item">
+                    <span>التصريحات الضريبية (G12, G50)</span>
+                    <span>1,500 - 2,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>تصريحات CNAS و CASNOS</span>
+                    <span>1,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>تسجيل المركبات</span>
+                    <span>1,500 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>التحقق من المخالفات</span>
+                    <span>500 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>حجز موعد جواز السفر</span>
+                    <span>500 دج</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>الطباعة والنسخ</h3>
+                <div class="service-item">
+                    <span>طباعة أبيض وأسود (لكل صفحة)</span>
+                    <span>50 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>طباعة ملونة (لكل صفحة)</span>
+                    <span>100 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>نسخ (لكل صفحة)</span>
+                    <span>20 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>مسح ضوئي (لكل صفحة)</span>
+                    <span>50 دج</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>الوثائق والسيرة الذاتية</h3>
+                <div class="service-item">
+                    <span>إنشاء سيرة ذاتية</span>
+                    <span>1,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>رسالة تعريفية</span>
+                    <span>500 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>تنسيق الوثائق</span>
+                    <span>500 دج</span>
+                </div>
+                <div class="service-item">
+                    <span>ترجمة (عربية ↔ فرنسية)</span>
+                    <span>1,000 دج</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="benefits">
+            <h3>لماذا تختارنا؟</h3>
+            <div class="benefit-item">✅ خدمة سريعة — في انتظارك</div>
+            <div class="benefit-item">✅ أسعار مناسبة للجميع</div>
+            <div class="benefit-item">✅ جودة مضمونة</div>
+            <div class="benefit-item">✅ خبرة في الإجراءات الإدارية</div>
+        </div>
+
+        <div class="contact">
+            <h3>اتصل بنا الآن!</h3>
+            <div class="contact-item">📞 الهاتف: [رقم الهاتف]</div>
+            <div class="contact-item whatsapp">📱 واتساب: [رقم الواتساب]</div>
+            <div class="contact-item">🕐 السبت-الخميس: 8 صباحاً - 6 مساءً</div>
+            <div class="contact-item">📍 العنوان: [العنوان]، الباينة</div>
+        </div>
+    </div>
+</body>
+</html>

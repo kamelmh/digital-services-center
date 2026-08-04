@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarifs — Centre de Services Numériques</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .board {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border: 3px solid #0066cc;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .header {
+            background: #0066cc;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .section {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+        .price-row:last-child {
+            border-bottom: none;
+        }
+        .service {
+            font-size: 16px;
+        }
+        .price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #cc6600;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #856404;
+        }
+        .contact {
+            background: #d4edda;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .contact p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .whatsapp {
+            color: #25d366;
+            font-weight: bold;
+        }
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            .board {
+                border: 2px solid black;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="board">
+        <div class="header">
+            <h1>CENTRE DE SERVICES NUMÉRIQUES</h1>
+            <p>جميع خدماتك الرقمية في مكان واحد</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">IMPRESSION & COPIES</div>
+            <div class="price-row">
+                <span class="service">Impression N&B (par page)</span>
+                <span class="price">50 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Impression couleur (par page)</span>
+                <span class="price">100 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Photocopie (par page)</span>
+                <span class="price">20 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Scan (par page)</span>
+                <span class="price">50 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Photo passeport</span>
+                <span class="price">200 DZD</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">DOCUMENTS & CV</div>
+            <div class="price-row">
+                <span class="service">Création CV</span>
+                <span class="price">1,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Lettre de motivation</span>
+                <span class="price">500 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Mise en forme document</span>
+                <span class="price">500 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Traduction (FR↔AR)</span>
+                <span class="price">1,000 DZD</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">DÉMARCHES ADMINISTRATIVES</div>
+            <div class="price-row">
+                <span class="service">Déclaration fiscale (G12)</span>
+                <span class="price">2,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Déclaration fiscale (G50)</span>
+                <span class="price">1,500 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Déclaration CNAS</span>
+                <span class="price">1,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Déclaration CASNOS</span>
+                <span class="price">1,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Immatriculation véhicule</span>
+                <span class="price">1,500 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Vérification infractions</span>
+                <span class="price">500 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Rendez-vous passeport</span>
+                <span class="price">500 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Rendez-vous CNI</span>
+                <span class="price">500 DZD</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">PAIEMENTS & FACTURES</div>
+            <div class="price-row">
+                <span class="service">Paiement Sonelgaz</span>
+                <span class="price">200 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Paiement Algérie Télécom</span>
+                <span class="price">200 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Paiement eau</span>
+                <span class="price">200 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Autre facture</span>
+                <span class="price">300 DZD</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">ÉTUDES DE FAISABILITÉ</div>
+            <div class="price-row">
+                <span class="service">Étude de faisabilité (résumé 2 pages)</span>
+                <span class="price">5,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Étude de faisabilité complète (27 pages)</span>
+                <span class="price">15,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Étude de marché sectorielle</span>
+                <span class="price">10,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Business Plan + prévisionnel financier</span>
+                <span class="price">20,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Analyse de concurrence locale</span>
+                <span class="price">7,500 DZD</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">CONSEIL & ACCOMPAGNEMENT</div>
+            <div class="price-row">
+                <span class="service">Consultation initiale (30 min)</span>
+                <span class="price">Gratuit</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Accompagnement création entreprise</span>
+                <span class="price">25,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Dossier ANAE complet</span>
+                <span class="price">5,000 DZD</span>
+            </div>
+            <div class="price-row">
+                <span class="service">Optimisation fiscale</span>
+                <span class="price">10,000 DZD</span>
+            </div>
+        </div>
+
+        <div class="highlight">
+            SERVICE RAPIDE — FAIBLE PRIX — QUALITÉ GARANTIE
+        </div>
+
+        <div class="contact">
+            <p>📞 Téléphone: [VOTRE NUMÉRO]</p>
+            <p class="whatsapp">📱 WhatsApp: [VOTRE NUMÉRO]</p>
+            <p>🕐 Lundi-Samedi: 8h-18h | Dimanche: 9h-13h</p>
+            <p>📍 Adresse: [VOTRE ADRESSE]</p>
+        </div>
+    </div>
+</body>
+</html>
