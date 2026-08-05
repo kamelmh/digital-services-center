@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 440" width="400" height="440">
+  <!-- Navy hexagon -->
+  <polygon points="200.0,40.0 355.9,130.0 355.9,310.0 200.0,400.0 44.1,310.0 44.1,130.0" fill="#0A1628" stroke="#D4AF37" stroke-width="3"/>
+  <!-- MK monogram inside -->
+  <g transform="translate(68, 58) scale(0.8)">
+    <path d="M 80 80 L 80 320 L 140 180 L 200 320 L 200 80"
+          fill="none" stroke="#D4AF37" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 200 80 L 200 320"
+          fill="none" stroke="#D4AF37" stroke-width="28" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 80"
+          fill="none" stroke="#D4AF37" stroke-width="28" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 320"
+          fill="none" stroke="#D4AF37" stroke-width="28" stroke-linecap="round"/>
+    <circle cx="200" cy="200" r="14" fill="#D4AF37"/>
+  </g>
+  <!-- "DIGITAL SERVICES CENTER" text arc below hexagon -->
+  <text x="200" y="430" text-anchor="middle"
+        font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700"
+        fill="#0A1628" letter-spacing="4">DIGITAL SERVICES CENTER</text>
+</svg>

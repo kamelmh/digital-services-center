@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <g transform="translate(5, 5) scale(0.12)">
+    <path d="M 80 80 L 80 320 L 140 180 L 200 320 L 200 80"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 200 80 L 200 320"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 80"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 320"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round"/>
+    <circle cx="200" cy="200" r="14" fill="#0A1628"/>
+  </g>
+  <text x="55" y="38" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#0A1628">DSC</text>
+</svg>

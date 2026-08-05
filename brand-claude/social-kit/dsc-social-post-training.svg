@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <rect width="100%" height="100%" fill="#0A1628"/>
+  <!-- Decorative -->
+  <rect x="0" y="0" width="8" height="1080" fill="#D4AF37"/>
+  <circle cx="900" cy="180" r="200" fill="#D4AF37" opacity="0.05"/>
+  <!-- MK icon top-right -->
+  <g transform="translate(920, 30) scale(0.2)">
+    <path d="M 80 80 L 80 320 L 140 180 L 200 320 L 200 80"
+          fill="none" stroke="#D4AF37" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 200 80 L 200 320"
+          fill="none" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 80"
+          fill="none" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 320"
+          fill="none" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="200" cy="200" r="2" fill="#D4AF37"/>
+  </g>
+  <!-- Content -->
+  <text x="80" y="350" font-family="Space Grotesk, sans-serif" font-size="64" font-weight="700" fill="#FFFFFF">PROFESSIONAL</text>
+  <text x="80" y="430" font-family="Space Grotesk, sans-serif" font-size="64" font-weight="700" fill="#FFFFFF">TRAINING</text>
+  <!-- Gold accent -->
+  <rect x="80" y="460" width="160" height="4" fill="#D4AF37"/>
+  <!-- Subtitle -->
+  <text x="80" y="520" font-family="Inter, sans-serif" font-size="24" font-weight="400" fill="#D4AF37">Skills That Pay The Bills</text>
+  <!-- Courses -->
+  <text x="80" y="600" font-family="Inter, sans-serif" font-size="18" font-weight="500" fill="#FFFFFF">" Excel for Business (8h)</text>
+  <text x="80" y="640" font-family="Inter, sans-serif" font-size="18" font-weight="500" fill="#FFFFFF">" VBA Mastery (12h)</text>
+  <text x="80" y="680" font-family="Inter, sans-serif" font-size="18" font-weight="500" fill="#FFFFFF">" Python for Data (16h)</text>
+  <text x="80" y="720" font-family="Inter, sans-serif" font-size="18" font-weight="500" fill="#FFFFFF">" AI Tools for Business (8h)</text>
+  <!-- Bottom bar -->
+  <rect x="0" y="1000" width="1080" height="80" fill="#D4AF37"/>
+  <text x="540" y="1048" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="18" font-weight="700" fill="#0A1628" letter-spacing="4">DIGITAL SERVICES CENTER</text>
+</svg>

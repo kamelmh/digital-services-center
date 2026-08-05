@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <rect width="100%" height="100%" fill="#0A1628"/>
+  <!-- MK icon centered -->
+  <g transform="translate(420, 80) scale(0.6)">
+    <path d="M 80 80 L 80 320 L 140 180 L 200 320 L 200 80"
+          fill="none" stroke="#D4AF37" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 200 80 L 200 320"
+          fill="none" stroke="#D4AF37" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 80"
+          fill="none" stroke="#D4AF37" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 320"
+          fill="none" stroke="#D4AF37" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="200" cy="200" r="8" fill="#D4AF37"/>
+  </g>
+  <!-- Company name -->
+  <text x="540" y="450" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="48" font-weight="700" fill="#FFFFFF" letter-spacing="4">DIGITAL SERVICES CENTER</text>
+  <!-- Gold accent -->
+  <rect x="390" y="480" width="300" height="3" fill="#D4AF37"/>
+  <!-- Tagline -->
+  <text x="540" y="530" text-anchor="middle" font-family="Inter, sans-serif" font-size="20" font-weight="400" fill="#D4AF37" letter-spacing="5">FEASIBILITY &bull; AUTOMATION &bull; TRAINING</text>
+  <!-- Services -->
+  <text x="540" y="620" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" font-weight="500" fill="#FFFFFF">Feasibility Studies &amp; Business Plans</text>
+  <text x="540" y="660" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" font-weight="500" fill="#FFFFFF">Business Automation &amp; AI Solutions</text>
+  <text x="540" y="700" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" font-weight="500" fill="#FFFFFF">Professional Training &amp; Consulting</text>
+  <!-- Contact -->
+  <text x="540" y="800" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="400" fill="#666">kamelmahi71@gmail.com | +213 676 77 38 92</text>
+  <text x="540" y="830" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="400" fill="#666">El Bayadh, Algeria</text>
+</svg>
