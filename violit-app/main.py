@@ -10,6 +10,9 @@ from business_plan_generator import BusinessPlanGenerator
 from market_research_generator import MarketResearchGenerator
 from financial_projections_generator import FinancialProjectionsGenerator
 from marketing_plan_generator import MarketingPlanGenerator
+from social_media_generator import SocialMediaGenerator, CONTENT_TYPES
+from tax_declaration_generator import TaxDeclarationGenerator, DECLARATION_TYPES
+from invoice_generator import InvoiceGenerator
 
 app = vl.App(title="Digital Services Center", theme="ocean")
 
@@ -238,6 +241,116 @@ def marketing_plan_page():
             app.toast(f"Error: {e}", type="error")
 
 
+def social_media_page():
+    _sidebar()
+    app.title("Social Media Content Generator")
+    app.text("إنشاء محتوى جاهز للنشر على فيسبوك، إنستغرام، واتساب، تيك توك")
+
+    business_type = app.selectbox("Business Type", options=list(BUSINESS_TEMPLATES.keys()), index=0)
+    template = BUSINESS_TEMPLATES[business_type.value]
+    app.html(f"<h3 style='margin-bottom:2px;'>{template['name_ar']}</h3><p style='margin-top:0;color:#666;'>{template['name_en']}</p>")
+
+    content_type = app.selectbox("Content Type", options=list(CONTENT_TYPES.keys()), index=0)
+    ct = CONTENT_TYPES[content_type.value]
+    app.text(f"Generates: {ct['name_en']}")
+
+    location = app.text_input("City / Location")
+    wilaya = _wilaya_select()
+    business_name = app.text_input("Business Name (Arabic)")
+    provider = _provider_select()
+
+    if app.button("Generate Content"):
+        if not business_name.value or not location.value:
+            app.toast("Please fill all fields", type="error")
+            return
+        app.toast("Generating social media content...", type="info")
+        try:
+            gen = SocialMediaGenerator(provider=provider.value)
+            result = gen.generate(content_type.value, business_type.value, business_name.value, location.value, wilaya.value)
+            app.markdown("### Social Media Content")
+            app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{result['content']}</div>")
+            _save_output("social_media", business_name.value, result["content"])
+        except Exception as e:
+            app.toast(f"Error: {e}", type="error")
+
+
+def tax_declaration_page():
+    _sidebar()
+    app.title("Tax Declaration Helper")
+    app.text("أدلة التصريات الضريبية — G12، G50، CNAS، CASNOS، IRG")
+
+    decl_type = app.selectbox("Declaration Type", options=list(DECLARATION_TYPES.keys()), index=0)
+    dt = DECLARATION_TYPES[decl_type.value]
+    app.html(f"<h3 style='margin-bottom:2px;'>{dt['name_ar']}</h3><p style='margin-top:0;color:#666;'>{dt['name_en']}</p>")
+
+    business_name = app.text_input("Business / Person Name")
+    provider = _provider_select()
+
+    if app.button("Generate Guide"):
+        app.toast("Generating tax declaration guide...", type="info")
+        try:
+            gen = TaxDeclarationGenerator(provider=provider.value)
+            result = gen.generate(decl_type.value, business_name.value)
+            app.markdown("### Tax Declaration Guide")
+            app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{result['content']}</div>")
+            _save_output("tax_guide", dt["name_en"], result["content"])
+        except Exception as e:
+            app.toast(f"Error: {e}", type="error")
+
+
+def invoice_page():
+    _sidebar()
+    app.title("Invoice / Quote Generator")
+    app.text("إنشاء فاتورة أو عرض سعر احترافي")
+
+    doc_type = app.selectbox("Document Type", options=["Invoice (فاتورة)", "Quote (عرض سعر)"], index=0)
+    is_invoice = doc_type.value.startswith("Invoice")
+
+    business_name = app.text_input("Your Business Name")
+    client_name = app.text_input("Client Name")
+
+    app.markdown("### Items")
+    num_items = app.number_input("Number of items", min_value=1, max_value=20, value=3, step=1)
+
+    items = []
+    for i in range(int(num_items.value)):
+        cols = app.columns(3)
+        with cols[0]:
+            desc = app.text_input(f"Item {i+1} description", key=f"desc_{i}")
+        with cols[1]:
+            qty = app.number_input(f"Qty", min_value=1, value=1, key=f"qty_{i}")
+        with cols[2]:
+            price = app.number_input(f"Price (DZD)", min_value=0, value=0, step=100, key=f"price_{i}")
+        if desc.value:
+            items.append({"description": desc.value, "qty": int(qty.value), "price": int(price.value)})
+
+    if is_invoice:
+        discount = app.number_input("Discount (%)", min_value=0.0, max_value=100.0, value=0.0, step=5.0)
+        payment_terms = app.text_input("Payment terms", value="30 jours")
+        notes = app.text_input("Notes (optional)")
+    else:
+        validity = app.number_input("Quote validity (days)", min_value=7, max_value=90, value=30, step=7)
+        notes = app.text_input("Notes (optional)")
+
+    if app.button(f"Generate {doc_type.value.split(' ')[0]}"):
+        if not business_name.value or not client_name.value or not items:
+            app.toast("Please fill business name, client name, and at least 1 item", type="error")
+            return
+        app.toast("Generating document...", type="info")
+        try:
+            gen = InvoiceGenerator(provider=provider.value)
+            if is_invoice:
+                result = gen.generate_invoice(business_name.value, client_name.value, items, discount.value, notes.value, payment_terms.value)
+            else:
+                result = gen.generate_quote(business_name.value, client_name.value, items, validity.value, notes.value)
+            doc_label = "Invoice" if is_invoice else "Quote"
+            app.markdown(f"### {doc_label}")
+            app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{result['content']}</div>")
+            _save_output(doc_label.lower(), client_name.value, result["content"])
+        except Exception as e:
+            app.toast(f"Error: {e}", type="error")
+
+
 def _save_output(doc_type: str, name: str, content: str):
     """Save generated content to output directory."""
     output_dir = Path(__file__).parent.parent / "generated_output"
@@ -254,6 +367,9 @@ app.navigation([
     vl.Page(market_research_page, title="Market Research", icon="bar-chart"),
     vl.Page(financial_projections_page, title="Financials", icon="trending-up"),
     vl.Page(marketing_plan_page, title="Marketing Plan", icon="megaphone"),
+    vl.Page(social_media_page, title="Social Media", icon="share-2"),
+    vl.Page(tax_declaration_page, title="Tax Helper", icon="receipt"),
+    vl.Page(invoice_page, title="Invoice / Quote", icon="file-plus"),
 ])
 
 if __name__ == "__main__":
