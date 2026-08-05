@@ -604,6 +604,75 @@ def aapi_page():
                 app.html(f"<div style='padding:4px 0;'>• <strong>{s['criterion']}</strong>: +{s['gap']} pts — {s['advice']}</div>")
 
 
+def dossier_page():
+    _sidebar()
+    app.title("Complete Dossier / dossier complet")
+    app.text("One-click pipeline: Feasibility + Financials + AAPI + Quality + PDF")
+
+    app.markdown("### Client Information")
+    col1, col2 = app.columns(2)
+    with col1:
+        client_name = app.text_input("Client Name", value="Nouveau Client")
+        biz_type = app.selectbox("Business Type", options=list(BUSINESS_TEMPLATES.keys()), index=0)
+    with col2:
+        location = app.text_input("City/Location", value="El Bayadh")
+        wilaya = app.selectbox("Wilaya", options=list(ALGERIA_DATA["wilayas"].keys()), index=0)
+        investment = app.number_input("Investment (DZD)", min_value=100_000, value=4_600_000, step=100_000)
+
+    from business_defaults import get_defaults, estimate_profitability, estimate_monthly_revenue
+    defaults = get_defaults(biz_type)
+    est_revenue = estimate_monthly_revenue(biz_type, investment)
+    est_profit = estimate_profitability(biz_type, investment, est_revenue)
+
+    app.markdown("### Auto-Estimated Values")
+    col1, col2, col3 = app.columns(3)
+    with col1:
+        app.html(f"<div style='text-align:center;padding:10px;background:#f8f9fa;border-radius:8px;'><strong>Monthly Revenue</strong><br><span style='font-size:1.2em;color:#D4AF37;'>{est_revenue:,.0f} DZD</span></div>")
+    with col2:
+        app.html(f"<div style='text-align:center;padding:10px;background:#f8f9fa;border-radius:8px;'><strong>Net Margin</strong><br><span style='font-size:1.2em;color:#28a745;'>{est_profit['net_margin']:.1%}</span></div>")
+    with col3:
+        app.html(f"<div style='text-align:center;padding:10px;background:#f8f9fa;border-radius:8px;'><strong>Payback</strong><br><span style='font-size:1.2em;color:#0A1628;'>{est_profit['payback_years']:.1f} years</span></div>")
+
+    monthly_revenue = app.number_input("Monthly Revenue (override if needed)", min_value=0, value=est_revenue, step=50_000)
+    skip_quality = app.checkbox("Skip quality checks", value=False)
+
+    if app.button("Generate Complete Dossier", type="primary"):
+        from service_orchestrator import ServiceOrchestrator
+        orch = ServiceOrchestrator()
+        stage_text = app.text("Starting...")
+
+        def progress_cb(stage, msg, pct):
+            stage_text.value = f"[{pct:.0f}%] {stage}: {msg}"
+        orch.on_progress(progress_cb)
+
+        with app.spinner("Generating dossier... 30-60s"):
+            results = orch.generate_dossier(
+                business_type=biz_type, location=location, wilaya=wilaya,
+                investment=investment, client_name=client_name,
+                monthly_revenue=monthly_revenue, skip_quality=skip_quality,
+            )
+
+        if results.get("pdf_path"):
+            app.success(f"PDF: {os.path.basename(results['pdf_path'])}")
+            if os.path.exists(results["pdf_path"]):
+                with open(results["pdf_path"], "rb") as f:
+                    app.download_button("Download PDF", data=f.read(), file_name=os.path.basename(results["pdf_path"]), mime="application/pdf")
+
+        aapi = results.get("aapi", {})
+        if "total" in aapi:
+            color = "#28a745" if aapi.get("percentage", 0) >= 60 else "#ffc107"
+            app.html(f"<div style='padding:15px;border-radius:8px;border:2px solid {color};margin:10px 0;'><strong>AAPI:</strong> <span style='color:{color};font-size:1.2em;'>{aapi['total']}/1500 ({aapi.get('rating', '')})</span></div>")
+
+        quality = results.get("quality", {})
+        if quality:
+            app.markdown("### Quality Report")
+            for gen, report in quality.items():
+                gc = "#28a745" if report.grade in ("A", "B") else "#ffc107" if report.grade == "C" else "#dc3545"
+                app.html(f"<div style='padding:5px 10px;margin:3px 0;background:#f8f9fa;border-radius:4px;'><strong>{gen}</strong>: <span style='color:{gc};'>{report.overall_score:.0%} ({report.grade})</span></div>")
+
+        app.html(f"<div style='padding:10px;margin-top:10px;color:#666;'>Time: {results.get('metadata', {}).get('elapsed_seconds', 0):.1f}s</div>")
+
+
 def _save_output(doc_type: str, name: str, content: str):
     """Save generated content to output directory."""
     output_dir = Path(__file__).parent.parent / "generated_output"
@@ -615,6 +684,7 @@ def _save_output(doc_type: str, name: str, content: str):
 
 app.navigation([
     vl.Page(home_page, title="Home", icon="house"),
+    vl.Page(dossier_page, title="Complete Dossier", icon="package"),
     vl.Page(feasibility_page, title="Feasibility", icon="file-text"),
     vl.Page(business_plan_page, title="Business Plan", icon="briefcase"),
     vl.Page(market_research_page, title="Market Research", icon="bar-chart"),
