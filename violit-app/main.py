@@ -16,6 +16,9 @@ from invoice_generator import InvoiceGenerator
 from cv_generator import CVGenerator, TEMPLATES as CV_TEMPLATES
 from cover_letter_generator import CoverLetterGenerator, TEMPLATES as COVER_TEMPLATES
 from government_paperwork_helper import GovernmentPaperworkHelper, PROCEDURES
+from financial_calculators import FinancialCalculators, InvestmentPlan, FinancingPlan, generate_3_scenarios, format_dzd, format_pct
+from aapi_optimizer import AAAPIOptimizer, AAPIScore
+from training_data_collector import TrainingDataCollector
 
 app = vl.App(title="Digital Services Center", theme="ocean")
 
@@ -478,6 +481,129 @@ def government_page():
             app.toast(f"Saved: {filepath}", type="success")
 
 
+def calculators_page():
+    _sidebar()
+    app.title("Financial Calculators / حاسبات مالية")
+    app.text("VAN, TRI, Seuil de Rentabilité, Scénarios — calculs réels, pas de LLM")
+
+    calc = FinancialCalculators()
+
+    app.markdown("### 📊 Investissement & Financement")
+    col1, col2 = app.columns(2)
+    with col1:
+        equipment = app.number_input("Équipements (DZD)", min_value=0, value=2_000_000, step=100_000)
+        buildings = app.number_input("Bâtiments (DZD)", min_value=0, value=1_500_000, step=100_000)
+        engineering = app.number_input("Études & montage (DZD)", min_value=0, value=300_000, step=50_000)
+    with col2:
+        working_capital = app.number_input("Fonds de roulement (DZD)", min_value=0, value=800_000, step=50_000)
+        equity = app.number_input("Apports personnels (DZD)", min_value=0, value=3_000_000, step=100_000)
+        loan = app.number_input("Emprunt bancaire (DZD)", min_value=0, value=1_600_000, step=100_000)
+
+    investment = InvestmentPlan(
+        equipment=equipment, buildings=buildings,
+        engineering=engineering, working_capital=working_capital,
+    )
+    financing = FinancingPlan(equity=equity, bank_loan=loan)
+
+    app.markdown("### 📈 Revenus & Coûts Annuels")
+    annual_revenue = app.number_input("Chiffre d'affaires annuel (DZD)", min_value=0, value=6_000_000, step=500_000)
+    cogs_rate = app.slider("Taux coût d'achat (%)", min_value=30, max_value=80, value=65) / 100
+    operating_rate = app.slider("Taux charges opérationnelles (%)", min_value=5, max_value=40, value=15) / 100
+    years = app.slider("Durée prévisionnelle (ans)", min_value=3, max_value=10, value=5)
+
+    if app.button("Calculer VAN, TRI, Scénarios"):
+        scenarios = generate_3_scenarios(
+            base_revenue=annual_revenue,
+            base_cogs_rate=cogs_rate,
+            base_operating_rate=operating_rate,
+            investment=investment,
+            financing=financing,
+            years=years,
+        )
+
+        for name, s in scenarios.items():
+            color = "#28a745" if s["van"] > 0 else "#dc3545"
+            app.html(f"""<div style="background:#f8f9fa;padding:15px;border-radius:8px;margin:10px 0;border-left:4px solid {color};">
+                <h4 style="margin:0 0 8px;">{s['label']}</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+                    <div><strong>VAN:</strong> <span style="color:{color};">{format_dzd(s['van'])}</span></div>
+                    <div><strong>TRI:</strong> <span style="color:{color};">{format_pct(s['tri'])}</span></div>
+                    <div><strong>Taux marge:</strong> {format_pct(s['taux_marge'])}</div>
+                    <div><strong>Seuil rentabilité:</strong> {format_dzd(s['seuil_rentabilite'])} unités</div>
+                    <div><strong>Délai récupération:</strong> {s['delai_recuperation']:.1f} ans</div>
+                    <div><strong>Paiement emprunt:</strong> {format_dzd(s['loan_payment'])}/an</div>
+                </div>
+            </div>""")
+
+        app.toast("Calculs terminés", type="success")
+
+
+def aapi_page():
+    _sidebar()
+    app.title("AAPI Scorer / تقييم AAPI")
+    app.text("Grille d'évaluation — Décret 26-154, Annexe I — 1500 points max")
+
+    app.markdown("### Paramètres du Projet")
+    col1, col2 = app.columns(2)
+    with col1:
+        activity_priority = app.selectbox("Priorité activité", options=["1 — Industrie/Agro/BTP", "2 — Services/Transport/Digital", "3 — Commerce/Restauration"], index=2)
+        investment = app.number_input("Montant investissement (DZD)", min_value=0, value=4_600_000, step=100_000)
+        employees = app.number_input("Nombre d'emplois créés", min_value=1, value=5, step=1)
+    with col2:
+        equity_pct = app.slider("Apport personnel (%)", min_value=10, max_value=100, value=65)
+        local_pct = app.slider("Contenu local (%)", min_value=0, max_value=100, value=40)
+        cdd_pct = app.slider("Part CDD (%)", min_value=0, max_value=100, value=10)
+
+    has_extension = app.checkbox("Extension sur bien mitoyen")
+    export_pct = app.slider("Part exportations (%)", min_value=0, max_value=100, value=0)
+
+    priority_num = int(activity_priority[0])
+
+    if app.button("Calculer Score AAPI"):
+        params = {
+            "activity_priority": priority_num,
+            "investment_amount": investment,
+            "employees": employees,
+            "equity_ratio": equity_pct / 100,
+            "local_integration": local_pct,
+            "cdd_ratio": cdd_pct / 100,
+            "has_extension": has_extension,
+            "export_ratio": export_pct,
+        }
+
+        optimizer = AAAPIOptimizer()
+        score = optimizer.score_project(params)
+        suggestions = optimizer.optimize(score, params)
+
+        color = "#28a745" if score.percentage >= 60 else "#ffc107" if score.percentage >= 40 else "#dc3545"
+        app.html(f"""<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:15px 0;border:2px solid {color};text-align:center;">
+            <h2 style="margin:0;color:{color};">{score.total}/1500</h2>
+            <p style="margin:5px 0;font-size:1.1em;">{score.percentage:.0f}% — {score.rating}</p>
+        </div>""")
+
+        app.markdown("### Détail par Critère")
+        for key, criterion in [
+            ("activity_type", "Nature de l'activité", 420),
+            ("investment_amount", "Montant investissement", 360),
+            ("employment", "Emploi", 300),
+            ("equity_contribution", "Apports fonds propres", 200),
+            ("local_content", "Contenu local", 60),
+            ("employment_permanence", "Pérennité emploi", 60),
+            ("investment_extension", "Extension investissement", 70),
+            ("export_diversification", "Exportations", 30),
+        ]:
+            val = getattr(score, key)
+            pct = (val / max_val * 100) if (max_val := criterion[2] if isinstance(criterion[2], int) else 100) else 0
+            bar_len = int(pct / 5)
+            bar = "█" * bar_len + "░" * (20 - bar_len)
+            app.html(f"<div style='padding:3px 0;font-size:0.9em;'><strong>{criterion[1]}</strong>: {val}/{criterion[2]} <code>{bar}</code> {pct:.0f}%</div>")
+
+        if suggestions:
+            app.markdown("### 💡 Recommandations")
+            for s in suggestions[:-1]:
+                app.html(f"<div style='padding:4px 0;'>• <strong>{s['criterion']}</strong>: +{s['gap']} pts — {s['advice']}</div>")
+
+
 def _save_output(doc_type: str, name: str, content: str):
     """Save generated content to output directory."""
     output_dir = Path(__file__).parent.parent / "generated_output"
@@ -495,11 +621,13 @@ app.navigation([
     vl.Page(financial_projections_page, title="Financials", icon="trending-up"),
     vl.Page(marketing_plan_page, title="Marketing Plan", icon="megaphone"),
     vl.Page(social_media_page, title="Social Media", icon="share-2"),
-    vl.Page(tax_declaration_page, title="Tax Helper", icon="receipt"),
-    vl.Page(invoice_page, title="Invoice / Quote", icon="file-plus"),
+    vl.Page(tax_helper_page, title="Tax Helper", icon="calculator"),
+    vl.Page(invoice_quote_page, title="Invoice/Quote", icon="file"),
     vl.Page(cv_page, title="CV Generator", icon="user"),
     vl.Page(cover_letter_page, title="Cover Letter", icon="mail"),
-    vl.Page(government_page, title="Gov Paperwork", icon="building"),
+    vl.Page(gov_paperwork_page, title="Gov Paperwork", icon="building"),
+    vl.Page(calculators_page, title="Calculators", icon="calculator"),
+    vl.Page(aapi_page, title="AAPI Scorer", icon="award"),
 ])
 
 if __name__ == "__main__":
