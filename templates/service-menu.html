@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu des Services - Digital Services Center</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap');
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .menu {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 0;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            background: #0A1628;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #D4AF37 0%, #B8960C 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 36px;
+            color: #0A1628;
+            margin: 0 auto 20px;
+        }
+        
+        .company-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 12px;
+            color: #D4AF37;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .gold-line {
+            height: 3px;
+            background: linear-gradient(90deg, #D4AF37 0%, #0A1628 50%, #D4AF37 100%);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #0A1628;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .service-card {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 4px solid #D4AF37;
+            transition: transform 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .service-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #D4AF37 0%, #B8960C 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .service-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0A1628;
+            margin-bottom: 10px;
+        }
+        
+        .service-description {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .service-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #D4AF37;
+        }
+        
+        .service-price span {
+            font-size: 12px;
+            color: #666;
+            font-weight: 400;
+        }
+        
+        .contact-section {
+            background: #0A1628;
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .contact-left h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .contact-left p {
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        .contact-right {
+            text-align: right;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .contact-item span {
+            color: #D4AF37;
+        }
+        
+        .footer {
+            background: #0A1628;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 9px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        .footer-left {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .footer-item span {
+            color: #D4AF37;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu">
+        <div class="header">
+            <div class="logo">MK</div>
+            <div class="company-name">DIGITAL SERVICES CENTER</div>
+            <div class="tagline">Services Professionnels à El Bayadh</div>
+        </div>
+        
+        <div class="gold-line"></div>
+        
+        <div class="content">
+            <h2 class="section-title">Nos Services</h2>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">📊</div>
+                    <div class="service-name">Études de Faisabilité</div>
+                    <div class="service-description">
+                        Études de faisabilité complètes pour projets commerciaux.
+                        Analyse marché, financière, technique et marketing.
+                    </div>
+                    <div class="service-price">
+                        5,000 - 20,000 <span>DZD</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">📈</div>
+                    <div class="service-name">Business Plan</div>
+                    <div class="service-description">
+                        Plans d'affaires professionnels avec prévisionnels financiers.
+                        Idéal pour demandes de financement ou investisseurs.
+                    </div>
+                    <div class="service-price">
+                        15,000 - 25,000 <span>DZD</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">📄</div>
+                    <div class="service-name">Conception de CV</div>
+                    <div class="service-description">
+                        CV professionnel et moderne, adapté à votre domaine d'activité.
+                        Inclut design personnalisé et optimisation pour ATS.
+                    </div>
+                    <div class="service-price">
+                        800 - 1,500 <span>DZD</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">📋</div>
+                    <div class="service-name">Documents Administratifs</div>
+                    <div class="service-description">
+                        Lettres, formulaires, rapports et documents officiels.
+                        Rédaction et mise en forme professionnelle.
+                    </div>
+                    <div class="service-price">
+                        300 - 2,000 <span>DZD</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">🌐</div>
+                    <div class="service-name">Traduction</div>
+                    <div class="service-description">
+                        Traduction AR/FR/EN de documents officiels et commerciaux.
+                        Certification de conformité disponible.
+                    </div>
+                    <div class="service-price">
+                        1,000 - 1,500 <span>DZD/page</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">📱</div>
+                    <div class="service-name">Marketing Digital</div>
+                    <div class="service-description">
+                        Gestion réseaux sociaux, création de contenu,
+                        campagnes publicitaires et stratégie digitale.
+                    </div>
+                    <div class="service-price">
+                        2,000 - 5,000 <span>DZD</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">💻</div>
+                    <div class="service-name">Création Web</div>
+                    <div class="service-description">
+                        Sites vitrines, landing pages et e-commerce.
+                        Design moderne et responsive.
+                    </div>
+                    <div class="service-price">
+                        10,000 - 30,000 <span>DZD</span>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">📊</div>
+                    <div class="service-name">Excel & Automatisation</div>
+                    <div class="service-description">
+                        Tableaux de bord, macros VBA, automatisation
+                        de processus et analyse de données.
+                    </div>
+                    <div class="service-price">
+                        5,000 - 15,000 <span>DZD</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-section">
+                <div class="contact-left">
+                    <h3>Besoin d'un devis gratuit?</h3>
+                    <p>Contactez-nous pour discuter de votre projet</p>
+                </div>
+                <div class="contact-right">
+                    <div class="contact-item">
+                        <span>📞</span> +213 676 77 38 92
+                    </div>
+                    <div class="contact-item">
+                        <span>✉️</span> kamelmahi71@gmail.com
+                    </div>
+                    <div class="contact-item">
+                        <span>🌐</span> www.kamelmahi.netlify.app
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-left">
+                <div class="footer-item">
+                    <span>📍</span> El Bayadh, Algeria
+                </div>
+                <div class="footer-item">
+                    <span>🕐</span> Lun-Sam: 9h-18h
+                </div>
+            </div>
+            <div>
+                © 2026 Digital Services Center
+            </div>
+        </div>
+    </div>
+</body>
+</html>
