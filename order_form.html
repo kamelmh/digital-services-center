@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commander — DSC Digital Services Center</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f5f5f0;color:#1a1a1a}
+.header{background:#0A1628;color:white;padding:30px 0;text-align:center}
+.header h1{font-size:1.8em}
+.header .subtitle{color:#D4AF37;margin-top:5px}
+.container{max-width:700px;margin:0 auto;padding:30px 20px}
+.card{background:white;border-radius:10px;padding:25px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.card h2{color:#0A1628;font-size:1.2em;margin-bottom:15px;border-bottom:2px solid #D4AF37;padding-bottom:8px}
+label{display:block;font-weight:600;margin-bottom:5px;color:#333}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:1em;margin-bottom:15px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#D4AF37;box-shadow:0 0 0 2px rgba(212,175,55,0.2)}
+textarea{resize:vertical;min-height:80px}
+.radio-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:15px}
+.radio-option{position:relative}
+.radio-option input{position:absolute;opacity:0}
+.radio-option label{display:block;padding:12px;border:2px solid #e8e8e8;border-radius:8px;cursor:pointer;text-align:center;font-weight:500;transition:all .2s}
+.radio-option input:checked+label{border-color:#D4AF37;background:#fdf8e8;color:#0A1628}
+.radio-option label:hover{border-color:#ccc;background:#f8f8f8}
+.radio-option .price{display:block;font-size:0.8em;color:#666;margin-top:3px}
+.estimate{background:#f8f9fa;border-radius:8px;padding:15px;margin:15px 0;border-left:4px solid #D4AF37}
+.estimate .row{display:flex;justify-content:space-between;margin:5px 0}
+.estimate .total{font-weight:bold;font-size:1.1em;border-top:1px solid #ddd;padding-top:8px;margin-top:8px}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:8px;font-size:1.1em;font-weight:bold;cursor:pointer;transition:all .2s}
+.btn-whatsapp{background:#25D366;color:white}
+.btn-whatsapp:hover{background:#128C7E}
+.btn-email{background:#0A1628;color:white;margin-top:10px}
+.btn-email:hover{background:#1a2d4a}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.whatsapp-preview{background:#dcf8c6;border-radius:8px;padding:15px;margin:15px 0;font-size:0.9em;white-space:pre-wrap;line-height:1.5;max-height:400px;overflow-y:auto}
+.footer{text-align:center;padding:20px;color:#999;font-size:0.85em}
+.badge{display:inline-block;background:#D4AF37;color:#0A1628;padding:2px 8px;border-radius:10px;font-size:0.75em;font-weight:bold;margin-left:5px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>Commander une Étude</h1>
+<div class="subtitle">Remplissez le formulaire — recevez un devis via WhatsApp</div>
+</div>
+<div class="container">
+
+<!-- Step 1: Service Type -->
+<div class="card" id="step1">
+<h2>1. Quel service souhaitez-vous ?</h2>
+<div class="radio-grid">
+<div class="radio-option">
+<input type="radio" name="service" id="s_feasibility" value="feasibility" checked>
+<label for="s_feasibility">📊 Étude de Faisabilité<span class="price">10,000 – 60,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="service" id="s_business_plan" value="business_plan">
+<label for="s_business_plan">📋 Business Plan<span class="price">15,000 – 40,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="service" id="s_market" value="market_research">
+<label for="s_market">🔍 Étude de Marché<span class="price">10,000 – 20,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="service" id="s_financial" value="financial_projections">
+<label for="s_financial">💰 Prévisions Financières<span class="price">15,000 – 25,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="service" id="s_marketing" value="marketing_plan">
+<label for="s_marketing">📣 Plan Marketing<span class="price">10,000 – 20,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="service" id="s_cv" value="cv">
+<label for="s_cv">📄 CV Professionnel<span class="price">2,000 – 4,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="service" id="s_cover" value="cover_letter">
+<label for="s_cover">✉️ Lettre de Motivation<span class="price">1,000 – 3,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="service" id="s_aapi" value="aapi">
+<label for="s_aapi">🏛️ Dossier AAPI Premium<span class="price">75,000 – 150,000 DZD</span></label>
+</div>
+</div>
+
+<!-- Sub-options for feasibility -->
+<div id="feasibility_options">
+<label>Niveau de détail</label>
+<div class="radio-grid">
+<div class="radio-option">
+<input type="radio" name="feasibility_level" id="fl_express" value="express">
+<label for="fl_express">Express<span class="price">10,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="feasibility_level" id="fl_standard" value="standard" checked>
+<label for="fl_standard">Standard<span class="price">20,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="feasibility_level" id="fl_complete" value="complete">
+<label for="fl_complete">Complet<span class="price">40,000 DZD</span></label>
+</div>
+<div class="radio-option">
+<input type="radio" name="feasibility_level" id="fl_aapi" value="aapi_optimized">
+<label for="fl_aapi">AAPI Optimisé<span class="price">60,000 DZD</span></label>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Step 2: Business Details -->
+<div class="card" id="step2">
+<h2>2. Détails de votre projet</h2>
+
+<label>Type d'activité</label>
+<select id="business_type">
+<option value="quincaillerie">Quincaillerie — متجر مواد البناء</option>
+<option value="supermarche">Supermarché — سوبر ماركت</option>
+<option value="restaurant">Restaurant — مطعم</option>
+<option value="atelier_ferro">Atelier Ferronnerie — ورشة حدادة</option>
+<option value="pharmacie">Pharmacie — صيدلية</option>
+<option value="cafe_patisserie">Café-Pâtisserie — مقهى مع مخابز</option>
+<option value="boulangerie">Boulangerie — مخبزة</option>
+<option value="epicerie">Épicerie — دكان</option>
+<option value="garage">Garage Auto — ورشة سيارات</option>
+<option value="salon_coiffure">Salon Coiffure — صالون حلاقة</option>
+<option value="cybercafe">Cybercafé — مقهى إنترنت</option>
+<option value="plombier">Plombier — سباك</option>
+<option value="centre_services_num">Centre Services Numériques — مركز خدمات رقمية</option>
+</select>
+
+<label>Wilaya</label>
+<select id="wilaya">
+<option value="El Bayadh">El Bayadh — البيض</option>
+<option value="Oran">Oran — وهران</option>
+<option value="Alger">Alger — الجزائر</option>
+<option value="Constantine">Constantine — قسنطينة</option>
+<option value="Annaba">Annaba — عنابة</option>
+<option value="Blida">Blida — البليدة</option>
+<option value="Batna">Batna — باتنة</option>
+<option value="Sétif">Sétif — سطيف</option>
+<option value="Sidi Bel Abbès">Sidi Bel Abbès — سيدي بلعباس</option>
+<option value="Biskra">Biskra — بسكرة</option>
+<option value="Tébessa">Tébessa — تبسة</option>
+<option value="Tlemcen">Tlemcen — تلمسان</option>
+<option value="Béjaïa">Béjaïa — بجاية</option>
+<option value="Tizi Ouzou">Tizi Ouzou — تيزي وزو</option>
+<option value="Boumerdès">Boumerdès — بومرداس</option>
+<option value="Médéa">Médéa — المدية</option>
+<option value="Mostaganem">Mostaganem — مستغانم</option>
+<option value="M'Sila">M'Sila — المسيلة</option>
+<option value="Chlef">Chlef — الشلف</option>
+<option value="Skikda">Skikda — سكيكدة</option>
+</select>
+
+<label>Quartier / Ville</label>
+<input type="text" id="location" placeholder="Ex: Centre-ville, Bir El Djir, Bab Ezzouar...">
+
+<label>Investissement prévisionnel (DZD)</label>
+<input type="number" id="investment" placeholder="Ex: 5000000" min="500000" step="100000">
+
+<label>Nombre d'emplois prévus</label>
+<div style="display:flex;gap:10px">
+<input type="number" id="staff_min" placeholder="Min" min="1" max="200" style="width:50%">
+<input type="number" id="staff_max" placeholder="Max" min="1" max="200" style="width:50%">
+</div>
+
+<label>Description courte du projet (optionnel)</label>
+<textarea id="description" placeholder="Décrivez brièvement votre projet..."></textarea>
+</div>
+
+<!-- Step 3: Client Info -->
+<div class="card" id="step3">
+<h2>3. Vos coordonnées</h2>
+
+<label>Nom complet</label>
+<input type="text" id="client_name" placeholder="Ex: Ahmed Benali">
+
+<label>Téléphone (WhatsApp)</label>
+<input type="tel" id="client_phone" placeholder="Ex: 0555123456">
+
+<label>Email (optionnel)</label>
+<input type="email" id="client_email" placeholder="Ex: ahmed@email.com">
+</div>
+
+<!-- Preview & Send -->
+<div class="card" id="preview_card">
+<h2>4. Aperçu du message WhatsApp</h2>
+<p style="color:#666;margin-bottom:10px">Vérifiez les informations avant d'envoyer :</p>
+<div class="whatsapp-preview" id="whatsapp_preview"></div>
+
+<div class="estimate" id="price_estimate"></div>
+
+<button class="btn btn-whatsapp" id="send_whatsapp" onclick="sendWhatsApp()">
+📱 Envoyer via WhatsApp
+</button>
+<button class="btn btn-email" id="send_email" onclick="sendEmail()">
+📧 Envoyer par Email
+</button>
+</div>
+
+</div>
+<div class="footer">
+DSC Digital Services Center — contact@dsc-dz.com
+</div>
+
+<script>
+const SERVICES = {
+  feasibility: {name: "Étude de Faisabilité", emoji: "📊", prices: {express: "10,000", standard: "20,000", complete: "40,000", aapi_optimized: "60,000"}},
+  business_plan: {name: "Business Plan", emoji: "📋", prices: {default: "15,000 – 40,000"}},
+  market_research: {name: "Étude de Marché", emoji: "🔍", prices: {default: "10,000 – 20,000"}},
+  financial_projections: {name: "Prévisions Financières", emoji: "💰", prices: {default: "15,000 – 25,000"}},
+  marketing_plan: {name: "Plan Marketing", emoji: "📣", prices: {default: "10,000 – 20,000"}},
+  cv: {name: "CV Professionnel", emoji: "📄", prices: {default: "2,000 – 4,000"}},
+  cover_letter: {name: "Lettre de Motivation", emoji: "✉️", prices: {default: "1,000 – 3,000"}},
+  aapi: {name: "Dossier AAPI Premium", emoji: "🏛️", prices: {default: "75,000 – 150,000"}},
+};
+
+const BUSINESS_NAMES = {
+  quincaillerie: {fr: "Quincaillerie", ar: "متجر مواد البناء والعتاد"},
+  supermarche: {fr: "Supermarché", ar: "سوبر ماركت"},
+  restaurant: {fr: "Restaurant", ar: "مطعم"},
+  atelier_ferro: {fr: "Atelier Ferronnerie", ar: "ورشة حدادة"},
+  pharmacie: {fr: "Pharmacie", ar: "صيدلية"},
+  cafe_patisserie: {fr: "Café-Pâtisserie", ar: "مقهى مع مخابز"},
+  boulangerie: {fr: "Boulangerie", ar: "مخبزة"},
+  epicerie: {fr: "Épicerie", ar: "دكان"},
+  garage: {fr: "Garage Auto", ar: "ورشة سيارات"},
+  salon_coiffure: {fr: "Salon Coiffure", ar: "صالون حلاقة"},
+  cybercafe: {fr: "Cybercafé", ar: "مقهى إنترنت"},
+  plombier: {fr: "Plombier", ar: "سباك"},
+  centre_services_num: {fr: "Centre Services Numériques", ar: "مركز خدمات رقمية"},
+};
+
+const WILAYA_AR = {
+  "El Bayadh": "البيض", "Oran": "وهران", "Alger": "الجزائر", "Constantine": "قسنطينة",
+  "Annaba": "عنابة", "Blida": "البليدة", "Batna": "باتنة", "Sétif": "سطيف",
+  "Sidi Bel Abbès": "سيدي بلعباس", "Biskra": "بسكرة", "Tébessa": "تبسة",
+  "Tlemcen": "تلمسان", "Béjaïa": "بجاية", "Tizi Ouzou": "تيزي وزو",
+  "Boumerdès": "بومرداس", "Médéa": "المدية", "Mostaganem": "مستغانم",
+  "M'Sila": "المسيلة", "Chlef": "الشلف", "Skikda": "سكيكدة",
+};
+
+const INVEST_RANGES = {
+  quincaillerie: [4000000, 6000000], supermarche: [8000000, 15000000],
+  restaurant: [6000000, 12000000], atelier_ferro: [3000000, 6000000],
+  pharmacie: [5000000, 10000000], cafe_patisserie: [3000000, 6000000],
+  boulangerie: [2000000, 4000000], epicerie: [1500000, 3000000],
+  garage: [4000000, 8000000], salon_coiffure: [2000000, 4000000],
+  cybercafe: [3000000, 5000000], plombier: [1500000, 3000000],
+  centre_services_num: [4000000, 8000000],
+};
+
+const STAFF_RANGES = {
+  quincaillerie: [4, 8], supermarche: [8, 20], restaurant: [6, 15],
+  atelier_ferro: [3, 6], pharmacie: [2, 4], cafe_patisserie: [4, 8],
+  boulangerie: [3, 6], epicerie: [1, 3], garage: [3, 6],
+  salon_coiffure: [2, 5], cybercafe: [2, 4], plombier: [1, 3],
+  centre_services_num: [3, 6],
+};
+
+const PRICES = {
+  feasibility: {express: 10000, standard: 20000, complete: 40000, aapi_optimized: 60000},
+  business_plan: 25000, market_research: 15000, financial_projections: 20000,
+  marketing_plan: 15000, cv: 3000, cover_letter: 2000, aapi: 100000,
+};
+
+function getService() { return document.querySelector('input[name="service"]:checked').value; }
+function getLevel() { return document.querySelector('input[name="feasibility_level"]:checked')?.value || "standard"; }
+
+function updateUI() {
+  const svc = getService();
+  document.getElementById("feasibility_options").classList.toggle("hidden", svc !== "feasibility");
+
+  const biz = document.getElementById("business_type").value;
+  if (INVEST_RANGES[biz]) {
+    document.getElementById("investment").placeholder = `Ex: ${(INVEST_RANGES[biz][0]+INVEST_RANGES[biz][1])/2}`;
+    document.getElementById("staff_min").value = STAFF_RANGES[biz][0];
+    document.getElementById("staff_max").value = STAFF_RANGES[biz][1];
+  }
+  updatePreview();
+}
+
+function getPrice() {
+  const svc = getService();
+  if (svc === "feasibility") return PRICES.feasibility[getLevel()] || 20000;
+  return PRICES[svc] || 20000;
+}
+
+function updatePreview() {
+  const svc = getService();
+  const level = getLevel();
+  const info = SERVICES[svc];
+  const biz = document.getElementById("business_type").value;
+  const bizInfo = BUSINESS_NAMES[biz];
+  const wilaya = document.getElementById("wilaya").value;
+  const location = document.getElementById("location").value || "Non précisé";
+  const investment = parseInt(document.getElementById("investment").value) || 0;
+  const staffMin = document.getElementById("staff_min").value || "?";
+  const staffMax = document.getElementById("staff_max").value || "?";
+  const name = document.getElementById("client_name").value || "[Votre nom]";
+  const phone = document.getElementById("client_phone").value || "[Téléphone]";
+  const desc = document.getElementById("description").value;
+
+  let serviceDetail = "";
+  if (svc === "feasibility") {
+    const levelNames = {express: "Express (10k DZD)", standard: "Standard (20k DZD)", complete: "Complet (40k DZD)", aapi_optimized: "AAPI Optimisé (60k DZD)"};
+    serviceDetail = `\n📋 Niveau: ${levelNames[level] || level}`;
+  }
+
+  const price = getPrice();
+  const invStr = investment > 0 ? `${investment.toLocaleString("fr-DZ")} DZD` : "Non précisé";
+
+  const msg = `*Nouvelle Demande — DSC* 🏛️
+
+👤 *Client:* ${name}
+📞 *Téléphone:* ${phone}
+${document.getElementById("client_email").value ? `📧 *Email:* ${document.getElementById("client_email").value}` : ""}
+
+━━━━━━━━━━━━━━━━━━━━
+📊 *Service:* ${info.emoji} ${info.name}${serviceDetail}
+
+🏢 *Activité:* ${bizInfo.fr} (${bizInfo.ar})
+📍 *Wilaya:* ${wilaya} (${WILAYA_AR[wilaya] || ""})
+📌 *Quartier:* ${location}
+💰 *Investissement:* ${invStr}
+👥 *Emplois:* ${staffMin} – ${staffMax}
+${desc ? `\n📝 *Description:* ${desc}` : ""}
+━━━━━━━━━━━━━━━━━━━━
+
+💵 *Prix estimé:* ${price.toLocaleString("fr-DZ")} DZD
+
+Merci de me confirmer la disponibilité et les délais.`;
+
+  document.getElementById("whatsapp_preview").textContent = msg;
+
+  document.getElementById("price_estimate").innerHTML = `
+    <div class="row"><span>Service</span><span>${info.name}</span></div>
+    <div class="row"><span>Investissement déclaré</span><span>${invStr}</span></div>
+    <div class="row total"><span>Prix DSC</span><span style="color:#0A1628">${price.toLocaleString("fr-DZ")} DZD</span></div>
+  `;
+
+  return msg;
+}
+
+function sendWhatsApp() {
+  const msg = updatePreview();
+  const phone = document.getElementById("client_phone").value.replace(/\D/g, "");
+  const encoded = encodeURIComponent(msg);
+  window.open(`https://wa.me/213676773892?text=${encoded}`, "_blank");
+}
+
+function sendEmail() {
+  const msg = updatePreview();
+  const subject = encodeURIComponent("Nouvelle demande — DSC");
+  const body = encodeURIComponent(msg);
+  window.open(`mailto:contact@dsc-dz.com?subject=${subject}&body=${body}`, "_blank");
+}
+
+// Event listeners
+document.querySelectorAll('input[name="service"]').forEach(r => r.addEventListener("change", updateUI));
+document.querySelectorAll('input[name="feasibility_level"]').forEach(r => r.addEventListener("change", updateUI));
+document.getElementById("business_type").addEventListener("change", updateUI);
+["wilaya","location","investment","staff_min","staff_max","client_name","client_phone","client_email","description"].forEach(id => {
+  document.getElementById(id).addEventListener("input", updatePreview);
+});
+
+// Auto-fill defaults
+updateUI();
+</script>
+</body>
+</html>
