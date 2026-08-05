@@ -21,7 +21,9 @@ from aapi_optimizer import AAAPIOptimizer, AAPIScore
 from bmc_generator import BMCGenerator, BMC_TEMPLATES
 from nesda_calculator import calculate_nesda_financing, format_nesda_report, MODELS as NESDA_MODELS
 from nesda_catalog import search_catalog, recommend_activity, get_sector_stats, SECTORS, CATALOG
+from nesda_eligibility import check_eligibility, format_eligibility_report
 from linkedin_automation import LinkedInContentGenerator
+from pricing_calculator import calculate_quote, SERVICES as PRICING_SERVICES, PACKAGES
 from batch_processor import BatchManager
 from training_data_collector import TrainingDataCollector
 
@@ -43,39 +45,71 @@ def _sidebar():
 def home_page():
     _sidebar()
     app.html("""
-    <div style="text-align:center;padding:30px 0;">
+    <div style="text-align:center;padding:25px 0;">
         <h1 style="color:#0A1628;margin-bottom:5px;">Digital Services Center</h1>
         <p style="color:#D4AF37;font-size:1.1em;margin-top:0;">مركز الخدمات الرقمية — الجزائر</p>
+        <p style="color:#888;font-size:0.9em;margin-top:5px;">23 Tools • 20 Pages • One-Click Dossier Pipeline</p>
     </div>
     """)
-    app.markdown("### Services")
-    col1, col2 = app.columns(2)
-    with col1:
-        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #D4AF37;">
-            <h4 style="margin:0 0 8px;">📄 Feasibility Studies</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">دراسات جدوى أولية احترافية — 3k to 20k DZD</p>
+
+    # Tool categories
+    categories = [
+        ("📊 Studies & Feasibility", "#0A1628", [
+            ("Feasibility", "دراسات جدوى 10k-60k"),
+            ("Business Plan", "خطط عمل 25k-40k"),
+            ("Market Research", "أبحاث سوق 10k-20k"),
+            ("Financials", "توقعات مالية 15k-25k"),
+            ("Complete Dossier", "ملف كامل NESDA"),
+            ("BMC Canvas", "نموذج أعمال 9 محاور"),
+        ]),
+        ("🎯 NESDA Tools", "#D4AF37", [
+            ("NESDA Calc", "حساب تمويل ثلاثي"),
+            ("NESDA Catalog", "51 نشاط مدعوم"),
+            ("Eligibility", "تحقق من الأهلية"),
+        ]),
+        ("💰 Pricing & Quotes", "#28a745", [
+            ("Pricing", "حاسبة أسعار + واتساب"),
+            ("Invoice/Quote", "فواتير وعروض سعر"),
+            ("Tax Helper", "تصريحات ضريبية"),
+        ]),
+        ("📣 Marketing", "#e83e8c", [
+            ("Marketing Plan", "خطط تسويقية"),
+            ("Social Media", "محتوى شبكات اجتماعية"),
+            ("LinkedIn", "إنشاء محتوى تلقائي"),
+        ]),
+        ("📄 Documents", "#6f42c1", [
+            ("CV Generator", "سيرة ذاتية PDF"),
+            ("Cover Letter", "رسالة تعريفية"),
+            ("Gov Paperwork", "مساعدة إدارية"),
+        ]),
+        ("🛠️ Operations", "#17a2b8", [
+            ("Calculators", "حسابات مالية VAN/TRI"),
+            ("AAPI Scorer", "نقاط AAPI /1500"),
+            ("Batch Process", "إدارة العملاء"),
+        ]),
+    ]
+
+    for cat_title, color, tools in categories:
+        app.html(f"""<div style="margin:15px 0 8px;padding:8px 12px;background:{color}10;border-radius:8px;border-left:4px solid {color};">
+            <strong style="color:{color};">{cat_title}</strong>
         </div>""")
-        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #28a745;margin-top:10px;">
-            <h4 style="margin:0 0 8px;">📊 Market Research</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">أبحاث سوق وتحليل المنافسين — 5k DZD</p>
-        </div>""")
-        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #6f42c1;margin-top:10px;">
-            <h4 style="margin:0 0 8px;">📈 Financial Projections</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">توقعات مالية وتحليل حساسية — 7k DZD</p>
-        </div>""")
-    with col2:
-        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #0A1628;">
-            <h4 style="margin:0 0 8px;">📋 Business Plans</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">خطط عمل مفصلة — 15k to 25k DZD</p>
-        </div>""")
-        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #e83e8c;margin-top:10px;">
-            <h4 style="margin:0 0 8px;">📣 Marketing Plans</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">خطط تسويقية + محتوى — 5k to 10k DZD</p>
-        </div>""")
-        app.html("""<div style="padding:15px;background:#D4AF3710;border-radius:8px;border:2px solid #D4AF37;margin-top:10px;">
-            <h4 style="margin:0 0 8px;color:#D4AF37;">⭐ Full Package</h4>
-            <p style="margin:0;font-size:0.9em;color:#333;font-weight:bold;">30k DZD — All 5 services</p>
-        </div>""")
+        cols = app.columns(min(3, len(tools)))
+        for i, (tool, desc) in enumerate(tools):
+            with cols[i % len(cols)]:
+                app.html(f"""<div style="padding:10px;background:white;border-radius:6px;margin:3px 0;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <strong style="font-size:0.9em;">{tool}</strong>
+                    <div style="font-size:0.78em;color:#888;">{desc}</div>
+                </div>""")
+
+    # Stats
+    app.html("""<div style="text-align:center;padding:20px;margin-top:15px;background:#f8f9fa;border-radius:8px;">
+        <div style="display:flex;justify-content:center;gap:30px;">
+            <div><strong style="font-size:1.5em;color:#0A1628;">23</strong><div style="font-size:0.8em;color:#888;">Generator</div></div>
+            <div><strong style="font-size:1.5em;color:#D4AF37;">51</strong><div style="font-size:0.8em;color:#888;">NESDA Activities</div></div>
+            <div><strong style="font-size:1.5em;color:#28a745;">20</strong><div style="font-size:0.8em;color:#888;">Services</div></div>
+            <div><strong style="font-size:1.5em;color:#e83e8c;">4</strong><div style="font-size:0.8em;color:#888;">Packages</div></div>
+        </div>
+    </div>""")
 
 
 def _provider_select():
@@ -1028,6 +1062,148 @@ def batch_page():
         app.info("No clients yet. Add your first client above.")
 
 
+def eligibility_page():
+    """NESDA Eligibility Checker — verify project eligibility for financing."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">NESDA Eligibility Checker</h2>
+        <p style="margin:3px 0 0;color:#888;">تحقق من أهليتك لتمويل NESDA</p>
+    </div>
+    """)
+
+    col1, col2 = app.columns(2)
+    with col1:
+        age = app.number_input("العمر / Âge", min_value=18, max_value=65, value=28)
+        activity = app.selectbox("النشاط / Activité", options=list(CATALOG.keys()), index=0)
+    with col2:
+        investment = app.number_input("المبلغ (DZD)", min_value=100_000, max_value=50_000_000, value=3_000_000, step=100_000)
+        profile = app.selectbox("الوضع / Profil", options=["unemployed", "employed", "student"], index=0)
+
+    # Document checklist
+    app.markdown("### المستندات / Documents")
+    col1, col2 = app.columns(2)
+    with col1:
+        has_cde = app.checkbox("شهادة CDE")
+        has_anem = app.checkbox("تسجيل ANEM")
+    with col2:
+        has_bp = app.checkbox("خطة العمل")
+        has_feas = app.checkbox("دراسة الجدوى")
+
+    if app.button("Check Eligibility", primary=True):
+        result = check_eligibility(
+            age=age, activity_key=activity, investment=investment,
+            wilaya="El Bayadh", profile=profile,
+            has_cde_training=has_cde, has_anem_registration=has_anem,
+            has_business_plan=has_bp, has_feasibility_study=has_feas,
+        )
+
+        # Score display
+        color = "#28a745" if result.eligible else "#dc3545"
+        app.html(f"""<div style="text-align:center;padding:25px;background:{color}10;border-radius:12px;border:2px solid {color};margin:15px 0;">
+            <div style="font-size:3em;font-weight:bold;color:{color};">{result.score}/{result.max_score}</div>
+            <div style="font-size:1.2em;color:{color};">{'مؤهل ✓' if result.eligible else 'غير مؤهل ✗'}</div>
+        </div>""")
+
+        # Individual checks
+        app.markdown("### نتائج الفحص")
+        for c in result.checks:
+            icon = "✅" if c["status"] == "pass" else "⚠️" if c["status"] == "warning" else "❌" if c["status"] == "fail" else "ℹ️"
+            app.html(f"""<div style="padding:8px 12px;margin:4px 0;background:white;border-radius:6px;border-left:3px solid {'#28a745' if c['status']=='pass' else '#ffc107' if c['status']=='warning' else '#dc3545'};">
+                <strong>{icon} {c['name']}</strong>: {c['detail']}
+            </div>""")
+
+        # Financing estimate
+        app.markdown("### هيكل التمويل")
+        fe = result.financing_estimate
+        col1, col2, col3 = app.columns(3)
+        with col1:
+            app.html(f"""<div style="text-align:center;padding:15px;background:#e3f2fd;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">المساهمة الشخصية</div>
+                <div style="font-size:1.3em;font-weight:bold;color:#1565c0;">{fe['personal']:,} دج</div>
+            </div>""")
+        with col2:
+            app.html(f"""<div style="text-align:center;padding:15px;background:#e8f5e9;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">مساهمة NESDA</div>
+                <div style="font-size:1.3em;font-weight:bold;color:#2e7d32;">{fe['nesda_grant']:,} دج</div>
+            </div>""")
+        with col3:
+            app.html(f"""<div style="text-align:center;padding:15px;background:#fff3e0;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">القرض البنكي</div>
+                <div style="font-size:1.3em;font-weight:bold;color:#e65100;">{fe['bank_loan']:,} دج</div>
+            </div>""")
+
+        # Next steps
+        app.markdown("### الخطوات التالية")
+        for step in result.next_steps:
+            app.html(f"<div style='padding:6px 12px;margin:3px 0;background:#f8f9fa;border-radius:4px;'>{step}</div>")
+
+
+def pricing_page():
+    """DSC Pricing Calculator — instant quotes with WhatsApp."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">Pricing Calculator</h2>
+        <p style="margin:3px 0 0;color:#888;">حاسبة الأسعار — عروض فورية مع واتساب</p>
+    </div>
+    """)
+
+    # Package presets
+    app.markdown("### Quick Packages")
+    pkg_cols = app.columns(4)
+    for i, (key, pkg) in enumerate(PACKAGES.items()):
+        with pkg_cols[i]:
+            if app.button(f"{pkg['name_ar']}\n{pkg['price_label']}", key=f"pkg_{key}"):
+                app.session_state.selected_services = pkg["services"]
+                app.session_state.pkg_discount = pkg["discount"]
+
+    app.markdown("### Select Services")
+    selected = []
+    for key, svc in PRICING_SERVICES.items():
+        if app.checkbox(f"{svc['name_fr']} — {svc['name_ar']} ({svc['price_min']:,}-{svc['price_max']:,} DZD)", key=f"svc_{key}"):
+            selected.append(key)
+
+    discount = app.number_input("Discount %", min_value=0, max_value=50, value=0)
+    client_name = app.text_input("Client Name")
+    client_phone = app.text_input("Phone (+213)")
+
+    if app.button("Generate Quote", primary=True) and selected:
+        quote = calculate_quote(selected, discount_pct=discount, client_name=client_name, client_phone=client_phone)
+
+        # Summary
+        app.markdown("### Quote Summary")
+        for s in quote.services:
+            app.html(f"""<div style="padding:8px 12px;margin:4px 0;background:white;border-radius:6px;">
+                <strong>{s['name_fr']}</strong> ({s['name_ar']}) — <strong>{s['price']:,} دج</strong>
+                <span style="color:#888;font-size:0.85em;"> | {s['delivery_days']} أيام</span>
+            </div>""")
+
+        # Total
+        color = "#D4AF37"
+        app.html(f"""<div style="text-align:center;padding:20px;background:{color}10;border-radius:12px;border:2px solid {color};margin:15px 0;">
+            <div style="font-size:1.5em;font-weight:bold;color:{color};">الإجمالي: {quote.total:,} دج</div>
+            <div style="color:#666;">العربون: {quote.deposit_amount:,} دج | المتبقي: {quote.balance:,} دج</div>
+            <div style="color:#888;font-size:0.9em;margin-top:5px;">التسليم: {quote.estimated_delivery}</div>
+        </div>""")
+
+        # WhatsApp
+        if client_phone:
+            app.html(f"""<div style="padding:15px;background:#25D36610;border-radius:8px;border:2px solid #25D366;margin:10px 0;">
+                <div style="font-weight:bold;color:#25D366;">📱 WhatsApp Quote Ready</div>
+                <div style="font-size:0.85em;color:#555;margin-top:5px;white-space:pre-wrap;">{quote.whatsapp_message[:200]}...</div>
+            </div>""")
+
+        # Save
+        if app.button("Save Quote"):
+            out = Path(__file__).parent.parent / "generated_output"
+            out.mkdir(exist_ok=True)
+            from pricing_calculator import format_quote_markdown
+            md = format_quote_markdown(quote, client_name)
+            (out / f"quote_{client_name.replace(' ', '_') or 'client'}.md").write_text(md, encoding="utf-8")
+            app.toast("Quote saved!", type="success")
+
+
 app.navigation([
     vl.Page(home_page, title="Home", icon="house"),
     vl.Page(dossier_page, title="Complete Dossier", icon="package"),
@@ -1038,6 +1214,8 @@ app.navigation([
     vl.Page(bmc_page, title="BMC Canvas", icon="layout"),
     vl.Page(nesda_calc_page, title="NESDA Calc", icon="calculator"),
     vl.Page(nesda_catalog_page, title="NESDA Catalog", icon="search"),
+    vl.Page(eligibility_page, title="Eligibility", icon="check-circle"),
+    vl.Page(pricing_page, title="Pricing", icon="dollar-sign"),
     vl.Page(marketing_plan_page, title="Marketing Plan", icon="megaphone"),
     vl.Page(social_media_page, title="Social Media", icon="share-2"),
     vl.Page(tax_helper_page, title="Tax Helper", icon="calculator"),
