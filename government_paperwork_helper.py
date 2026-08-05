@@ -387,7 +387,19 @@ class GovernmentPaperworkHelper:
         lines.append(f"  {notes}")
         lines.append("")
 
-        return "\n".join(lines)
+        result = "\n".join(lines)
+
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="gov_paperwork",
+                input_params={"procedure": key, "lang": lang},
+                output_content=result,
+            )
+        except Exception:
+            pass
+
+        return result
 
     def save_checklist(self, key, lang="fr"):
         text = self.generate_checklist(key, lang)

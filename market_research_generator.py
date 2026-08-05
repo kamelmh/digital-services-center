@@ -165,6 +165,17 @@ currency: DZD
         content += f"""**إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** {now:%d/%m/%Y}"""
 
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="market_research",
+                input_params={"business_type": business_type, "location": location, "wilaya": wilaya},
+                output_content=content,
+                metadata={"sections": list(sections.keys())},
+            )
+        except Exception:
+            pass
+
         return {
             "title": f"بحث سوق — {business_name or template['name_ar']}",
             "location": f"{location}، {wilaya}",

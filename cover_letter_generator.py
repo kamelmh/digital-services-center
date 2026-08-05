@@ -123,6 +123,18 @@ class CoverLetterGenerator:
             c.drawString(20*mm, y, data.get("sender_name", ""))
 
         c.save()
+
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="cover_letter",
+                input_params={"sender_name": data.get("sender_name", ""), "lang": lang},
+                output_content=f"Cover letter generated: {filename}",
+                metadata={"filepath": filepath},
+            )
+        except Exception:
+            pass
+
         return filepath
 
 

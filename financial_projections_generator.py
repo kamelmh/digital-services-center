@@ -261,6 +261,17 @@ currency: DZD
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** """ + now.strftime("%d/%m/%Y")
 
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="financial_projections",
+                input_params={"business_type": business_type, "investment": investment, "monthly_revenue": monthly_revenue_estimate},
+                output_content=content,
+                metadata={"sections": list(sections.keys())},
+            )
+        except Exception:
+            pass
+
         return {
             "title": f"توقعات مالية — {business_name}",
             "business_name": business_name,

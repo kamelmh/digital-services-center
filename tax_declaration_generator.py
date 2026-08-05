@@ -253,6 +253,16 @@ language: ar
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** {now:%d/%m/%Y}"""
 
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="tax_declaration",
+                input_params={"declaration_type": declaration_type, "business_name": business_name},
+                output_content=full_content,
+            )
+        except Exception:
+            pass
+
         return {
             "title": f"دليل {config['name_ar']}",
             "declaration_type": config["name_ar"],

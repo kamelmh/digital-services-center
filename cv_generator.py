@@ -169,6 +169,18 @@ class CVGenerator:
                     c.drawString(15*mm, y, line)
 
         c.save()
+
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="cv",
+                input_params={"name": data.get("name", ""), "template": data.get("template", ""), "lang": lang},
+                output_content=f"CV generated: {filename}",
+                metadata={"filepath": filepath},
+            )
+        except Exception:
+            pass
+
         return filepath
 
 

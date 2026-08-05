@@ -186,6 +186,17 @@ currency: DZD
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** """ + now.strftime("%d/%m/%Y")
 
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="business_plan",
+                input_params={"business_type": business_type, "business_name": business_name, "location": location, "wilaya": wilaya, "investment": investment},
+                output_content=content,
+                metadata={"sections": list(sections.keys())},
+            )
+        except Exception:
+            pass
+
         return {
             "title": f"خطة عمل — {business_name}",
             "business_name": business_name,

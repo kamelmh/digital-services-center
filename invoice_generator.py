@@ -182,6 +182,16 @@ currency: DZD
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** {now:%d/%m/%Y}"""
 
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="invoice",
+                input_params={"invoice_number": invoice_number, "client_name": client_name, "items": items},
+                output_content=full_content,
+            )
+        except Exception:
+            pass
+
         return {
             "invoice_number": invoice_number,
             "client": client_name,
@@ -266,6 +276,16 @@ currency: DZD
 
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** {now:%d/%m/%Y}"""
+
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="quote",
+                input_params={"quote_number": quote_number, "client_name": client_name, "items": items},
+                output_content=full_content,
+            )
+        except Exception:
+            pass
 
         return {
             "quote_number": quote_number,

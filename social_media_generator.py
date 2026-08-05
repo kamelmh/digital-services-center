@@ -294,6 +294,16 @@ language: ar
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** {now:%d/%m/%Y}"""
 
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="social_media",
+                input_params={"business_type": business_type, "content_type": content_type},
+                output_content=full_content,
+            )
+        except Exception:
+            pass
+
         return {
             "title": f"محتوى سوشيال ميديا — {business_name}",
             "content_type": content_config["name_ar"],

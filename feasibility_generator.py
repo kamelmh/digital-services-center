@@ -363,7 +363,21 @@ class FeasibilityGenerator:
         for index, (name, prompt, temperature) in enumerate(prompts, start=1):
             print(f"  [{index}/{len(prompts)}] إنشاء {name}...", file=sys.stderr)
             sections[name] = self._call_llm(prompt, temperature)
-        return self._assemble_study(business, location.strip(), wilaya.strip(), investment, sections)
+        result = self._assemble_study(business, location.strip(), wilaya.strip(), investment, sections)
+
+        try:
+            from training_hook import hook_generation
+            full_text = "\n\n".join(str(v) for v in result.values() if isinstance(v, str))
+            hook_generation(
+                generator="feasibility",
+                input_params={"business_type": business_type, "location": location, "wilaya": wilaya, "investment": investment},
+                output_content=full_text,
+                metadata={"sections": list(sections.keys())},
+            )
+        except Exception:
+            pass
+
+        return result
 
     @staticmethod
     def _build_prompts(business: dict[str, Any], location: str, wilaya: str, investment: int) -> list[tuple[str, str, float]]:
