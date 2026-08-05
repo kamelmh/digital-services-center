@@ -8,6 +8,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from feasibility_generator import FeasibilityGenerator, BUSINESS_TEMPLATES, ALGERIA_DATA
 from business_plan_generator import BusinessPlanGenerator
 from market_research_generator import MarketResearchGenerator
+from financial_projections_generator import FinancialProjectionsGenerator
+from marketing_plan_generator import MarketingPlanGenerator
 
 app = vl.App(title="Digital Services Center", theme="ocean")
 
@@ -33,34 +35,33 @@ def home_page():
     </div>
     """)
     app.markdown("### Services")
-    col1, col2, col3 = app.columns(3)
+    col1, col2 = app.columns(2)
     with col1:
         app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #D4AF37;">
             <h4 style="margin:0 0 8px;">📄 Feasibility Studies</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">دراسات جدوى أولية احترافية للمشاريع الجزائرية</p>
+            <p style="margin:0;font-size:0.9em;color:#555;">دراسات جدوى أولية احترافية — 3k to 20k DZD</p>
+        </div>""")
+        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #28a745;margin-top:10px;">
+            <h4 style="margin:0 0 8px;">📊 Market Research</h4>
+            <p style="margin:0;font-size:0.9em;color:#555;">أبحاث سوق وتحليل المنافسين — 5k DZD</p>
+        </div>""")
+        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #6f42c1;margin-top:10px;">
+            <h4 style="margin:0 0 8px;">📈 Financial Projections</h4>
+            <p style="margin:0;font-size:0.9em;color:#555;">توقعات مالية وتحليل حساسية — 7k DZD</p>
         </div>""")
     with col2:
         app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #0A1628;">
             <h4 style="margin:0 0 8px;">📋 Business Plans</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">خطط عمل مفصلة للمشاريع الناشئة والقائمة</p>
+            <p style="margin:0;font-size:0.9em;color:#555;">خطط عمل مفصلة — 15k to 25k DZD</p>
         </div>""")
-    with col3:
-        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #28a745;">
-            <h4 style="margin:0 0 8px;">📊 Market Research</h4>
-            <p style="margin:0;font-size:0.9em;color:#555;">أبحاث سوق وتقارير تحليل المنافسين</p>
+        app.html("""<div style="padding:15px;background:#f8f9fa;border-radius:8px;border-left:3px solid #e83e8c;margin-top:10px;">
+            <h4 style="margin:0 0 8px;">📣 Marketing Plans</h4>
+            <p style="margin:0;font-size:0.9em;color:#555;">خطط تسويقية + محتوى — 5k to 10k DZD</p>
         </div>""")
-    app.markdown("---")
-    app.markdown("### Pricing")
-    app.html("""<table style="width:100%;border-collapse:collapse;">
-        <tr style="background:#0A1628;color:white;"><th style="padding:8px;text-align:left;">Service</th><th style="padding:8px;text-align:right;">Price (DZD)</th></tr>
-        <tr><td style="padding:8px;border-bottom:1px solid #eee;">Feasibility Study — Basic</td><td style="padding:8px;text-align:right;border-bottom:1px solid #eee;">3,000</td></tr>
-        <tr><td style="padding:8px;border-bottom:1px solid #eee;">Feasibility Study — Standard</td><td style="padding:8px;text-align:right;border-bottom:1px solid #eee;">8,000</td></tr>
-        <tr><td style="padding:8px;border-bottom:1px solid #eee;">Feasibility Study — Comprehensive</td><td style="padding:8px;text-align:right;border-bottom:1px solid #eee;">15,000</td></tr>
-        <tr><td style="padding:8px;border-bottom:1px solid #eee;">Business Plan — Basic</td><td style="padding:8px;text-align:right;border-bottom:1px solid #eee;">15,000</td></tr>
-        <tr><td style="padding:8px;border-bottom:1px solid #eee;">Business Plan — Comprehensive</td><td style="padding:8px;text-align:right;border-bottom:1px solid #eee;">25,000</td></tr>
-        <tr><td style="padding:8px;border-bottom:1px solid #eee;">Market Research</td><td style="padding:8px;text-align:right;border-bottom:1px solid #eee;">5,000</td></tr>
-        <tr><td style="padding:8px;font-weight:bold;">Full Package</td><td style="padding:8px;text-align:right;font-weight:bold;">30,000</td></tr>
-    </table>""")
+        app.html("""<div style="padding:15px;background:#D4AF3710;border-radius:8px;border:2px solid #D4AF37;margin-top:10px;">
+            <h4 style="margin:0 0 8px;color:#D4AF37;">⭐ Full Package</h4>
+            <p style="margin:0;font-size:0.9em;color:#333;font-weight:bold;">30k DZD — All 5 services</p>
+        </div>""")
 
 
 def _provider_select():
@@ -165,6 +166,78 @@ def market_research_page():
             app.toast(f"Error: {e}", type="error")
 
 
+def financial_projections_page():
+    _sidebar()
+    app.title("Financial Projections Generator")
+    app.text("إنشاء توقعات مالية تفصيلية")
+
+    business_type = app.selectbox("Business Type", options=list(BUSINESS_TEMPLATES.keys()), index=0)
+    template = BUSINESS_TEMPLATES[business_type.value]
+    app.html(f"<h3 style='margin-bottom:2px;'>{template['name_ar']}</h3><p style='margin-top:0;color:#666;'>{template['name_en']}</p>")
+    app.text(f"Profit margin: {template['margin'][0]*100:.0f}%-{template['margin'][1]*100:.0f}%")
+
+    inv_min, inv_max = template["investment"]
+    investment = app.number_input("Investment Amount (DZD)", min_value=inv_min, max_value=inv_max, value=(inv_min + inv_max) // 2, step=100_000)
+    num_employees = app.number_input("Number of Employees", min_value=template["staff"][0], max_value=template["staff"][1], value=(template["staff"][0] + template["staff"][1]) // 2, step=1)
+    monthly_revenue = app.number_input("Estimated Monthly Revenue (DZD) — leave 0 for auto", min_value=0, value=0, step=100_000)
+    wilaya = _wilaya_select()
+    location = app.text_input("City / Location")
+    business_name = app.text_input("Business Name (Arabic)")
+    provider = _provider_select()
+
+    if app.button("Generate Financial Projections"):
+        if not business_name.value or not location.value:
+            app.toast("Please fill all fields", type="error")
+            return
+        app.toast("Generating financial projections (5 sections)...", type="info")
+        try:
+            gen = FinancialProjectionsGenerator(provider=provider.value)
+            result = gen.generate(
+                business_type.value, business_name.value, location.value, wilaya.value,
+                investment.value, num_employees.value, monthly_revenue.value or None,
+            )
+            app.markdown("### Financial Projections")
+            app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{result['content']}</div>")
+            _save_output("financial_projections", business_name.value, result["content"])
+        except Exception as e:
+            app.toast(f"Error: {e}", type="error")
+
+
+def marketing_plan_page():
+    _sidebar()
+    app.title("Marketing Plan Generator")
+    app.text("إنشاء خطة تسويقية شاملة")
+
+    business_type = app.selectbox("Business Type", options=list(BUSINESS_TEMPLATES.keys()), index=0)
+    template = BUSINESS_TEMPLATES[business_type.value]
+    app.html(f"<h3 style='margin-bottom:2px;'>{template['name_ar']}</h3><p style='margin-top:0;color:#666;'>{template['name_en']}</p>")
+
+    inv_min, inv_max = template["investment"]
+    investment = app.number_input("Investment Amount (DZD)", min_value=inv_min, max_value=inv_max, value=(inv_min + inv_max) // 2, step=100_000)
+    monthly_budget = app.number_input("Monthly Marketing Budget (DZD) — leave 0 for auto", min_value=0, value=0, step=5_000)
+    wilaya = _wilaya_select()
+    location = app.text_input("City / Location")
+    business_name = app.text_input("Business Name (Arabic)")
+    provider = _provider_select()
+
+    if app.button("Generate Marketing Plan"):
+        if not business_name.value or not location.value:
+            app.toast("Please fill all fields", type="error")
+            return
+        app.toast("Generating marketing plan...", type="info")
+        try:
+            gen = MarketingPlanGenerator(provider=provider.value)
+            result = gen.generate(
+                business_type.value, business_name.value, location.value, wilaya.value,
+                investment.value, monthly_budget.value or None,
+            )
+            app.markdown("### Marketing Plan")
+            app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{result['content']}</div>")
+            _save_output("marketing_plan", business_name.value, result["content"])
+        except Exception as e:
+            app.toast(f"Error: {e}", type="error")
+
+
 def _save_output(doc_type: str, name: str, content: str):
     """Save generated content to output directory."""
     output_dir = Path(__file__).parent.parent / "generated_output"
@@ -179,6 +252,8 @@ app.navigation([
     vl.Page(feasibility_page, title="Feasibility", icon="file-text"),
     vl.Page(business_plan_page, title="Business Plan", icon="briefcase"),
     vl.Page(market_research_page, title="Market Research", icon="bar-chart"),
+    vl.Page(financial_projections_page, title="Financials", icon="trending-up"),
+    vl.Page(marketing_plan_page, title="Marketing Plan", icon="megaphone"),
 ])
 
 if __name__ == "__main__":
