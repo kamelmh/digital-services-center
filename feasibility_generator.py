@@ -1,626 +1,448 @@
-"""
-Academix DSS — Feasibility Study Generator
-Generates professional 27-page feasibility studies for Algerian businesses
-Based on Hany Sewilam template structure, localized for Algeria
+"""Generate professional Arabic feasibility studies for Algerian businesses.
+
+The generator uses OpenAI-compatible chat-completions APIs.  It supports Groq,
+OpenRouter, and AIHubMix without storing keys in source control.
 """
 
-import json
+from __future__ import annotations
+
+import argparse
 import os
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 try:
     import requests
-    HAS_REQUESTS = True
-except ImportError:
-    HAS_REQUESTS = False
+except ImportError as error:  # pragma: no cover - depends on local installation
+    raise SystemExit(
+        "Missing dependency: requests. Install it with: python -m pip install requests"
+    ) from error
 
-# ─── ALGERIAN REFERENCE DATA ────────────────────────────────────────────────
+
+class FeasibilityError(RuntimeError):
+    """Raised when a feasibility study cannot be generated safely."""
+
 
 ALGERIA_DATA = {
-    "country": "الجزائر",
     "currency": "دج",
     "currency_code": "DZD",
-    "population": 45_000_000,
-    "growth_rate": 0.018,  # 1.8% annual population growth
-    "smig": 20_000,  # SMIG minimum wage (monthly)
-    "smig_hourly": 120,  # SMIG hourly
-    "tax_rate_corporate": 0.19,  # IS tax rate (standard)
-    "tax_rate_small": 0.19,  # IS for small enterprises
-    "tva_rate": 0.19,  # TVA standard
-    "cnas_employer": 0.26,  # CNAS employer contribution
-    "cnas_employee": 0.09,  # CNAS employee contribution
-    "casnos_rate": 0.02,  # CASNOS for self-employed
-    "interest_rate": 0.09,  # Average bank loan rate
-    "discount_rate": 0.12,  # NPV discount rate
-    "inflation": 0.03,  # Annual inflation
+    "population_growth_rate": 0.018,
+    "smig_monthly": 20_000,
+    "tva_rate": 0.19,
+    "corporate_tax_rate": 0.19,
+    "cnas_employer_rate": 0.26,
+    "loan_interest_rate": 0.09,
+    "discount_rate": 0.12,
+    "inflation_rate": 0.03,
     "wilayas": {
-        "El Bayadh": {"population": 228_000, "index": 0.85},
-        "Alger": {"population": 3_915_000, "index": 1.15},
-        "Oran": {"population": 1_560_000, "index": 1.05},
-        "Constantine": {"population": 938_000, "index": 0.95},
-        "Blida": {"population": 1_002_000, "index": 0.95},
-        "Setif": {"population": 1_489_000, "index": 0.90},
-        "Tlemcen": {"population": 949_000, "index": 0.90},
-        "Bejaia": {"population": 912_000, "index": 0.90},
-        "Tizi Ouzou": {"population": 1_127_000, "index": 0.95},
-        "Annaba": {"population": 640_000, "index": 0.95},
-    },
-    "business_registration": {
-        "ANAE": "السجل التجاري + الضرائب",
-        "CNAS": "الصندوق الوطني للتأمينات",
-        "cost_registration": 5_000,  # Approximate
-        "time_days": 15,
+        "El Bayadh": {"population": 228_000, "market_index": 0.85},
+        "Alger": {"population": 3_915_000, "market_index": 1.15},
+        "Oran": {"population": 1_560_000, "market_index": 1.05},
+        "Constantine": {"population": 938_000, "market_index": 0.95},
+        "Blida": {"population": 1_002_000, "market_index": 0.95},
+        "Sétif": {"population": 1_489_000, "market_index": 0.90},
+        "Tlemcen": {"population": 949_000, "market_index": 0.90},
+        "Béjaïa": {"population": 912_000, "market_index": 0.90},
+        "Tizi Ouzou": {"population": 1_127_000, "market_index": 0.95},
+        "Annaba": {"population": 640_000, "market_index": 0.95},
     },
 }
 
-# ─── BUSINESS TEMPLATES ──────────────────────────────────────────────────────
-
 BUSINESS_TEMPLATES = {
     "quincaillerie": {
-        "name_ar": "متجر مواد بناء و معدنية",
+        "name_ar": "متجر مواد البناء والعتاد",
         "name_en": "Hardware & Building Materials Store",
         "category": "تجارة",
-        "typical_investment": {"min": 2_000_000, "max": 8_000_000},
-        "typical_margin": {"min": 0.15, "max": 0.35},
-        "typical_staff": {"min": 3, "max": 8},
-        "typical_area_sqm": {"min": 80, "max": 300},
-        "products": [
-            "مواد بناء (أسمنت، رمل، حجارة)",
-            "أنابيب وأدوات سباكة",
-            "أسلاك كهربائية ولوحات",
-            "أدوات يدوية",
-            "دهانات ومواد لاصقة",
-            "أقفال وأبواب",
-            "سيراميك وبلاط",
-        ],
-        "seasonal_peak": "مارس - يونيو (موسم البناء)",
-        "competition_level": "متوسط - مرتفع",
-        "success_factors": ["موقع جيد", "تنوع المنتجات", "أسعار تنافسية", "خدمة ما بعد البيع"],
+        "investment": (2_000_000, 8_000_000),
+        "margin": (0.15, 0.35),
+        "staff": (3, 8),
+        "area_sqm": (80, 300),
+        "products": "مواد البناء، السباكة، الكهرباء، الأدوات اليدوية، الدهانات، السيراميك",
     },
     "supermarche": {
         "name_ar": "سوبر ماركت",
         "name_en": "Supermarket",
-        "category": "تجارة تجزئة",
-        "typical_investment": {"min": 3_000_000, "max": 15_000_000},
-        "typical_margin": {"min": 0.12, "max": 0.25},
-        "typical_staff": {"min": 5, "max": 20},
-        "typical_area_sqm": {"min": 150, "max": 500},
-        "products": [
-            "مواد غذائية أساسية",
-            "مشروبات",
-            "مواد تنظيف",
-            "منتجات ألبان",
-            "لحوم ودواجن",
-            "فواكه وخضار",
-        ],
-        "seasonal_peak": "رمضان + الأعياد",
-        "competition_level": "مرتفع",
-        "success_factors": ["موقع حيوي", "جودة المنتجات", "نظافة المحل", "أسعار منافسة"],
+        "category": "تجارة التجزئة",
+        "investment": (3_000_000, 15_000_000),
+        "margin": (0.12, 0.25),
+        "staff": (5, 20),
+        "area_sqm": (150, 500),
+        "products": "مواد غذائية، مشروبات، منتجات ألبان، مواد تنظيف، خضر وفواكه",
     },
     "restaurant": {
         "name_ar": "مطعم",
         "name_en": "Restaurant",
-        "category": "ضيافة",
-        "typical_investment": {"min": 1_500_000, "max": 6_000_000},
-        "typical_margin": {"min": 0.20, "max": 0.40},
-        "typical_staff": {"min": 4, "max": 15},
-        "typical_area_sqm": {"min": 60, "max": 200},
-        "products": [
-            "وجبات مطبوخة",
-            "مشروبات ساخنة وباردة",
-            "حلويات",
-            "مشاوي",
-        ],
-        "seasonal_peak": "رمضان + عطل نهاية الأسبوع",
-        "competition_level": "مرتفع جداً",
-        "success_factors": ["جودة الطعام", "خدمة سريعة", "نظافة", "سعر مناسب", "موقع"],
+        "category": "خدمات الإطعام",
+        "investment": (1_500_000, 6_000_000),
+        "margin": (0.20, 0.40),
+        "staff": (4, 15),
+        "area_sqm": (60, 200),
+        "products": "وجبات مطبوخة، مشروبات، حلويات ومشاوي",
     },
     "atelier_ferro": {
-        "name_ar": "ورشة حدادة و التلحيم",
+        "name_ar": "ورشة حدادة ولحام",
         "name_en": "Welding & Fabrication Workshop",
-        "category": "صناعة",
-        "typical_investment": {"min": 1_000_000, "max": 4_000_000},
-        "typical_margin": {"min": 0.25, "max": 0.45},
-        "typical_staff": {"min": 2, "max": 6},
-        "typical_area_sqm": {"min": 50, "max": 150},
-        "products": [
-            "أبواب وشبابيك",
-            "درابزينات",
-            "هياكل معدنية",
-            "أعمال لحام",
-        ],
-        "seasonal_peak": "طوال السنة",
-        "competition_level": "متوسط",
-        "success_factors": ["جودة اللحام", "سرعة التسليم", "سعر مناسب", "خبرة تقنية"],
+        "category": "صناعة حرفية",
+        "investment": (1_000_000, 4_000_000),
+        "margin": (0.25, 0.45),
+        "staff": (2, 6),
+        "area_sqm": (50, 150),
+        "products": "أبواب وشبابيك، درابزين، هياكل معدنية وأعمال لحام",
     },
     "pharmacie": {
         "name_ar": "صيدلية",
         "name_en": "Pharmacy",
-        "category": "صحة",
-        "typical_investment": {"min": 3_000_000, "max": 10_000_000},
-        "typical_margin": {"min": 0.25, "max": 0.35},
-        "typical_staff": {"min": 2, "max": 5},
-        "typical_area_sqm": {"min": 40, "max": 100},
-        "products": [
-            "أدوية عامة",
-            "مستلزمات طبية",
-            "مستحضرات تجميل",
-            "مكملات غذائية",
-        ],
-        "seasonal_peak": "موسم البرد + الإنفلونزا",
-        "competition_level": "مرتفع",
-        "success_factors": ["موقع مركزي", "توافر الأدوية", "خبرة صيدلانية", "ثقة المرضى"],
+        "category": "الصحة",
+        "investment": (3_000_000, 10_000_000),
+        "margin": (0.25, 0.35),
+        "staff": (2, 5),
+        "area_sqm": (40, 100),
+        "products": "أدوية، مستلزمات طبية، مستحضرات تجميل ومكملات غذائية",
     },
     "cafe_patisserie": {
         "name_ar": "مقهى وحلويات",
         "name_en": "Café & Pastry Shop",
-        "category": "ضيافة",
-        "typical_investment": {"min": 1_000_000, "max": 4_000_000},
-        "typical_margin": {"min": 0.30, "max": 0.55},
-        "typical_staff": {"min": 3, "max": 8},
-        "typical_area_sqm": {"min": 40, "max": 120},
-        "products": [
-            "قهوة ومشروبات ساخنة",
-            "عصائر طبيعية",
-            "حلويات تقليدية",
-            "كعكات وكيك",
-        ],
-        "seasonal_peak": "طوال السنة + رمضان",
-        "competition_level": "مرتفع جداً",
-        "success_factors": ["جودة المنتجات", "أجواء مريحة", "خدمة ممتازة", "موقع حيوي"],
+        "category": "خدمات الإطعام",
+        "investment": (1_000_000, 4_000_000),
+        "margin": (0.30, 0.55),
+        "staff": (3, 8),
+        "area_sqm": (40, 120),
+        "products": "قهوة ومشروبات، عصائر، حلويات تقليدية وكعكات",
     },
 }
 
-
-# ─── FEASIBILITY STUDY SECTIONS ──────────────────────────────────────────────
-
-TEMPLATE_SECTIONS = {
-    "cover": {
-        "title_ar": "دراسة جدوى أولية",
-        "fields": ["project_name", "location", "date", "center_name"],
+PROVIDERS = {
+    "groq": {
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "key_env": ("GROQ_API_KEY",),
+        "model": "llama-3.3-70b-versatile",
     },
-    "toc": {
-        "title_ar": "المحتويات",
-        "sections": [
-            "١. وصف المشروع",
-            "٢. دراسة السوق",
-            "٣. الدراسة الفنية",
-            "٤. الدراسة المالية",
-        ],
+    "openrouter": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "key_env": ("OPENROUTER_API_KEY",),
+        "model": "google/gemma-4-26b-a4b-it:free",
     },
-    "section_1": {
-        "title_ar": "١. وصف المشروع",
-        "subsections": [
-            "١.١ وصف المشروع",
-            "١.٢ مبررات المشروع",
-            "١.٣ الموقع العام للمشروع",
-        ],
-    },
-    "section_2": {
-        "title_ar": "٢. دراسة السوق",
-        "subsections": [
-            "٢.١ وصف المنتج",
-            "٢.٢ الطلب الحالي",
-            "٢.٣ الطلب المتوقع",
-            "٢.٤ حصة المشروع من السوق والطاقة الإنتاجية",
-            "٢.٥ المنافسة والبيع بأسعار مناسبة",
-            "٢.٦ إيرادات المشروع المتوقعة",
-        ],
-    },
-    "section_3": {
-        "title_ar": "٣. الدراسة الفنية",
-        "subsections": [
-            "٣.١ موقع المشروع",
-            "٣.٢ البناء",
-            "٣.٣ عملية التصنيع / النشاط",
-            "٣.٤ الآلات والأجهزة والمعدات",
-            "٣.٥ الأثاث والتجهيزات",
-            "٣.٦ السيارات",
-            "٣.٧ القوى العاملة",
-            "٣.٨ المواد الأولية",
-            "٣.٩ الخدمات الضرورية",
-            "٣.١٠ برنامج تنفيذ المشروع",
-        ],
-    },
-    "section_4": {
-        "title_ar": "٤. الدراسة المالية",
-        "subsections": [
-            "٤.١ تكاليف التشغيل السنوية",
-            "٤.٢ رأس المال العامل",
-            "٤.٣ نفقات التأسيس والتشغيل قبل",
-            "٤.٤ تكاليف المشروع",
-            "٤.٥ وسائل التمويل",
-            "٤.٦ الفرضيات المالية",
-            "٤.٧ الخلاصة",
-        ],
-    },
-    "appendices": {
-        "title_ar": "٥. الملحقات",
-        "tables": [
-            "حساب الأرباح والخسائر",
-            "التدفقات النقدية",
-            "الميزانية العمومية",
-            "تحليل الحساسية",
-            "المعايير المالية",
-        ],
+    "aihubmix": {
+        "url": "https://aihubmix.com/v1/chat/completions",
+        "key_env": ("AIHUBMIX_API_KEY", "OPENAI_API_KEY"),
+        "model": "gpt-4.1-free",
     },
 }
 
+SYSTEM_PROMPT = """أنت مستشار أعمال جزائري تعد دراسة جدوى أولية احترافية.
+اكتب بالعربية الفصحى فقط وبأسلوب واضح مناسب لتقديمه لصاحب مشروع أو بنك.
+استخدم Markdown منظمًا، والجداول عند الحاجة. كل الأرقام تقديرية ويجب وصفها بأنها
+تقديرات أولية قابلة للتحقق، ولا تخترع إحصاءات أو مصادر أو جهات حكومية مؤكدة.
+راعِ واقع السوق الجزائري، واستخدم الدينار الجزائري. لا تكتب مقدمة عامة ولا عنوانًا
+مكررًا للقسم؛ أجب بمحتوى القسم المطلوب فقط."""
 
-# ─── GROQ API GENERATOR ──────────────────────────────────────────────────────
 
 class FeasibilityGenerator:
-    """Generate professional feasibility studies using LLM API"""
+    """Generate an Arabic feasibility study through a selected LLM provider."""
 
-    PROVIDERS = {
-        "openrouter": {
-            "url": "https://openrouter.ai/api/v1/chat/completions",
-            "env_key": "OPENROUTER_API_KEY",
-            "model": "google/gemma-4-26b-a4b-it:free",
-        },
-        "openrouter-nemotron": {
-            "url": "https://openrouter.ai/api/v1/chat/completions",
-            "env_key": "OPENROUTER_API_KEY",
-            "model": "nvidia/nemotron-3-super-120b-a12b:free",
-        },
-        "groq": {
-            "url": "https://api.groq.com/openai/v1/chat/completions",
-            "env_key": "GROQ_API_KEY",
-            "model": "llama-3.3-70b-versatile",
-        },
-        "aihubmix": {
-            "url": "https://aihubmix.com/v1/chat/completions",
-            "env_key": "OPENAI_API_KEY",
-            "model": "gpt-4.1-mini",
-        },
-    }
+    def __init__(
+        self,
+        provider: str | None = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        timeout: int = 90,
+        retries: int = 3,
+    ) -> None:
+        self.provider = self._resolve_provider(provider, api_key)
+        config = PROVIDERS[self.provider]
+        self.api_key = api_key or self._read_api_key(config["key_env"])
+        if not self.api_key:
+            variables = " or ".join(config["key_env"])
+            raise FeasibilityError(f"No API key found for {self.provider}. Set {variables} or use --api-key.")
 
-    def __init__(self, provider: str = None, api_key: str = None):
-        # Auto-detect provider
-        if provider and provider in self.PROVIDERS:
-            self.provider = provider
-        else:
-            # Try providers in order
-            for name, cfg in self.PROVIDERS.items():
-                key = os.environ.get(cfg["env_key"])
-                if key and len(key) > 10:
-                    self.provider = name
-                    break
-            else:
-                raise ValueError("No valid API key found. Set GROQ_API_KEY, OPENROUTER_API_KEY, or OPENAI_API_KEY.")
+        self.model = model or os.getenv(f"FEASIBILITY_{self.provider.upper()}_MODEL") or config["model"]
+        self.url = os.getenv(f"FEASIBILITY_{self.provider.upper()}_URL", config["url"])
+        self.timeout = timeout
+        self.retries = retries
+        self.session = requests.Session()
 
-        cfg = self.PROVIDERS[self.provider]
-        self.api_key = api_key or os.environ.get(cfg["env_key"])
-        self.base_url = cfg["url"]
-        self.model = cfg["model"]
-        print(f"Using provider: {self.provider} ({self.model})")
+    @staticmethod
+    def _read_api_key(names: tuple[str, ...]) -> str | None:
+        return next((os.getenv(name) for name in names if os.getenv(name)), None)
 
-    def _call_llm(self, system_prompt: str, user_prompt: str, temperature: float = 0.7) -> str:
-        """Call LLM API"""
+    def _resolve_provider(self, requested: str | None, api_key: str | None) -> str:
+        if requested:
+            if requested not in PROVIDERS:
+                raise FeasibilityError(f"Unsupported provider: {requested}.")
+            return requested
+        if api_key:
+            raise FeasibilityError("Specify --provider when using --api-key.")
+        for name, config in PROVIDERS.items():
+            if self._read_api_key(config["key_env"]):
+                return name
+        raise FeasibilityError("No API key found. Set GROQ_API_KEY, OPENROUTER_API_KEY, or AIHUBMIX_API_KEY.")
+
+    def _headers(self) -> dict[str, str]:
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
+            "User-Agent": "Academix-DSS-Feasibility-Generator/1.0",
         }
+        if self.provider == "openrouter":
+            headers["HTTP-Referer"] = os.getenv("OPENROUTER_SITE_URL", "https://kamelmahi.netlify.app")
+            headers["X-OpenRouter-Title"] = "Academix DSS Feasibility Generator"
+        return headers
+
+    @staticmethod
+    def _error_detail(response: requests.Response) -> str:
+        try:
+            payload = response.json()
+            detail = payload.get("error", payload)
+            if isinstance(detail, dict):
+                detail = detail.get("message", detail)
+            return str(detail)[:600]
+        except ValueError:
+            return response.text.strip()[:600] or "No response body."
+
+    def _call_llm(self, prompt: str, temperature: float) -> str:
         payload = {
             "model": self.model,
             "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
             ],
             "temperature": temperature,
-            "max_tokens": 4000,
+            "max_tokens": 4_000,
         }
-        resp = requests.post(self.base_url, headers=headers, json=payload)
-        resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+        retryable_statuses = {408, 409, 429, 500, 502, 503, 504}
+        last_error: Exception | None = None
 
-    def generate_section_1(self, biz: dict, location: str, wilaya: str) -> str:
-        """Section 1: Project Description"""
-        system = """You are an Algerian business consultant writing feasibility studies.
-Write in Arabic (Modern Standard Arabic). Be professional and specific to Algeria.
-Use real Algerian data: SMIG (20,000 DZD), CNAS rates (26% employer), TVA (19%).
-Output ONLY the content for this section, no headers."""
+        for attempt in range(self.retries + 1):
+            try:
+                response = self.session.post(
+                    self.url,
+                    headers=self._headers(),
+                    json=payload,
+                    timeout=(10, self.timeout),
+                )
+                if response.status_code in retryable_statuses:
+                    raise requests.HTTPError(
+                        f"HTTP {response.status_code}: {self._error_detail(response)}", response=response
+                    )
+                if not response.ok:
+                    raise FeasibilityError(
+                        f"{self.provider} rejected the request (HTTP {response.status_code}): "
+                        f"{self._error_detail(response)}"
+                    )
+                return self._extract_content(response.json())
+            except FeasibilityError:
+                raise
+            except (requests.Timeout, requests.ConnectionError, requests.HTTPError, ValueError) as error:
+                last_error = error
+                if attempt == self.retries:
+                    break
+                delay = min(2**attempt, 8)
+                if isinstance(error, requests.HTTPError) and error.response is not None:
+                    retry_after = error.response.headers.get("Retry-After")
+                    if retry_after and retry_after.isdigit():
+                        delay = min(int(retry_after), 30)
+                print(f"  Provider request failed ({error}); retrying in {delay}s...", file=sys.stderr)
+                time.sleep(delay)
 
-        prompt = f"""Write Section 1 (وصف المشروع) of a feasibility study for:
-- Business type: {biz['name_ar']} ({biz['name_en']})
-- Location: {location}, {wilaya}
-- Category: {biz['category']}
+        raise FeasibilityError(
+            f"{self.provider} could not generate this section after {self.retries + 1} attempts: {last_error}"
+        )
 
-Include:
-1.1 وصف المشروع: What the business does, products/services, target customers
-1.2 مبررات المشروع: 3 clear justifications (market demand, import substitution, job creation)
-1.3 الموقع العام: Why this location in {location} is strategic
+    @staticmethod
+    def _extract_content(payload: dict[str, Any]) -> str:
+        try:
+            content = payload["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, TypeError) as error:
+            raise FeasibilityError("Provider returned an unexpected response format.") from error
+        if not isinstance(content, str) or not content.strip():
+            raise FeasibilityError("Provider returned an empty response.")
+        return content.strip().removeprefix("```markdown").removeprefix("```").removesuffix("```").strip()
 
-Be specific with Algerian context. Use real numbers where possible.
-Write 400-500 words."""
-        return self._call_llm(system, prompt, temperature=0.7)
+    def check_connection(self) -> None:
+        """Send a minimal request to confirm credentials, endpoint, and model."""
+        self._call_llm("أجب بكلمة واحدة فقط: تم", temperature=0.1)
 
-    def generate_section_2(self, biz: dict, location: str, wilaya: str, investment: int) -> str:
-        """Section 2: Market Study"""
-        system = """You are an Algerian market analyst writing feasibility studies.
-Write in Arabic (Modern Standard Arabic). Use real Algerian market data.
-Include specific numbers, percentages, and market analysis.
-Output ONLY the content for this section."""
-
-        wilaya_data = ALGERIA_DATA["wilayas"].get(wilaya, {"population": 500_000, "index": 0.90})
-
-        prompt = f"""Write Section 2 (دراسة السوق) of a feasibility study for:
-- Business: {biz['name_ar']} in {location}, {wilaya}
-- Investment: {investment:,} DZD
-- Wilaya population: {wilaya_data['population']:,}
-- Products: {', '.join(biz['products'][:5])}
-
-Include:
-2.1 وصف المنتج: Product descriptions and categories
-2.2 الطلب الحالي: Current demand, imports vs local production, customs data
-2.3 الطلب المتوقع: Population growth (1.8%/year), demand projection for 5 years
-2.4 حصة المشروع: Realistic market share (start 2-5%, grow to 10-15%)
-2.5 المنافسة: Competitive landscape, pricing strategy
-2.6 الإيرادات المتوقعة: Revenue projections for 5 years
-
-Use tables for projections. Be realistic, not optimistic.
-Write 500-700 words."""
-        return self._call_llm(system, prompt, temperature=0.7)
-
-    def generate_section_3(self, biz: dict, location: str, investment: int) -> str:
-        """Section 3: Technical Study"""
-        system = """You are an Algerian technical consultant writing feasibility studies.
-Write in Arabic (Modern Standard Arabic). Use real Algerian costs and suppliers.
-Include specific equipment lists with prices in DZD.
-Output ONLY the content for this section."""
-
-        prompt = f"""Write Section 3 (الدراسة الفنية) of a feasibility study for:
-- Business: {biz['name_ar']} in {location}
-- Total investment: {investment:,} DZD
-- Staff: {biz['typical_staff']['min']}-{biz['typical_staff']['max']} employees
-- Area: {biz['typical_area_sqm']['min']}-{biz['typical_area_sqm']['max']} sqm
-
-Include:
-3.1 الموقع: Industrial zone or commercial area in {location}
-3.2 البناء: Area breakdown (workspace, storage, office), rent estimate
-3.3 عملية النشاط: Step-by-step business operations
-3.4 الآلات والمعدات: Equipment list with DZD costs (use Algerian suppliers)
-3.5 الأثاث: Office furniture, computer, phone
-3.6 السيارات: Delivery vehicle if needed
-3.7 القوى العاملة: Staff table (position, count, monthly salary in DZD, CNAS)
-3.8 المواد الأولية: Initial inventory with quantities and costs
-3.9 الخدمات: Electricity, water, fuel estimates
-3.10 البرنامج: 3-6 month implementation timeline
-
-Use tables for equipment and staff lists.
-Write 600-800 words."""
-        return self._call_llm(system, prompt, temperature=0.7)
-
-    def generate_section_4(self, biz: dict, investment: int) -> str:
-        """Section 4: Financial Study"""
-        system = """You are an Algerian financial analyst writing feasibility studies.
-Write in Arabic (Modern Standard Arabic). Use real Algerian financial data:
-- Interest rate: 9% bank loans
-- TVA: 19%
-- IS tax: 19%
-- SMIG: 20,000 DZD/month
-- CNAS employer: 26%
-- Discount rate for NPV: 12%
-- Inflation: 3%/year
-Output ONLY the content for this section."""
-
-        prompt = f"""Write Section 4 (الدراسة المالية) of a feasibility study for:
-- Business: {biz['name_ar']}
-- Total investment: {investment:,} DZD
-- Typical margin: {biz['typical_margin']['min']*100:.0f}-{biz['typical_margin']['max']*100:.0f}%
-
-Include:
-4.1 تكاليف التشغيل: Annual operating costs breakdown (rent, salaries, utilities, marketing)
-4.2 رأس المال العامل: Working capital calculation (2-3 months of operating costs)
-4.3 نفقات التأسيس: Pre-establishment costs (registration, permits, deposits)
-4.4 تكاليف المشروع: Summary table of all costs
-4.5 وسائل التمويل: 50% own capital + 50% bank loan (CNAC/BND)
-4.6 الفرضيات: Financial assumptions (growth 5%/year, tax 19%, interest 9%)
-4.7 الخلاصة: NPV, IRR, payback period, B/C ratio
-
-Include 5-year projections table. Be conservative.
-Write 500-700 words."""
-        return self._call_llm(system, prompt, temperature=0.6)
-
-    def generate_financial_tables(self, biz: dict, investment: int) -> str:
-        """Generate financial projection tables"""
-        system = """You are an Algerian financial analyst. Generate ONLY financial tables in Arabic.
-Use DZD currency. Be conservative and realistic for an Algerian small business.
-Output markdown tables only."""
-
-        prompt = f"""Generate financial tables for {biz['name_ar']} with {investment:,} DZD investment.
-
-Create these tables:
-
-1. جدول الأرباح والخسائر (5 سنوات):
-   - الإيرادات (المبيعات)
-   - تكلفة البضاعة المباعة
-   - الربح الإجمالي
-   - مصاريف تشغيلية (رواتب، إيجار، خدمات، تسويق)
-   - الربح قبل الضرائب
-   - الضرائب (19%)
-   - الربح الصافي
-
-2. جدول التدفقات النقدية (5 سنوات):
-   - التدفق الداخلي
-   - التدفق الخارجي
-   - الرصيد النقدي
-
-3. تحليل الحساسية:
-   - زيادة التكاليف 10%
-   - زيادة التكاليف 20%
-   - تخفيض المبيعات 5%
-   - تخفيض المبيعات 10%
-
-Use realistic numbers for Algeria. Format as markdown tables."""
-        return self._call_llm(system, prompt, temperature=0.5)
-
-    def generate_full_study(self, business_type: str, location: str, wilaya: str,
-                            investment: int = None) -> dict:
-        """Generate complete 27-page feasibility study"""
-        biz = BUSINESS_TEMPLATES.get(business_type)
-        if not biz:
-            raise ValueError(f"Unknown business type: {business_type}. Available: {list(BUSINESS_TEMPLATES.keys())}")
-
+    def generate_full_study(self, business_type: str, location: str, wilaya: str, investment: int | None = None) -> dict[str, Any]:
+        business = BUSINESS_TEMPLATES.get(business_type)
+        if business is None:
+            choices = ", ".join(BUSINESS_TEMPLATES)
+            raise FeasibilityError(f"نوع النشاط غير معروف: {business_type}. الأنواع المتاحة: {choices}")
+        if not location.strip() or not wilaya.strip():
+            raise FeasibilityError("يجب إدخال اسم المدينة والولاية.")
         if investment is None:
-            investment = (biz["typical_investment"]["min"] + biz["typical_investment"]["max"]) // 2
+            minimum, maximum = business["investment"]
+            investment = (minimum + maximum) // 2
+        if investment <= 0:
+            raise FeasibilityError("يجب أن يكون مبلغ الاستثمار رقمًا موجبًا.")
 
-        print(f"Generating feasibility study for {biz['name_ar']} in {location}, {wilaya}...")
-        print(f"Estimated investment: {investment:,} DZD")
+        prompts = self._build_prompts(business, location.strip(), wilaya.strip(), investment)
+        sections: dict[str, str] = {}
+        for index, (name, prompt, temperature) in enumerate(prompts, start=1):
+            print(f"  [{index}/{len(prompts)}] إنشاء {name}...", file=sys.stderr)
+            sections[name] = self._call_llm(prompt, temperature)
+        return self._assemble_study(business, location.strip(), wilaya.strip(), investment, sections)
 
-        # Generate each section
-        sections = {}
+    @staticmethod
+    def _build_prompts(business: dict[str, Any], location: str, wilaya: str, investment: int) -> list[tuple[str, str, float]]:
+        wilaya_data = ALGERIA_DATA["wilayas"].get(wilaya, {"population": None, "market_index": None})
+        population_note = f"تعداد سكان الولاية المرجعي: {wilaya_data['population']:,}." if wilaya_data["population"] else "لا تتوفر بيانات سكانية محلية مؤكدة؛ اذكر الحاجة إلى التحقق الميداني."
+        context = (
+            f"النشاط: {business['name_ar']} ({business['name_en']}).\n"
+            f"الموقع: {location}، ولاية {wilaya}.\n"
+            f"التصنيف: {business['category']}.\n"
+            f"الاستثمار التقديري: {investment:,} دج.\n"
+            f"المنتجات/الخدمات: {business['products']}.\n"
+            f"عدد العمال المتوقع: {business['staff'][0]}–{business['staff'][1]}.\n"
+            f"المساحة المقترحة: {business['area_sqm'][0]}–{business['area_sqm'][1]} م².\n"
+        )
+        return [
+            ("وصف المشروع", context + """
+اكتب القسم الأول: وصف المشروع، مبرراته، العملاء المستهدفون، والموقع. اعرض ثلاثة مبررات عملية على الأقل، مع تنبيه صريح إلى أن التراخيص والطلب المحلي يجب التحقق منهما ميدانيًا. استخدم عناوين فرعية من المستوى الثالث فقط.""", 0.5),
+            ("دراسة السوق", context + f"\n{population_note}\n" + """
+اكتب القسم الثاني: السوق والطلب والمنافسة وخطة التسويق وتوقع المبيعات لخمس سنوات. قدّم جدول توقعات محافظًا. لا تنسب أرقامًا إلى الجمارك أو جهات رسمية ما لم تكن موفرة في المعطيات؛ سمّها افتراضات تقديرية.""", 0.45),
+            ("الدراسة الفنية", context + """
+اكتب القسم الثالث: اختيار الموقع، المساحة، سير العمل، المعدات، الموارد البشرية، المخزون/المواد الأولية والخدمات، وبرنامج تنفيذ من 3 إلى 6 أشهر. أدرج جداول للمعدات والعمالة، وبيّن أن عروض الأسعار الفعلية يجب جمعها محليًا.""", 0.45),
+            ("الدراسة المالية", context + f"""
+اكتب القسم الرابع: التكاليف التشغيلية، رأس المال العامل، مصاريف التأسيس، الاستثمار، التمويل، الافتراضات، ومؤشرات أولية للجدوى. استخدم: TVA 19%، ضريبة الشركات 19%، CNAS صاحب العمل 26%، فائدة قروض 9%، ومعدل خصم 12% كافتراضات قابلة للتحقق. لا تدّعِ دقة محاسبية نهائية.""", 0.4),
+            ("الجداول المالية", context + """
+أنشئ الجداول المالية فقط: قائمة أرباح وخسائر لخمس سنوات، تدفقات نقدية لخمس سنوات، وتحليل حساسية لارتفاع التكاليف 10% و20% وانخفاض المبيعات 5% و10%. استخدم أرقامًا محافظة ومتسقة، وضع جميع القيم بالدينار الجزائري.""", 0.35),
+        ]
 
-        print("  [1/5] Section 1: Project Description...")
-        sections["section_1"] = self.generate_section_1(biz, location, wilaya)
-
-        print("  [2/5] Section 2: Market Study...")
-        sections["section_2"] = self.generate_section_2(biz, location, wilaya, investment)
-
-        print("  [3/5] Section 3: Technical Study...")
-        sections["section_3"] = self.generate_section_3(biz, location, investment)
-
-        print("  [4/5] Section 4: Financial Study...")
-        sections["section_4"] = self.generate_section_4(biz, investment)
-
-        print("  [5/5] Financial Tables...")
-        sections["tables"] = self.generate_financial_tables(biz, investment)
-
-        # Assemble full study
-        study = self._assemble_study(biz, location, wilaya, investment, sections)
-
-        return study
-
-    def _assemble_study(self, biz: dict, location: str, wilaya: str,
-                        investment: int, sections: dict) -> dict:
-        """Assemble all sections into a complete study"""
+    @staticmethod
+    def _assemble_study(business: dict[str, Any], location: str, wilaya: str, investment: int, sections: dict[str, str]) -> dict[str, Any]:
         now = datetime.now()
-
-        full_study = f"""# دراسة جدوى أولية — {biz['name_ar']}
-
-## بيانات المشروع
-| البند | التفاصيل |
-|-------|----------|
-| اسم المشروع | {biz['name_ar']} ({biz['name_en']}) |
-| الموقع | {location}، ولاية {wilaya} |
-| التصنيف | {biz['category']} |
-| إجمالي الاستثمار | {investment:,} دج |
-| تاريخ الإعداد | {now.strftime('%Y-%m-%d')} |
-| إعداد | أكاديمكس DSS — مركز الدراسات |
-
+        content = f"""---
+title: "دراسة جدوى أولية — {business['name_ar']}"
+date: {now:%Y-%m-%d}
+language: ar
+currency: DZD
 ---
+
+# دراسة جدوى أولية
+
+## {business['name_ar']}
+
+| البند | التفاصيل |
+|---|---|
+| موقع المشروع | {location}، ولاية {wilaya} |
+| التصنيف | {business['category']} |
+| الاستثمار التقديري | {investment:,} دج |
+| تاريخ الإعداد | {now:%d/%m/%Y} |
+| جهة الإعداد | Academix DSS — مركز الخدمات الرقمية |
+
+> **تنبيه مهني:** هذه دراسة أولية لاتخاذ القرار. يجب التحقق من الأسعار والتراخيص والضرائب والطلب الفعلي ميدانيًا، ومراجعة محاسب أو مستشار مختص قبل التمويل أو التنفيذ.
 
 ## المحتويات
-{TEMPLATE_SECTIONS['toc']['title_ar']}
 
-١. وصف المشروع
-٢. دراسة السوق
-٣. الدراسة الفنية
-٤. الدراسة المالية
-٥. الملحقات
-
----
-
-## {TEMPLATE_SECTIONS['section_1']['title_ar']}
-
-{sections['section_1']}
+1. وصف المشروع
+2. دراسة السوق
+3. الدراسة الفنية
+4. الدراسة المالية
+5. الجداول المالية والتحليل الحساس
 
 ---
 
-## {TEMPLATE_SECTIONS['section_2']['title_ar']}
+## 1. وصف المشروع
 
-{sections['section_2']}
-
----
-
-## {TEMPLATE_SECTIONS['section_3']['title_ar']}
-
-{sections['section_3']}
+{sections['وصف المشروع']}
 
 ---
 
-## {TEMPLATE_SECTIONS['section_4']['title_ar']}
+## 2. دراسة السوق
 
-{sections['section_4']}
+{sections['دراسة السوق']}
 
 ---
 
-## الملحقات — الجداول المالية
+## 3. الدراسة الفنية
 
-{sections['tables']}
+{sections['الدراسة الفنية']}
+
+---
+
+## 4. الدراسة المالية
+
+{sections['الدراسة المالية']}
+
+---
+
+## 5. الجداول المالية وتحليل الحساسية
+
+{sections['الجداول المالية']}
 
 ---
 
 ## ملاحظات ختامية
 
-1. هذه دراسة جدوى أولية قابلة للتعديل حسب الظروف الفعلية
-2. يُنصح بمراجعة الأرقام مع محاسب أو مستشار مالي
-3. التكاليف تقريبية وقابلة للتغيير حسب المنطقة والتوقيت
-4. يُنصح بإجراء دراسة سوق ميدانية قبل البدء
+- يجب استبدال كل التقديرات بعروض أسعار محلية قبل اعتماد المشروع.
+- تتطلب بعض الأنشطة، ومنها الصيدليات، شروطًا مهنية وتنظيمية خاصة يجب التحقق منها لدى الجهات المختصة.
+- تم إعداد هذه الوثيقة باللغة العربية وللاستخدام المهني داخل الجزائر.
 
----
-
-**إعداد:** أكاديمكس DSS
-**التاريخ:** {now.strftime('%d/%m/%Y')}
-**للتواصل:** kamelmahi71@gmail.com | +213 676 77 38 92
+**إعداد:** Academix DSS — مركز الخدمات الرقمية<br>
+**تاريخ الإعداد:** {now:%d/%m/%Y}
 """
         return {
-            "title": f"دراسة جدوى — {biz['name_ar']}",
-            "business_type": biz["name_ar"],
-            "location": f"{location}, {wilaya}",
+            "title": f"دراسة جدوى أولية — {business['name_ar']}",
+            "business_type": business["name_ar"],
+            "location": f"{location}، {wilaya}",
             "investment": investment,
-            "date": now.isoformat(),
-            "content": full_study,
+            "date": now.isoformat(timespec="seconds"),
+            "content": content,
             "sections": sections,
         }
 
 
-# ─── CLI ─────────────────────────────────────────────────────────────────────
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="إنشاء دراسة جدوى أولية للمشاريع الجزائرية.")
+    parser.add_argument("--business", "-b", choices=sorted(BUSINESS_TEMPLATES))
+    parser.add_argument("--location", "-l", help="المدينة أو المنطقة")
+    parser.add_argument("--wilaya", "-w", help="اسم الولاية")
+    parser.add_argument("--investment", "-i", type=int, help="الاستثمار الإجمالي بالدينار الجزائري")
+    parser.add_argument("--output", "-o", type=Path, help="مسار ملف Markdown الناتج")
+    parser.add_argument("--provider", "-p", choices=sorted(PROVIDERS), help="مزود LLM")
+    parser.add_argument("--api-key", help="مفتاح API؛ يفضّل استخدام متغيرات البيئة")
+    parser.add_argument("--model", help="اسم النموذج؛ يتجاوز النموذج الافتراضي للمزود")
+    parser.add_argument("--timeout", type=int, default=90, help="مهلة الاستجابة بالثواني")
+    parser.add_argument("--retries", type=int, default=3, help="عدد محاولات إعادة الاتصال")
+    parser.add_argument("--check-provider", action="store_true", help="اختبر الاتصال فقط، دون إنشاء دراسة")
+    return parser.parse_args()
 
-def main():
-    """CLI interface"""
-    import argparse
 
-    parser = argparse.ArgumentParser(description="Generate Algerian Feasibility Studies")
-    parser.add_argument("--business", "-b", required=True,
-                        help="Business type: quincaillerie, supermarche, restaurant, atelier_ferro, pharmacie, cafe_patisserie")
-    parser.add_argument("--location", "-l", required=True, help="City/location name")
-    parser.add_argument("--wilaya", "-w", required=True, help="Wilaya name")
-    parser.add_argument("--investment", "-i", type=int, default=None,
-                        help="Total investment in DZD (default: average for business type)")
-    parser.add_argument("--output", "-o", default=None, help="Output file path")
-    parser.add_argument("--api-key", "-k", default=None, help="API key")
-    parser.add_argument("--provider", "-p", default=None, choices=["groq", "openrouter", "aihubmix"],
-                        help="LLM provider (auto-detect if not specified)")
-
-    args = parser.parse_args()
-
+def main() -> int:
+    args = parse_args()
+    if args.timeout <= 0 or args.retries < 0:
+        print("خطأ: يجب أن تكون المهلة موجبة وعدد المحاولات صفرًا أو أكثر.", file=sys.stderr)
+        return 2
+    if not args.check_provider and not all((args.business, args.location, args.wilaya)):
+        print("خطأ: --business و--location و--wilaya مطلوبة لإنشاء دراسة.", file=sys.stderr)
+        return 2
     try:
-        generator = FeasibilityGenerator(provider=args.provider, api_key=args.api_key)
-    except ValueError as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+        generator = FeasibilityGenerator(args.provider, args.api_key, args.model, args.timeout, args.retries)
+        print(f"المزود: {generator.provider} | النموذج: {generator.model}", file=sys.stderr)
+        if args.check_provider:
+            generator.check_connection()
+            print("تم التحقق من اتصال المزود بنجاح.")
+            return 0
+        study = generator.generate_full_study(args.business, args.location, args.wilaya, args.investment)
+        output = args.output or Path(f"دراسة_جدوى_{args.business}_{args.location.strip().replace(' ', '_')}.md")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(study["content"], encoding="utf-8")
+    except FeasibilityError as error:
+        print(f"فشل إنشاء الدراسة: {error}", file=sys.stderr)
+        return 1
+    except OSError as error:
+        print(f"تعذر حفظ الملف: {error}", file=sys.stderr)
+        return 1
 
-    study = generator.generate_full_study(
-        business_type=args.business,
-        location=args.location,
-        wilaya=args.wilaya,
-        investment=args.investment,
-    )
-
-    # Output
-    output_path = args.output or f"FEASIBILITY_STUDY_{args.business}_{args.location.replace(' ', '_')}.md"
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(study["content"])
-
-    print(f"\nStudy generated: {output_path}")
-    print(f"Business: {study['business_type']}")
-    print(f"Location: {study['location']}")
-    print(f"Investment: {study['investment']:,} DZD")
-    print(f"Length: {len(study['content']):,} characters")
+    print(f"تم إنشاء الدراسة: {output.resolve()}")
+    print(f"النشاط: {study['business_type']}")
+    print(f"الموقع: {study['location']}")
+    print(f"الاستثمار التقديري: {study['investment']:,} دج")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
