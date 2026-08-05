@@ -13,6 +13,9 @@ from marketing_plan_generator import MarketingPlanGenerator
 from social_media_generator import SocialMediaGenerator, CONTENT_TYPES
 from tax_declaration_generator import TaxDeclarationGenerator, DECLARATION_TYPES
 from invoice_generator import InvoiceGenerator
+from cv_generator import CVGenerator, TEMPLATES as CV_TEMPLATES
+from cover_letter_generator import CoverLetterGenerator, TEMPLATES as COVER_TEMPLATES
+from government_paperwork_helper import GovernmentPaperworkHelper, PROCEDURES
 
 app = vl.App(title="Digital Services Center", theme="ocean")
 
@@ -351,6 +354,130 @@ def invoice_page():
             app.toast(f"Error: {e}", type="error")
 
 
+def cv_page():
+    _sidebar()
+    app.title("CV Generator / مولّد السيرة الذاتية")
+    app.text("إنشاء سيرة ذاتية احترافية بالعربية أو الفرنسية — PDF")
+
+    lang = app.selectbox("Language / اللغة", options=["Français", "العربية"], index=0)
+    template_key = app.selectbox("Template", options=list(CV_TEMPLATES.keys()), index=0)
+    template = CV_TEMPLATES[template_key.value]
+
+    name = app.text_input("Full Name / الاسم الكامل", value=template.get("name", ""))
+    title = app.text_input("Job Title / المنصب", value=template.get("title", ""))
+    phone = app.text_input("Phone / الهاتف")
+    email = app.text_input("Email / البريد الإلكتروني")
+    location = app.text_input("Location / الموقع")
+    summary = app.text_area("Summary / الملخص", value=template.get("summary", ""), height=80)
+
+    if app.button("Generate CV / إنشاء السيرة الذاتية"):
+        if not name.value:
+            app.toast("Please enter your name", type="error")
+            return
+        app.toast("Generating CV...", type="info")
+        try:
+            data = {
+                "name": name.value, "title": title.value,
+                "phone": phone.value, "email": email.value, "location": location.value,
+                "summary": summary.value,
+                "experience": template.get("experience", []),
+                "education": template.get("education", []),
+                "skills": template.get("skills", []),
+            }
+            gen = CVGenerator()
+            lang_code = "ar" if "العربية" in lang.value else "fr"
+            filepath = gen.generate(data, lang_code)
+            app.markdown("### CV Generated ✅")
+            app.html(f"<p style='color:#28a745;'>Saved: {filepath}</p>")
+            if os.path.exists(filepath):
+                with open(filepath, "rb") as f:
+                    pdf_bytes = f.read()
+                b64 = base64.b64encode(pdf_bytes).decode()
+                app.html(f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="600px" style="border:1px solid #ddd;border-radius:8px;"></iframe>')
+        except Exception as e:
+            app.toast(f"Error: {e}", type="error")
+
+
+def cover_letter_page():
+    _sidebar()
+    app.title("Cover Letter / رسالة التعريف")
+    app.text("إنشاء رسالة تعريف احترافية —_FR أو AR — PDF")
+
+    template_key = app.selectbox("Template", options=list(COVER_TEMPLATES.keys()), index=0)
+    template = COVER_TEMPLATES[template_key.value]
+
+    sender_name = app.text_input("Your Name / اسمك", value=template.get("sender_name", ""))
+    date = app.text_input("Date / التاريخ", value="05/08/2026")
+    recipient = app.text_input("Recipient /DESTINATAIRE", value="À l'attention du Directeur des Ressources Humaines")
+    subject = app.text_input("Subject / الموضوع", value=template.get("subject", ""))
+
+    if app.button("Generate Letter / إنشاء الرسالة"):
+        if not sender_name.value:
+            app.toast("Please enter your name", type="error")
+            return
+        app.toast("Generating cover letter...", type="info")
+        try:
+            data = dict(template)
+            data["sender_name"] = sender_name.value
+            data["date"] = date.value
+            data["recipient_name"] = recipient.value
+            data["recipient_address"] = [recipient.value]
+            if subject.value:
+                data["subject"] = subject.value
+            gen = CoverLetterGenerator()
+            lang_code = "ar" if "ar" in template_key.value else "fr"
+            filepath = gen.generate(data, lang_code)
+            app.markdown("### Cover Letter Generated ✅")
+            app.html(f"<p style='color:#28a745;'>Saved: {filepath}</p>")
+            if os.path.exists(filepath):
+                with open(filepath, "rb") as f:
+                    pdf_bytes = f.read()
+                b64 = base64.b64encode(pdf_bytes).decode()
+                app.html(f'<iframe src="data:application/pdf;base64,{b64}" width="100%" height="600px" style="border:1px solid #ddd;border-radius:8px;"></iframe>')
+        except Exception as e:
+            app.toast(f"Error: {e}", type="error")
+
+
+def government_page():
+    _sidebar()
+    app.title("Government Paperwork / الإجراءات الإدارية")
+    app.text("أدلة الإجراءات الحكومية — ANEM, CACI, CNAS, CASNOS, Carte Grise")
+
+    categories = {
+        "emploi": "Emploi / التشغيل",
+        "creation": "Création d'entreprise / إنشاء مؤسسة",
+        "social": "Sécurité sociale / الضمان الاجتماعي",
+        "vehicule": "Véhicule / المركبات",
+    }
+    cat = app.selectbox("Category / الفئة", options=list(categories.keys()), index=0)
+    helper = GovernmentPaperworkHelper()
+    procs = helper.list_procedures(category=cat, lang="fr")
+
+    proc_names = {p["key"]: p["name"] for p in procs}
+    selected = app.selectbox("Procedure / الإجراء", options=list(proc_names.keys()), index=0)
+
+    if selected.value:
+        proc = PROCEDURES[selected.value]
+        app.html(f"<h3 style='margin-bottom:2px;'>{proc['name_fr']}</h3><p style='margin-top:0;color:#666;'>{proc['name_ar']}</p>")
+        app.text(f"⏱️ {proc['duration_fr']}")
+        app.text(f"💰 {proc['cost_fr']}")
+
+        app.markdown("### Documents requis")
+        for doc in proc["documents_fr"]:
+            app.html(f"<div style='padding:4px 0;border-bottom:1px dotted #eee;'>□ {doc}</div>")
+
+        app.markdown("### Étapes")
+        for step in proc["steps_fr"]:
+            app.html(f"<div style='padding:4px 0;'>{step}</div>")
+
+        app.markdown("### Notes")
+        app.html(f"<div style='background:#f8f9fa;padding:12px;border-radius:8px;'>{proc['notes_fr']}</div>")
+
+        if app.button("Save Checklist / حفظ القائمة"):
+            filepath = helper.save_checklist(selected.value, "fr")
+            app.toast(f"Saved: {filepath}", type="success")
+
+
 def _save_output(doc_type: str, name: str, content: str):
     """Save generated content to output directory."""
     output_dir = Path(__file__).parent.parent / "generated_output"
@@ -370,6 +497,9 @@ app.navigation([
     vl.Page(social_media_page, title="Social Media", icon="share-2"),
     vl.Page(tax_declaration_page, title="Tax Helper", icon="receipt"),
     vl.Page(invoice_page, title="Invoice / Quote", icon="file-plus"),
+    vl.Page(cv_page, title="CV Generator", icon="user"),
+    vl.Page(cover_letter_page, title="Cover Letter", icon="mail"),
+    vl.Page(government_page, title="Gov Paperwork", icon="building"),
 ])
 
 if __name__ == "__main__":

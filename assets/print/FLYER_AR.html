@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز الخدمات الرقمية — البيض</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f5f5f0; padding: 20px; }
+        .flyer {
+            max-width: 600px; margin: 0 auto; background: #fff;
+            border: 3px solid #0A1628; border-radius: 12px; overflow: hidden;
+        }
+        .header {
+            background: #0A1628; color: #fff; padding: 30px 20px; text-align: center;
+            position: relative;
+        }
+        .header::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 80px; height: 4px; background: #D4AF37; border-radius: 2px;
+        }
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .header h1 span { color: #D4AF37; }
+        .header p { font-size: 14px; opacity: 0.85; }
+        .services { padding: 20px; }
+        .service-group { margin-bottom: 20px; }
+        .service-group h3 {
+            font-size: 16px; color: #0A1628; margin-bottom: 10px;
+            border-bottom: 2px solid #D4AF37; padding-bottom: 6px;
+        }
+        .service-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px dotted #e0e0e0;
+        }
+        .service-item:last-child { border-bottom: none; }
+        .service-name { font-size: 14px; color: #1A1A1A; }
+        .service-price { font-size: 14px; color: #D4AF37; font-weight: 700; white-space: nowrap; }
+        .packages {
+            background: #f5f5f0; border-radius: 8px; padding: 20px; margin: 0 20px 20px;
+        }
+        .packages h3 {
+            font-size: 16px; color: #0A1628; margin-bottom: 12px; text-align: center;
+        }
+        .package {
+            background: #fff; border: 2px solid #e0e0e0; border-radius: 8px;
+            padding: 16px; margin-bottom: 12px; transition: border-color 0.2s;
+        }
+        .package:hover { border-color: #D4AF37; }
+        .package h4 { font-size: 15px; color: #0A1628; margin-bottom: 6px; }
+        .package .price { font-size: 20px; color: #D4AF37; font-weight: 700; margin-bottom: 4px; }
+        .package .desc { font-size: 12px; color: #666; }
+        .footer {
+            background: #0A1628; color: #fff; padding: 20px; text-align: center;
+        }
+        .footer .gold { color: #D4AF37; font-weight: 700; }
+        .footer p { font-size: 13px; margin-bottom: 6px; }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .contact-item { font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="flyer">
+        <div class="header">
+            <h1>DSC <span>Signal</span></h1>
+            <p>مركز الخدمات الرقمية — البيض</p>
+            <p>Conception, Business, Impression, Web</p>
+        </div>
+
+        <div class="services">
+            <div class="service-group">
+                <h3>📊 دراسات الجدوى والخطة</h3>
+                <div class="service-item">
+                    <span class="service-name">دراسة جدوى أولية</span>
+                    <span class="service-price">3,000 – 8,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">دراسة جدوى شاملة</span>
+                    <span class="service-price">12,000 – 20,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">خطة عمل كاملة</span>
+                    <span class="service-price">15,000 – 25,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">تحليل السوق</span>
+                    <span class="service-price">5,000 – 10,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">خطة تسويقية</span>
+                    <span class="service-price">5,000 – 10,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">تصورات مالية</span>
+                    <span class="service-price">7,000 – 15,000 دج</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>🖥️ الخدمات الرقمية</h3>
+                <div class="service-item">
+                    <span class="service-name">إنشاء موقع إلكتروني</span>
+                    <span class="service-price">15,000 – 40,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">تصميم شعار وهوية بصرية</span>
+                    <span class="service-price">5,000 – 15,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">إدارة وسائل التواصل</span>
+                    <span class="service-price">3,000 – 5,000 دج/شهر</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">إنشاء محتوى فيديو</span>
+                    <span class="service-price">3,000 – 8,000 دج</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>📄 الوثائق والإدارة</h3>
+                <div class="service-item">
+                    <span class="service-name">إعداد السيرة الذاتية</span>
+                    <span class="service-price">1,500 – 3,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">كتابة الرسائل الرسمية</span>
+                    <span class="service-price">500 – 2,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">إعداد الطلبات الرسمية</span>
+                    <span class="service-price">1,000 – 3,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">المساعد الضريبي</span>
+                    <span class="service-price">2,000 – 5,000 دج</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">الفواتير والميزانيات</span>
+                    <span class="service-price">1,000 – 3,000 دج</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>🖨️ الخدمات المادية</h3>
+                <div class="service-item">
+                    <span class="service-name">الطباعة (الملون)</span>
+                    <span class="service-price">50 – 200 دج/صفحة</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">النسخ والتصوير</span>
+                    <span class="service-price">20 – 50 دج/صفحة</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">المسح الضوئي</span>
+                    <span class="service-price">100 – 300 دج/صفحة</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">الحجز والربط</span>
+                    <span class="service-price">200 – 500 دج</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="packages">
+            <h3>📦 الحزم المتكاملة</h3>
+            <div class="package">
+                <h4>💼 حزمة المقاول</h4>
+                <div class="price">35,000 – 50,000 دج</div>
+                <div class="desc">دراسة جدوى + خطة عمل + شعار + موقع بسيط + إدارة وسائل التواصل لمدة شهر</div>
+            </div>
+            <div class="package">
+                <h4>🏢 حزمة المؤسسة</h4>
+                <div class="price">80,000 – 120,000 دج</div>
+                <div class="desc">دراسة جدوى شاملة + خطة عمل + هوية بصرية كاملة + موقع إلكتروني + 3 أشهر دعم</div>
+            </div>
+            <div class="package">
+                <h4>🎓 حزمة الطالب</h4>
+                <div class="price">10,000 – 20,000 دج</div>
+                <div class="desc">سيرة ذاتية + رسالة تعريفية + طباعة + مساعدة في ملف التخرج</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="gold">DSC Signal — مركز الخدمات الرقمية</p>
+            <p>البيض، الجزائر</p>
+            <div class="contact-grid">
+                <div class="contact-item">📞 0555 08 17 18</div>
+                <div class="contact-item">💬 WhatsApp: 0676 77 38 92</div>
+                <div class="contact-item">✉️ kamelmahi71@gmail.com</div>
+                <div class="contact-item">🌐 kamelmahi.netlify.app</div>
+            </div>
+            <p style="margin-top: 12px; font-size: 11px; opacity: 0.7;">استشارة مجانية — تواصل معنا الآن</p>
+        </div>
+    </div>
+</body>
+</html>

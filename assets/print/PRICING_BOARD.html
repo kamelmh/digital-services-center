@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarifs — DSC Signal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f5f5f0; padding: 20px; }
+        .board {
+            max-width: 800px; margin: 0 auto; background: #fff;
+            border: 3px solid #0A1628; border-radius: 12px; overflow: hidden;
+        }
+        .header {
+            background: #0A1628; color: #fff; padding: 24px; text-align: center;
+            position: relative;
+        }
+        .header::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 4px; background: #D4AF37; border-radius: 2px;
+        }
+        .header h1 { font-size: 26px; margin-bottom: 6px; }
+        .header h1 span { color: #D4AF37; }
+        .header p { font-size: 13px; opacity: 0.85; }
+        .section { padding: 20px; border-bottom: 1px solid #e8e8e8; }
+        .section:last-child { border-bottom: none; }
+        .section-title {
+            font-size: 16px; color: #0A1628; margin-bottom: 14px;
+            padding-bottom: 8px; border-bottom: 2px solid #D4AF37;
+            display: flex; align-items: center; gap: 8px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 12px; color: #666; padding: 6px 0; border-bottom: 1px solid #e0e0e0; }
+        td { padding: 8px 0; border-bottom: 1px dotted #e8e8e8; font-size: 14px; }
+        td:last-child { text-align: right; color: #D4AF37; font-weight: 700; white-space: nowrap; }
+        .note { background: #f5f5f0; border-radius: 8px; padding: 14px; margin: 16px 20px 0; font-size: 12px; color: #666; }
+        .note strong { color: #0A1628; }
+        .footer { background: #0A1628; color: #fff; padding: 16px; text-align: center; }
+        .footer .gold { color: #D4AF37; font-weight: 700; }
+        .footer p { font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="board">
+        <div class="header">
+            <h1>DSC <span>Signal</span></h1>
+            <p>Tableau des Tarifs — Centre de Services Numériques — El Bayadh</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📊 Études de Faisabilité & Business</div>
+            <table>
+                <tr><th>Service</th><th>Prix</th></tr>
+                <tr><td>Étude de faisabilité express (5-10 pages)</td><td>3,000 – 5,000 DA</td></tr>
+                <tr><td>Étude de faisabilité standard (15-20 pages)</td><td>5,000 – 8,000 DA</td></tr>
+                <tr><td>Étude de faisabilité complète (25-35 pages)</td><td>12,000 – 20,000 DA</td></tr>
+                <tr><td>Business plan complet</td><td>15,000 – 25,000 DA</td></tr>
+                <tr><td>Étude de marché sectorielle</td><td>5,000 – 10,000 DA</td></tr>
+                <tr><td>Plan marketing</td><td>5,000 – 10,000 DA</td></tr>
+                <tr><td>Prévisions financières 5 ans</td><td>7,000 – 15,000 DA</td></tr>
+                <tr><td>Contenu réseaux sociaux (1 mois)</td><td>3,000 – 5,000 DA</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📄 Documents & Administration</div>
+            <table>
+                <tr><th>Service</th><th>Prix</th></tr>
+                <tr><td>CV professionnel (FR/AR)</td><td>1,500 – 3,000 DA</td></tr>
+                <tr><td>Lettre de motivation</td><td>500 – 2,000 DA</td></tr>
+                <tr><td>Demande administrative</td><td>1,000 – 3,000 DA</td></tr>
+                <tr><td>Déclaration fiscale (G12, G50, etc.)</td><td>2,000 – 5,000 DA</td></tr>
+                <tr><td>Facture / Devis</td><td>1,000 – 3,000 DA</td></tr>
+                <tr><td>Remplissage formulaires CACI/ANEM</td><td>500 – 1,500 DA</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🖥️ Services Numériques</div>
+            <table>
+                <tr><th>Service</th><th>Prix</th></tr>
+                <tr><td>Logo & identité visuelle</td><td>5,000 – 15,000 DA</td></tr>
+                <tr><td>Site vitrine (5-7 pages)</td><td>15,000 – 25,000 DA</td></tr>
+                <tr><td>Site e-commerce</td><td>25,000 – 40,000 DA</td></tr>
+                <tr><td>Landing page</td><td>8,000 – 15,000 DA</td></tr>
+                <tr><td>Gestion réseaux sociaux (mensuel)</td><td>3,000 – 5,000 DA</td></tr>
+                <tr><td>Création contenu vidéo</td><td>3,000 – 8,000 DA</td></tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🖨️ Services Physiques</div>
+            <table>
+                <tr><th>Service</th><th>Prix</th></tr>
+                <tr><td>Impression couleur</td><td>50 – 200 DA/page</td></tr>
+                <tr><td>Impression N&B</td><td>20 – 50 DA/page</td></tr>
+                <tr><td>Photocopies</td><td>20 – 50 DA/page</td></tr>
+                <tr><td>Scan</td><td>100 – 300 DA/page</td></tr>
+                <tr><td>Reliure</td><td>300 – 500 DA</td></tr>
+                <tr><td>Plastification</td><td>200 – 400 DA</td></tr>
+            </table>
+        </div>
+
+        <div class="note">
+            <strong>📌 Notes:</strong> Les prix peuvent varier selon la complexité et le délai.
+            Consultation initiale gratuite (30 min).
+            Paiement: espèces, CCP, ou virement bancaire.
+            Devis gratuit sur demande.
+        </div>
+
+        <div class="footer">
+            <p class="gold">DSC Signal — El Bayadh, Algérie</p>
+            <p>📞 0555 08 17 18 · WhatsApp: 0676 77 38 92 · ✉️ kamelmahi71@gmail.com</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centre de Services Numériques — El Bayadh</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f5f5f0; padding: 20px; }
+        .flyer {
+            max-width: 600px; margin: 0 auto; background: #fff;
+            border: 3px solid #0A1628; border-radius: 12px; overflow: hidden;
+        }
+        .header {
+            background: #0A1628; color: #fff; padding: 30px 20px; text-align: center;
+            position: relative;
+        }
+        .header::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 80px; height: 4px; background: #D4AF37; border-radius: 2px;
+        }
+        .header h1 { font-size: 28px; margin-bottom: 8px; }
+        .header h1 span { color: #D4AF37; }
+        .header p { font-size: 14px; opacity: 0.85; }
+        .services { padding: 20px; }
+        .service-group { margin-bottom: 20px; }
+        .service-group h3 {
+            font-size: 16px; color: #0A1628; margin-bottom: 10px;
+            border-bottom: 2px solid #D4AF37; padding-bottom: 6px;
+        }
+        .service-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px dotted #e0e0e0;
+        }
+        .service-item:last-child { border-bottom: none; }
+        .service-name { font-size: 14px; color: #1A1A1A; }
+        .service-price { font-size: 14px; color: #D4AF37; font-weight: 700; white-space: nowrap; }
+        .packages {
+            background: #f5f5f0; border-radius: 8px; padding: 20px; margin: 0 20px 20px;
+        }
+        .packages h3 { font-size: 16px; color: #0A1628; margin-bottom: 12px; text-align: center; }
+        .package {
+            background: #fff; border: 2px solid #e0e0e0; border-radius: 8px;
+            padding: 16px; margin-bottom: 12px; transition: border-color 0.2s;
+        }
+        .package:hover { border-color: #D4AF37; }
+        .package h4 { font-size: 15px; color: #0A1628; margin-bottom: 6px; }
+        .package .price { font-size: 20px; color: #D4AF37; font-weight: 700; margin-bottom: 4px; }
+        .package .desc { font-size: 12px; color: #666; }
+        .footer { background: #0A1628; color: #fff; padding: 20px; text-align: center; }
+        .footer .gold { color: #D4AF37; font-weight: 700; }
+        .footer p { font-size: 13px; margin-bottom: 6px; }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        .contact-item { font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="flyer">
+        <div class="header">
+            <h1>DSC <span>Signal</span></h1>
+            <p>Centre de Services Numériques — El Bayadh</p>
+            <p>Conception, Business, Impression, Web</p>
+        </div>
+
+        <div class="services">
+            <div class="service-group">
+                <h3>📊 Études de Faisabilité & Business Plan</h3>
+                <div class="service-item">
+                    <span class="service-name">Étude de faisabilité standard</span>
+                    <span class="service-price">3,000 – 8,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Étude de faisabilité complète</span>
+                    <span class="service-price">12,000 – 20,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Business plan complet</span>
+                    <span class="service-price">15,000 – 25,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Étude de marché</span>
+                    <span class="service-price">5,000 – 10,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Plan marketing</span>
+                    <span class="service-price">5,000 – 10,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Prévisions financières</span>
+                    <span class="service-price">7,000 – 15,000 DA</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>🖥️ Services Numériques</h3>
+                <div class="service-item">
+                    <span class="service-name">Création de site web</span>
+                    <span class="service-price">15,000 – 40,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Logo & identité visuelle</span>
+                    <span class="service-price">5,000 – 15,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Gestion réseaux sociaux</span>
+                    <span class="service-price">3,000 – 5,000 DA/mois</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Création de contenu vidéo</span>
+                    <span class="service-price">3,000 – 8,000 DA</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>📄 Documents & Administration</h3>
+                <div class="service-item">
+                    <span class="service-name">Préparation CV</span>
+                    <span class="service-price">1,500 – 3,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Lettres de motivation</span>
+                    <span class="service-price">500 – 2,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Demandes administratives</span>
+                    <span class="service-price">1,000 – 3,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Assistant fiscal</span>
+                    <span class="service-price">2,000 – 5,000 DA</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Factures & devis</span>
+                    <span class="service-price">1,000 – 3,000 DA</span>
+                </div>
+            </div>
+
+            <div class="service-group">
+                <h3>🖨️ Services Physiques</h3>
+                <div class="service-item">
+                    <span class="service-name">Impression couleur</span>
+                    <span class="service-price">50 – 200 DA/page</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Photocopies & scans</span>
+                    <span class="service-price">20 – 50 DA/page</span>
+                </div>
+                <div class="service-item">
+                    <span class="service-name">Reliure & plastification</span>
+                    <span class="service-price">200 – 500 DA</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="packages">
+            <h3>📦 Forfaits Intégrés</h3>
+            <div class="package">
+                <h4>💼 Forfait Entrepreneur</h4>
+                <div class="price">35,000 – 50,000 DA</div>
+                <div class="desc">Étude de faisabilité + business plan + logo + site vitrine + 1 mois gestion réseaux sociaux</div>
+            </div>
+            <div class="package">
+                <h4>🏢 Forfait Entreprise</h4>
+                <div class="price">80,000 – 120,000 DA</div>
+                <div class="desc">Étude complète + business plan + identité visuelle complète + site web + 3 mois support</div>
+            </div>
+            <div class="package">
+                <h4>🎓 Forfait Étudiant</h4>
+                <div class="price">10,000 – 20,000 DA</div>
+                <div class="desc">CV + lettre de motivation + impression + aide mémoire de fin d'études</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="gold">DSC Signal — Centre de Services Numériques</p>
+            <p>El Bayadh, Algérie</p>
+            <div class="contact-grid">
+                <div class="contact-item">📞 0555 08 17 18</div>
+                <div class="contact-item">💬 WhatsApp: 0676 77 38 92</div>
+                <div class="contact-item">✉️ kamelmahi71@gmail.com</div>
+                <div class="contact-item">🌐 kamelmahi.netlify.app</div>
+            </div>
+            <p style="margin-top: 12px; font-size: 11px; opacity: 0.7;">Consultation gratuite — Contactez-nous</p>
+        </div>
+    </div>
+</body>
+</html>
