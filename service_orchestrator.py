@@ -80,33 +80,52 @@ class ServiceOrchestrator:
             "monthly_revenue_estimated": monthly_revenue,
         }}
 
-        # ── Stage 1: Feasibility Study ──────────────────────────────────────
+        # ── Stage 1: Feasibility Study (with retry) ──────────────────────────
         self._emit("Feasibility", "Generating 9-section study...", 10)
-        try:
-            from feasibility_generator import FeasibilityGenerator
-            gen = FeasibilityGenerator(provider=self.provider, model=self.model)
-            feasibility = gen.generate_full_study(business_type, location, wilaya, investment)
-            results["feasibility"] = feasibility
-            self._emit("Feasibility", "Done", 25)
-        except Exception as e:
-            self._emit("Feasibility", f"Error: {e}", 25)
-            results["feasibility"] = {"error": str(e), "sections": {}}
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                from feasibility_generator import FeasibilityGenerator
+                gen = FeasibilityGenerator(provider=self.provider, model=self.model)
+                feasibility = gen.generate_full_study(business_type, location, wilaya, investment)
 
-        # ── Stage 2: Financial Projections ───────────────────────────────────
-        self._emit("Financials", "Generating 5-year projections...", 30)
+                # Quality check
+                feas_content = "\n\n".join(
+                    f"## {k}\n\n{v}" for k, v in feasibility.get("sections", {}).items()
+                )
+                report = self.scorer.score("feasibility", feas_content)
+                if report.passed or attempt == max_retries:
+                    results["feasibility"] = feasibility
+                    results["quality"]["feasibility"] = report
+                    self._emit("Feasibility", f"Done (attempt {attempt}, {report.grade})", 25)
+                    break
+                else:
+                    self._emit("Feasibility", f"Quality {report.grade} < C, retrying ({attempt}/{max_retries})...", 15)
+            except Exception as e:
+                if attempt == max_retries:
+                    self._emit("Feasibility", f"Error after {max_retries} attempts: {e}", 25)
+                    results["feasibility"] = {"error": str(e), "sections": {}}
+                else:
+                    self._emit("Feasibility", f"Attempt {attempt} failed: {e}, retrying...", 15)
+
+        # ── Stage 2: Financial Projections (mathematical, no LLM) ───────────
+        self._emit("Financials", "Generating 5-year projections (math)...", 30)
         try:
-            from financial_projections_generator import FinancialProjectionsGenerator
-            fin_gen = FinancialProjectionsGenerator(provider=self.provider, model=self.model)
-            profitability = estimate_profitability(business_type, investment, monthly_revenue)
-            financials = fin_gen.generate(
+            from projections_engine import ProjectionsEngine, format_projections
+            engine = ProjectionsEngine(
                 business_type=business_type,
-                business_name=client_name,
+                wilaya=wilaya,
                 investment=investment,
-                monthly_revenue_estimate=monthly_revenue,
+                monthly_revenue_y1=monthly_revenue,
             )
-            results["financials"] = financials
+            projections = engine.generate(years=5)
+            profitability = estimate_profitability(business_type, investment, monthly_revenue)
+            results["financials"] = {
+                "content": format_projections(projections),
+                "projections": projections.to_dict(),
+            }
             results["profitability_estimate"] = profitability
-            self._emit("Financials", "Done", 50)
+            self._emit("Financials", f"Done (VAN: {projections.van:,.0f}, TRI: {projections.tri:.1%})", 50)
         except Exception as e:
             self._emit("Financials", f"Error: {e}", 50)
             results["financials"] = {"error": str(e), "content": ""}
@@ -153,22 +172,14 @@ class ServiceOrchestrator:
         # ── Stage 4: Quality Gate ────────────────────────────────────────────
         if not skip_quality:
             self._emit("Quality", "Running quality checks...", 70)
-            quality_reports = {}
-            if "error" not in results.get("feasibility", {}):
-                feas_content = results["feasibility"].get("content", "")
-                if not feas_content:
-                    feas_content = "\n\n".join(
-                        f"## {k}\n\n{v}" for k, v in results["feasibility"].get("sections", {}).items()
-                    )
-                quality_reports["feasibility"] = self.scorer.score("feasibility", feas_content)
+            # Feasibility already scored in retry loop; score financials
+            if "financial_projections" not in results.get("quality", {}):
+                if "error" not in results.get("financials", {}):
+                    fin_content = results["financials"].get("content", "")
+                    results["quality"]["financial_projections"] = self.scorer.score("financial_projections", fin_content)
 
-            if "error" not in results.get("financials", {}):
-                fin_content = results["financials"].get("content", "")
-                quality_reports["financial_projections"] = self.scorer.score("financial_projections", fin_content)
-
-            results["quality"] = quality_reports
-            passed = sum(1 for r in quality_reports.values() if r.passed)
-            total = len(quality_reports)
+            passed = sum(1 for r in results.get("quality", {}).values() if r.passed)
+            total = len(results.get("quality", {}))
             self._emit("Quality", f"{passed}/{total} sections passed", 80)
         else:
             results["quality"] = {}
