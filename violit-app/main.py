@@ -18,6 +18,8 @@ from cover_letter_generator import CoverLetterGenerator, TEMPLATES as COVER_TEMP
 from government_paperwork_helper import GovernmentPaperworkHelper, PROCEDURES
 from financial_calculators import FinancialCalculators, InvestmentPlan, FinancingPlan, generate_3_scenarios, format_dzd, format_pct
 from aapi_optimizer import AAAPIOptimizer, AAPIScore
+from bmc_generator import BMCGenerator, BMC_TEMPLATES
+from nesda_calculator import calculate_nesda_financing, format_nesda_report, MODELS as NESDA_MODELS
 from training_data_collector import TrainingDataCollector
 
 app = vl.App(title="Digital Services Center", theme="ocean")
@@ -682,6 +684,118 @@ def _save_output(doc_type: str, name: str, content: str):
     app.toast(f"Saved: {filename}", type="success")
 
 
+def bmc_page():
+    """Business Model Canvas — Osterwalder 9-block canvas."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">Business Model Canvas</h2>
+        <p style="margin:3px 0 0;color:#888;">نموذج أعمال — Osterwalder 9-block</p>
+    </div>
+    """)
+    btypes = list(BMC_TEMPLATES.keys())
+    biz_type = app.selectbox("Business Type", options=btypes, index=0)
+    btn = app.button("Generate BMC", primary=True)
+
+    if btn:
+        gen = BMCGenerator()
+        bmc = gen.generate(biz_type)
+        html = gen.to_html(bmc)
+        app.html(html)
+
+        md = gen.to_markdown(bmc)
+        if app.button("Save HTML + Markdown"):
+            out = Path(__file__).parent.parent / "generated_output"
+            out.mkdir(exist_ok=True)
+            (out / f"bmc_{biz_type}.html").write_text(html, encoding="utf-8")
+            (out / f"bmc_{biz_type}.md").write_text(md, encoding="utf-8")
+            app.toast(f"Saved: bmc_{biz_type}.html + .md", type="success")
+
+
+def nesda_calc_page():
+    """NESDA Financing Calculator — triangular, mixed, self models."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">Calculateur NESDA</h2>
+        <p style="margin:3px 0 0;color:#888;">حساب تمويل NESDA — النموذج الثلاثي والمختلط</p>
+    </div>
+    """)
+
+    col1, col2 = app.columns(2)
+    with col1:
+        total_cost = app.number_input("التكلفة الإجمالية (DZD)", min_value=500_000, max_value=50_000_000, value=3_000_000, step=100_000)
+        model_key = app.selectbox("نموذج التمويل", options=list(NESDA_MODELS.keys()), index=0)
+    with col2:
+        profile = app.selectbox("الوضع", options=["unemployed", "employed"], index=0)
+        monthly_rev = app.number_input("الإيرادات الشهرية (DZD)", min_value=50_000, max_value=10_000_000, value=500_000, step=50_000)
+
+    btn = app.button("Calculate NESDA Financing", primary=True)
+
+    if btn:
+        result = calculate_nesda_financing(
+            total_cost=total_cost,
+            model=model_key,
+            profile=profile,
+            monthly_revenue=monthly_rev,
+        )
+
+        # Summary cards
+        col1, col2, col3 = app.columns(3)
+        with col1:
+            app.html(f"""<div style="text-align:center;padding:20px;background:#e3f2fd;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">المساهمة الشخصية</div>
+                <div style="font-size:1.5em;font-weight:bold;color:#1565c0;">{result.personal_amount:,} دج</div>
+                <div style="color:#888;">{result.personal_pct*100:.0f}%</div>
+            </div>""")
+        with col2:
+            app.html(f"""<div style="text-align:center;padding:20px;background:#e8f5e9;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">مساهمة NESDA (PNR)</div>
+                <div style="font-size:1.5em;font-weight:bold;color:#2e7d32;">{result.nesda_grant:,} دج</div>
+                <div style="color:#888;">{result.nesda_pct*100:.0f}%</div>
+            </div>""")
+        with col3:
+            app.html(f"""<div style="text-align:center;padding:20px;background:#fff3e0;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">القرض البنكي</div>
+                <div style="font-size:1.5em;font-weight:bold;color:#e65100;">{result.bank_loan:,} دج</div>
+                <div style="color:#888;">{result.bank_pct*100:.0f}%</div>
+            </div>""")
+
+        # Key metrics
+        app.markdown("### مؤشرات الجدوى")
+        col1, col2, col3, col4 = app.columns(4)
+        with col1:
+            app.metric("القسط الشهري", f"{result.monthly_payment:,.0f} دج")
+        with col2:
+            app.metric("الربح الشهري", f"{result.monthly_profit:,} دج")
+        with col3:
+            app.metric("مدة الاسترداد", f"{result.payback_months} شهر")
+        with col4:
+            app.metric("ROI السنوي", f"{result.roi_annual:.1f}%")
+
+        # Amortization schedule
+        app.markdown("### جدول السداد")
+        schedule_data = []
+        for s in result.schedule:
+            schedule_data.append({
+                "السنة": s["year"],
+                "الرصيد البداية": f"{s['balance_start']:,}",
+                "القسط": f"{s['payment']:,}",
+                "الفائدة": f"{s['interest']:,}",
+                "Principal": f"{s['principal']:,}",
+                "الرصيد النهاية": f"{s['balance_end']:,}",
+            })
+        app.table(schedule_data)
+
+        # Full report
+        report = format_nesda_report(result)
+        if app.button("Save Full Report"):
+            out = Path(__file__).parent.parent / "generated_output"
+            out.mkdir(exist_ok=True)
+            (out / f"nesda_calc_{model_key}.md").write_text(report, encoding="utf-8")
+            app.toast(f"Saved: nesda_calc_{model_key}.md", type="success")
+
+
 app.navigation([
     vl.Page(home_page, title="Home", icon="house"),
     vl.Page(dossier_page, title="Complete Dossier", icon="package"),
@@ -689,6 +803,8 @@ app.navigation([
     vl.Page(business_plan_page, title="Business Plan", icon="briefcase"),
     vl.Page(market_research_page, title="Market Research", icon="bar-chart"),
     vl.Page(financial_projections_page, title="Financials", icon="trending-up"),
+    vl.Page(bmc_page, title="BMC Canvas", icon="layout"),
+    vl.Page(nesda_calc_page, title="NESDA Calc", icon="calculator"),
     vl.Page(marketing_plan_page, title="Marketing Plan", icon="megaphone"),
     vl.Page(social_media_page, title="Social Media", icon="share-2"),
     vl.Page(tax_helper_page, title="Tax Helper", icon="calculator"),
