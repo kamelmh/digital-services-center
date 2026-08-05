@@ -20,6 +20,9 @@ from financial_calculators import FinancialCalculators, InvestmentPlan, Financin
 from aapi_optimizer import AAAPIOptimizer, AAPIScore
 from bmc_generator import BMCGenerator, BMC_TEMPLATES
 from nesda_calculator import calculate_nesda_financing, format_nesda_report, MODELS as NESDA_MODELS
+from nesda_catalog import search_catalog, recommend_activity, get_sector_stats, SECTORS, CATALOG
+from linkedin_automation import LinkedInContentGenerator
+from batch_processor import BatchManager
 from training_data_collector import TrainingDataCollector
 
 app = vl.App(title="Digital Services Center", theme="ocean")
@@ -796,6 +799,235 @@ def nesda_calc_page():
             app.toast(f"Saved: nesda_calc_{model_key}.md", type="success")
 
 
+def nesda_catalog_page():
+    """NESDA Activity Catalog — searchable database of 47 eligible activities."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">NESDA Activity Catalog</h2>
+        <p style="margin:3px 0 0;color:#888;">قائمة الأنشطة المدعومة من NESDA — 47 نشاط عبر 5 قطاعات</p>
+    </div>
+    """)
+
+    # Filters
+    col1, col2, col3 = app.columns(3)
+    with col1:
+        query = app.text_input("Search (FR/AR)", placeholder="boulangerie, مخبزة...")
+    with col2:
+        sector_filter = app.selectbox("Sector", options=["all"] + list(SECTORS.keys()), index=0)
+    with col3:
+        budget = app.number_input("Budget (DZD)", min_value=100_000, max_value=50_000_000, value=3_000_000, step=500_000)
+
+    # Sector overview
+    app.markdown("### Sector Overview")
+    cols = app.columns(len(SECTORS))
+    for i, (key, s) in enumerate(SECTORS.items()):
+        stats = get_sector_stats(key)
+        with cols[i]:
+            app.html(f"""<div style="text-align:center;padding:12px;background:#f8f9fa;border-radius:8px;border-top:3px solid {s['color']};">
+                <div style="font-weight:bold;font-size:0.9em;">{s['ar']}</div>
+                <div style="font-size:0.75em;color:#888;">{s['fr']}</div>
+                <div style="font-size:1.3em;font-weight:bold;color:{s['color']};margin:5px 0;">{stats['count']}</div>
+                <div style="font-size:0.75em;color:#666;">avg {stats['avg_investment']:,} DZD</div>
+                <div style="font-size:0.75em;color:#666;">margin {stats['avg_margin']:.0f}%</div>
+            </div>""")
+
+    # Search results
+    if query or sector_filter != "all":
+        results = search_catalog(query, sector_filter if sector_filter != "all" else None)
+    else:
+        results = list(CATALOG.values())
+
+    app.markdown(f"### Results ({len(results)} activities)")
+    for a in results:
+        color = "#28a745" if a.profit_margin_pct >= 40 else "#ffc107" if a.profit_margin_pct >= 25 else "#dc3545"
+        app.html(f"""<div style="padding:12px;margin:6px 0;background:white;border-radius:8px;border-left:4px solid {SECTORS.get(a.sector, {}).get('color', '#666')};box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <strong style="font-size:0.95em;">{a.name_fr}</strong>
+                    <span style="color:#888;font-size:0.85em;margin-left:8px;">{a.name_ar}</span>
+                </div>
+                <div style="text-align:right;">
+                    <span style="background:{SECTORS.get(a.sector, {}).get('color', '#666')};color:white;padding:2px 8px;border-radius:4px;font-size:0.75em;">{a.sector}</span>
+                    <span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:4px;font-size:0.75em;margin-left:4px;">priority {a.aapi_priority}</span>
+                </div>
+            </div>
+            <div style="margin-top:6px;font-size:0.82em;color:#555;">
+                💰 {a.investment_min:,} - {a.investment_max:,} DZD (ideal: {a.investment_ideal:,})
+                &nbsp;|&nbsp; 📈 margin: <span style="color:{color};font-weight:bold;">{a.profit_margin_pct:.0f}%</span>
+                &nbsp;|&nbsp; 👥 {a.staff_range[0]}-{a.staff_range[1]} staff
+                &nbsp;|&nbsp; ⏱️ {a.time_to_launch}
+            </div>
+            {f'<div style="margin-top:4px;font-size:0.8em;color:#888;">📝 {a.notes_fr}</div>' if a.notes_fr else ''}
+        </div>""")
+
+    # Recommendations
+    if app.button("Get Recommendations for My Budget", primary=True):
+        recs = recommend_activity(budget)
+        app.markdown(f"### Top 5 for {budget:,} DZD")
+        for i, a in enumerate(recs, 1):
+            app.html(f"""<div style="padding:10px;margin:4px 0;background:#e8f5e9;border-radius:6px;">
+                <strong>{i}. {a.name_fr}</strong> ({a.name_ar}) — {a.investment_ideal:,} DZD, margin {a.profit_margin_pct:.0f}%, priority {a.aapi_priority}
+            </div>""")
+
+
+def linkedin_page():
+    """LinkedIn Content Automation — auto-generate posts from generator outputs."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">LinkedIn Content Generator</h2>
+        <p style="margin:3px 0 0;color:#888;">إنشاء محتوى لينكدإن تلقائي — عربي / فرنسي / إنجليزي</p>
+    </div>
+    """)
+
+    gen = LinkedInContentGenerator()
+
+    post_type = app.selectbox("Post Type", options=["case_study", "data_insight", "myth_busting", "listicle", "arabic_hook", "generator_showcase"])
+    sector = app.selectbox("Market Sector", options=list(MARKET_DATA.keys()) if 'MARKET_DATA' in dir() else ["retail", "food", "digital", "construction", "services"])
+
+    if post_type == "case_study":
+        biz = app.text_input("Business Type", value="quincaillerie")
+        inv = app.number_input("Investment (DZD)", value=3_000_000)
+        wil = app.text_input("Wilaya", value="El Bayadh")
+        if app.button("Generate Post"):
+            post = gen.generate_from_feasibility({"business_type": biz, "investment": inv, "wilaya": wil})
+            for lang, content in post.items():
+                app.html(f"""<div style="padding:15px;margin:8px 0;background:white;border-radius:8px;border-left:3px solid #0A1628;">
+                    <div style="font-weight:bold;color:#0A1628;margin-bottom:5px;">{lang.upper()}</div>
+                    <pre style="white-space:pre-wrap;font-size:0.9em;">{content}</pre>
+                </div>""")
+    elif post_type == "data_insight":
+        if app.button("Generate Insight"):
+            for lang in ["ar", "fr", "en"]:
+                post = gen.generate_market_insight(sector, lang)
+                app.html(f"""<div style="padding:15px;margin:8px 0;background:white;border-radius:8px;border-left:3px solid #D4AF37;">
+                    <div style="font-weight:bold;color:#D4AF37;margin-bottom:5px;">{lang.upper()}</div>
+                    <pre style="white-space:pre-wrap;font-size:0.9em;">{post}</pre>
+                </div>""")
+    elif post_type == "generator_showcase":
+        tool = app.text_input("Tool Name", value="NESDA Dossier Generator")
+        desc = app.text_input("Description", value="Generate NESDA-compatible feasibility studies")
+        result = app.text_input("Result", value="Complete 9-part dossier in 30 seconds")
+        if app.button("Generate Post"):
+            post = gen.generate_tool_showcase(tool, desc, result)
+            for lang, content in post.items():
+                app.html(f"""<div style="padding:15px;margin:8px 0;background:white;border-radius:8px;border-left:3px solid #28a745;">
+                    <div style="font-weight:bold;color:#28a745;margin-bottom:5px;">{lang.upper()}</div>
+                    <pre style="white-space:pre-wrap;font-size:0.9em;">{content}</pre>
+                </div>""")
+    else:
+        if app.button("Generate Post"):
+            post = gen.generate_market_insight(sector, "ar")
+            app.html(f"""<div style="padding:15px;margin:8px 0;background:white;border-radius:8px;">
+                <pre style="white-space:pre-wrap;font-size:0.9em;">{post}</pre>
+            </div>""")
+
+    # Content Calendar
+    app.markdown("### 30-Day Content Calendar")
+    if app.button("Generate Calendar"):
+        calendar = gen.generate_content_calendar()
+        cal_data = [{"Date": c["date"], "Day": c["day"], "Topic": c["topic"], "Time": c["time"]} for c in calendar[:15]]
+        app.table(cal_data)
+        gen.save_calendar(calendar)
+        app.toast("Calendar saved to generated_output/", type="success")
+
+
+def batch_page():
+    """Batch Processing — client management, pipeline, referrals."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">Batch Processing</h2>
+        <p style="margin:3px 0 0;color:#888;">إدارة العملاء والدفعات — تتبع وتحويل</p>
+    </div>
+    """)
+
+    manager = BatchManager()
+    summary = manager.get_batch_summary()
+
+    # Dashboard metrics
+    col1, col2, col3, col4 = app.columns(4)
+    with col1:
+        app.metric("Total Clients", summary["total_clients"])
+    with col2:
+        app.metric("Active Pipeline", summary["active_pipeline"])
+    with col3:
+        app.metric("Wilayas", len(summary["by_wilaya"]))
+    with col4:
+        app.metric("Total Value", f"{summary['total_investment_value']:,} DZD")
+
+    # Pipeline status
+    app.markdown("### Pipeline Status")
+    status_cols = app.columns(5)
+    statuses = [("new", "New", "#007bff"), ("quoted", "Quoted", "#ffc107"), ("in_progress", "In Progress", "#17a2b8"), ("delivered", "Delivered", "#28a745"), ("paid", "Paid", "#6f42c1")]
+    for i, (s, label, color) in enumerate(statuses):
+        with status_cols[i]:
+            count = summary["by_status"].get(s, 0)
+            app.html(f"""<div style="text-align:center;padding:12px;background:{color}10;border-radius:8px;border:2px solid {color};">
+                <div style="font-size:1.5em;font-weight:bold;color:{color};">{count}</div>
+                <div style="font-size:0.85em;color:#666;">{label}</div>
+            </div>""")
+
+    # Add new client
+    app.markdown("### Add New Client")
+    with app.form("new_client"):
+        col1, col2 = app.columns(2)
+        with col1:
+            name = app.text_input("Client Name")
+            phone = app.text_input("Phone (+213)")
+            email = app.text_input("Email")
+        with col2:
+            wilaya = app.selectbox("Wilaya", options=[""] + ["Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira", "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda", "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", "Ouargla", "Oran", "El Bayadh", "Illizi", "Bordj Bou Arréridj", "Boumerdès", "El Tarf", "Tindouf", "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent", "Ghardaïa", "Relizane"], index=0)
+            biz = app.selectbox("Business Type", options=[""] + list(CATALOG.keys()), index=0)
+            inv = app.number_input("Investment (DZD)", value=0, step=100_000)
+            svc = app.selectbox("Service", options=["feasibility", "business_plan", "market_research", "financials", "marketing", "full_dossier"])
+            notes = app.text_area("Notes")
+
+        submitted = app.form_submit_button("Add Client")
+        if submitted and name and phone:
+            client = manager.add_client(name, phone, wilaya, biz, inv, svc, email, notes)
+            app.toast(f"Added: {client.name} ({client.id})", type="success")
+
+    # Client list
+    app.markdown("### Client List")
+    clients = list(manager.clients.values())
+    if clients:
+        client_data = []
+        for c in clients[-20:]:  # show last 20
+            client_data.append({
+                "ID": c.id,
+                "Name": c.name,
+                "Phone": c.phone,
+                "Wilaya": c.wilaya,
+                "Business": c.business_type,
+                "Status": c.status,
+                "Investment": f"{c.investment:,}" if c.investment else "-",
+            })
+        app.table(client_data)
+
+        # Status update
+        app.markdown("### Update Client Status")
+        client_ids = [c.id for c in clients]
+        sel_client = app.selectbox("Select Client", options=client_ids, index=0)
+        new_status = app.selectbox("New Status", options=["new", "quoted", "in_progress", "delivered", "paid"], index=0)
+        if app.button("Update Status"):
+            manager.update_status(sel_client, new_status)
+            app.toast(f"Updated {sel_client} → {new_status}", type="success")
+
+        # Referral network
+        referrals = manager.get_referral_network()
+        if referrals:
+            app.markdown("### Referral Network")
+            for wilaya_name, refs in referrals.items():
+                if refs:
+                    app.html(f"""<div style="padding:10px;margin:5px 0;background:#e8f5e9;border-radius:6px;">
+                        <strong>{wilaya_name}:</strong> {len(refs)} referral connections
+                    </div>""")
+    else:
+        app.info("No clients yet. Add your first client above.")
+
+
 app.navigation([
     vl.Page(home_page, title="Home", icon="house"),
     vl.Page(dossier_page, title="Complete Dossier", icon="package"),
@@ -805,6 +1037,7 @@ app.navigation([
     vl.Page(financial_projections_page, title="Financials", icon="trending-up"),
     vl.Page(bmc_page, title="BMC Canvas", icon="layout"),
     vl.Page(nesda_calc_page, title="NESDA Calc", icon="calculator"),
+    vl.Page(nesda_catalog_page, title="NESDA Catalog", icon="search"),
     vl.Page(marketing_plan_page, title="Marketing Plan", icon="megaphone"),
     vl.Page(social_media_page, title="Social Media", icon="share-2"),
     vl.Page(tax_helper_page, title="Tax Helper", icon="calculator"),
@@ -814,6 +1047,8 @@ app.navigation([
     vl.Page(gov_paperwork_page, title="Gov Paperwork", icon="building"),
     vl.Page(calculators_page, title="Calculators", icon="calculator"),
     vl.Page(aapi_page, title="AAPI Scorer", icon="award"),
+    vl.Page(linkedin_page, title="LinkedIn", icon="linkedin"),
+    vl.Page(batch_page, title="Batch Process", icon="layers"),
 ])
 
 if __name__ == "__main__":
