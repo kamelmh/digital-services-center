@@ -15,6 +15,7 @@ Usage:
 
 from __future__ import annotations
 import html as _html_mod
+from training_hook import hook_generation
 
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -559,7 +560,7 @@ def generate_g8(data: G8Data) -> str:
     Returns:
         Complete HTML document ready for printing.
     """
-    return f"""<!DOCTYPE html>
+    html = f"""<!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
 <meta charset="UTF-8">
@@ -579,6 +580,9 @@ def generate_g8(data: G8Data) -> str:
 
 </body>
 </html>"""
+
+    hook_generation("g8_existence", {"nom": data.nom, "prenom": data.prenom, "nif": data.nif}, html)
+    return html
 
 
 def generate_g8_html(data: G8Data) -> str:

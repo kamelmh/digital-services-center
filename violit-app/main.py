@@ -1709,33 +1709,28 @@ def linkedin_page():
 
 
 def batch_page():
-    """Batch Processing — client management, pipeline, referrals."""
+    """Batch Processing — client management, pipeline, referrals, revenue."""
     _sidebar()
     app.html("""
     <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
-        <h2 style="margin:0;color:#0A1628;">Batch Processing</h2>
-        <p style="margin:3px 0 0;color:#888;">إدارة العملاء والدفعات — تتبع وتحويل</p>
+        <h2 style="margin:0;color:#0A1628;">Batch Clients</h2>
+        <p style="margin:3px 0 0;color:#888;">إدارة العملاء والدفعات — Pipeline, CRM, الإيرادات</p>
     </div>
     """)
 
     manager = BatchManager()
     summary = manager.get_batch_summary()
 
-    # Dashboard metrics
-    col1, col2, col3, col4 = app.columns(4)
-    with col1:
-        app.metric("Total Clients", summary["total_clients"])
-    with col2:
-        app.metric("Active Pipeline", summary["active_pipeline"])
-    with col3:
-        app.metric("Wilayas", len(summary["by_wilaya"]))
-    with col4:
-        app.metric("Total Value", f"{summary['total_investment_value']:,} DZD")
-
-    # Pipeline status
-    app.markdown("### Pipeline Status")
+    # ── Pipeline Dashboard ──
+    app.markdown("### Pipeline Dashboard")
     status_cols = app.columns(5)
-    statuses = [("new", "New", "#007bff"), ("quoted", "Quoted", "#ffc107"), ("in_progress", "In Progress", "#17a2b8"), ("delivered", "Delivered", "#28a745"), ("paid", "Paid", "#6f42c1")]
+    statuses = [
+        ("new", "New", "#007bff"),
+        ("quoted", "Quoted", "#ffc107"),
+        ("in_progress", "In Progress", "#17a2b8"),
+        ("delivered", "Delivered", "#28a745"),
+        ("paid", "Paid", "#6f42c1"),
+    ]
     for i, (s, label, color) in enumerate(statuses):
         with status_cols[i]:
             count = summary["by_status"].get(s, 0)
@@ -1744,7 +1739,15 @@ def batch_page():
                 <div style="font-size:0.85em;color:#666;">{label}</div>
             </div>""")
 
-    # Add new client
+    col1, col2, col3 = app.columns(3)
+    with col1:
+        app.metric("Total Clients", summary["total_clients"])
+    with col2:
+        app.metric("Active Pipeline", summary["active_pipeline"])
+    with col3:
+        app.metric("Total Value", f"{summary['total_investment_value']:,} DZD")
+
+    # ── Add New Client ──
     app.markdown("### Add New Client")
     with app.form("new_client"):
         col1, col2 = app.columns(2)
@@ -1764,33 +1767,51 @@ def batch_page():
             client = manager.add_client(name, phone, wilaya, biz, inv, svc, email, notes)
             app.toast(f"Added: {client.name} ({client.id})", type="success")
 
-    # Client list
+    # ── Client List (filterable) ──
     app.markdown("### Client List")
     clients = list(manager.clients.values())
     if clients:
+        col1, col2 = app.columns(2)
+        with col1:
+            filter_status = app.selectbox("Filter by Status", options=["all"] + [s[0] for s in statuses], index=0)
+        with col2:
+            all_wilayas = sorted(set(c.wilaya for c in clients if c.wilaya))
+            filter_wilaya = app.selectbox("Filter by Wilaya", options=["all"] + all_wilayas, index=0)
+
+        filtered = clients
+        if filter_status != "all":
+            filtered = [c for c in filtered if c.status == filter_status]
+        if filter_wilaya != "all":
+            filtered = [c for c in filtered if c.wilaya == filter_wilaya]
+
+        app.html(f"<p style='color:#888;font-size:0.9em;'>Showing {len(filtered)} of {len(clients)} clients</p>")
+
         client_data = []
-        for c in clients[-20:]:  # show last 20
+        for c in filtered:
             client_data.append({
                 "ID": c.id,
                 "Name": c.name,
                 "Phone": c.phone,
                 "Wilaya": c.wilaya,
                 "Business": c.business_type,
+                "Service": c.service,
                 "Status": c.status,
                 "Investment": f"{c.investment:,}" if c.investment else "-",
+                "Created": c.created_at[:10] if c.created_at else "-",
             })
         app.table(client_data)
 
-        # Status update
+        # ── Status Update ──
         app.markdown("### Update Client Status")
         client_ids = [c.id for c in clients]
         sel_client = app.selectbox("Select Client", options=client_ids, index=0)
         new_status = app.selectbox("New Status", options=["new", "quoted", "in_progress", "delivered", "paid"], index=0)
+        status_notes = app.text_input("Notes (optional)")
         if app.button("Update Status"):
-            manager.update_status(sel_client, new_status)
+            manager.update_status(sel_client, new_status, notes=status_notes)
             app.toast(f"Updated {sel_client} → {new_status}", type="success")
 
-        # Referral network
+        # ── Referral Network ──
         referrals = manager.get_referral_network()
         if referrals:
             app.markdown("### Referral Network")
@@ -1801,6 +1822,36 @@ def batch_page():
                     </div>""")
     else:
         app.info("No clients yet. Add your first client above.")
+
+    # ── Revenue Summary ──
+    app.markdown("### Revenue Summary")
+    revenue = manager.get_revenue_report()
+    if revenue.get("total_revenue", 0) > 0:
+        col1, col2 = app.columns(2)
+        with col1:
+            app.html(f"""<div style="text-align:center;padding:20px;background:#e8f5e9;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">Total Revenue</div>
+                <div style="font-size:1.5em;font-weight:bold;color:#2e7d32;">{revenue['total_revenue']:,} DZD</div>
+            </div>""")
+        with col2:
+            app.html(f"""<div style="text-align:center;padding:20px;background:#e3f2fd;border-radius:8px;">
+                <div style="font-size:0.85em;color:#666;">Transactions</div>
+                <div style="font-size:1.5em;font-weight:bold;color:#1565c0;">{revenue.get('transaction_count', 0)}</div>
+            </div>""")
+
+        if revenue.get("by_service"):
+            app.markdown("#### By Service")
+            svc_data = [{"Service": s, "Revenue": f"{r:,} DZD"} for s, r in revenue["by_service"].items()]
+            app.table(svc_data)
+
+        if revenue.get("by_month"):
+            app.markdown("#### By Month")
+            month_data = [{"Month": m, "Revenue": f"{r:,} DZD"} for m, r in sorted(revenue["by_month"].items())]
+            app.table(month_data)
+    else:
+        app.html("""<div style="text-align:center;padding:20px;background:#f8f9fa;border-radius:8px;color:#888;">
+            No revenue recorded yet. Use the Pricing page to generate quotes and track payments.
+        </div>""")
 
 
 def eligibility_page():

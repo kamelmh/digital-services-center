@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import html as _html_mod
+from training_hook import hook_generation
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
@@ -934,6 +935,7 @@ def generate_g12_prévisionnelle(data: G12FormData) -> str:
 </body>
 </html>"""
 
+    hook_generation("g12_previsionnelle", {"year": data.year, "nif": data.nif}, html)
     return html
 
 
@@ -979,6 +981,7 @@ def generate_g12_définitive(data: G12FormData) -> str:
 </body>
 </html>"""
 
+    hook_generation("g12_definitive", {"year": data.year, "nif": data.nif}, html)
     return html
 
 

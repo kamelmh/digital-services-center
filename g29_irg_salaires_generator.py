@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import html as _html_mod
 import math
+from training_hook import hook_generation
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
@@ -681,7 +682,7 @@ def generate_g29(data: G29Data) -> str:
     Returns:
         Complete HTML string ready to save or render
     """
-    return f"""<!DOCTYPE html>
+    html = f"""<!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
 <meta charset="UTF-8">
@@ -710,6 +711,9 @@ def generate_g29(data: G29Data) -> str:
 
 </body>
 </html>"""
+
+    hook_generation("g29_irg_salaires", {"annee_imposition": data.annee_imposition, "raison_sociale": data.raison_sociale}, html)
+    return html
 
 
 # Alias for consistency with g12_official.py

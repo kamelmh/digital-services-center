@@ -27,6 +27,7 @@ Usage:
 from __future__ import annotations
 
 import html as _html_mod
+from training_hook import hook_generation
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -1613,6 +1614,7 @@ def generate_g50(data: G50Data) -> str:
 </body>
 </html>"""
 
+    hook_generation("g50", {"month": data.month, "year": data.year, "nif": data.nif}, html)
     return html
 
 

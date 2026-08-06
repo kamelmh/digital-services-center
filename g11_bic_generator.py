@@ -27,6 +27,7 @@ Usage:
 from __future__ import annotations
 
 import html as _html_mod
+from training_hook import hook_generation
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -925,6 +926,7 @@ def generate_g11(data: G11Data) -> str:
 </body>
 </html>"""
 
+    hook_generation("g11_bic", {"annee": data.annee, "nif": data.nif}, html)
     return html
 
 

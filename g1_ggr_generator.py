@@ -18,6 +18,7 @@ Usage:
 from __future__ import annotations
 
 import html as _html_mod
+from training_hook import hook_generation
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
@@ -1111,6 +1112,7 @@ def generate_g1(data: G1Data) -> str:
 </body>
 </html>"""
 
+    hook_generation("g1_ggr", {"annee_imposition": data.annee_imposition, "nif": data.nif}, html)
     return html
 
 
