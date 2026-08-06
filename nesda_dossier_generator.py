@@ -29,69 +29,17 @@ except ImportError:
 
 # ── NESDA Constants ──────────────────────────────────────────────────────────
 
-NESDA_ACTIVITIES = {
-    # Manufacturing
-    "nourriture_animaux": {"fr": "Fabrication de nourriture pour animaux", "ar": "تصنيع مFeed for animals", "sector": "industrie"},
-    "confiserie": {"fr": "Confiserie et pâtisserie", "ar": "حلويات ومعلبات", "sector": "industrie"},
-    "peau_mouton": {"fr": "Travail de peau de mouton", "ar": "art du cuir", "sector": "industrie"},
-    "meubles": {"fr": "Fabrication de meubles", "ar": " manufacture de mobilier", "sector": "industrie"},
-    "matelas": {"fr": "Matelas et literie", "ar": "فراش وأسرّة", "sector": "industrie"},
-    "souk_cases": {"fr": "Souches de ciment", "ar": "أسمنت خشن", "sector": "industrie"},
-    "vetements_maison": {"fr": "Vêtements de maison", "ar": "ملابس منزلية", "sector": "industrie"},
-    "vetements_travail": {"fr": "Vêtements de travail", "ar": "ملابس عمل", "sector": "industrie"},
-    "vetements_religieux": {"fr": "Vêtements religieux et traditionnels", "ar": "ملابس دينية وتقاليدية", "sector": "industrie"},
-    "accessoires": {"fr": "Fabrication de vêtements et accessoires", "ar": " manufacture de vêtements et accessoires", "sector": "industrie"},
-    "sacs": {"fr": "Sacs et valises", "ar": "حقائب وأكياس", "sector": "industrie"},
-    "imprimerie": {"fr": "Imprimerie", "ar": "مطبعة", "sector": "industrie"},
-    "chandails": {"fr": "T-shirt et bonneterie", "ar": "تيشيرت وknitting", "sector": "industrie"},
-    "tricot": {"fr": "Tricot et bonneterie", "ar": "编织和针织", "sector": "industrie"},
-    "caisses_carton": {"fr": "Caisses en carton", "ar": "كوابس من الورق المقوّى", "sector": "industrie"},
-    "biscuits": {"fr": "Fabrication de biscuits", "ar": "تصنيع البسكويت", "sector": "industrie"},
-    "cafe_torréfaction": {"fr": "Torréfaction de café", "ar": "تحمير القهوة", "sector": "industrie"},
-    "pates_alimentaires": {"fr": "Pâtes alimentaires", "ar": "معكرونة", "sector": "industrie"},
-    "jouets": {"fr": "Fabrication de jouets", "ar": "صناعة الألعاب الجاهزة", "sector": "industrie"},
-    "vetements_enfant": {"fr": "Vêtements pour bébés", "ar": "ملابس حديثي الولادة", "sector": "industrie"},
-    "vetements_homme": {"fr": "Vêtements pour hommes", "ar": "ملابس رجالية", "sector": "industrie"},
-    "vetements_femme": {"fr": "Vêtements pour femmes", "ar": "ملابس نسائية", "sector": "industrie"},
-    "linge_maison": {"fr": "Linge de maison", "ar": "أقمشة منزلية", "sector": "industrie"},
-    "verrerie": {"fr": "Verrerie", "ar": "زجاج", "sector": "industrie"},
-    "plastique": {"fr": "Plastique thermoformé", "ar": "بلاستيك م Heat-formed", "sector": "industrie"},
-    "jalousies": {"fr": "Jalousies et portes", "ar": "شُرُف و أبواب", "sector": "industrie"},
-    "ceramique": {"fr": "Céramique", "ar": "سيراميك", "sector": "industrie"},
-    "souvenirs": {"fr": "Articles de souvenirs", "ar": "هدايا تذكارية", "sector": "industrie"},
-    "articles_menager": {"fr": "Articles ménagers", "ar": "أدوات منزلية", "sector": "industrie"},
-    "boissons": {"fr": "Boissons gazeuses et jus", "ar": "مشروبات غازية وعصائر", "sector": "industrie"},
-    "eau": {"fr": "Production d'eau", "ar": "إنتاج الماء", "sector": "industrie"},
-    "glacon": {"fr": "Production de glaçons", "ar": "إنتاج الثلج", "sector": "industrie"},
-    "boulangerie": {"fr": "Boulangerie et pâtisserie", "ar": "مخبزة وحلويات", "sector": "industrie"},
-    "poulet": {"fr": "Élevage de poulet", "ar": "تربية الدجاج", "sector": "agriculture"},
-    "decoration": {"fr": "Décoration intérieure", "ar": "ديكور داخلي", "sector": "industrie"},
-    # Agriculture
-    "elevage_bovins": {"fr": "Élevage de bovins", "ar": "تربية الأبقار", "sector": "agriculture"},
-    "elevage_ovins": {"fr": "Élevage d'ovins", "ar": "تربية الأغنام", "sector": "agriculture"},
-    "apiculture": {"fr": "Apiculture", "ar": "تربية النحل", "sector": "agriculture"},
-    "pisciculture": {"fr": "Pisciculture", "ar": "تربية الأسماك", "sector": "agriculture"},
-    "marechellerie": {"fr": "Maréchellerie", "ar": "تربية الحيوانات الصغيرة", "sector": "agriculture"},
-    # Services
-    "formation_informatique": {"fr": "Centre de formation en informatique", "ar": "مركز تكوين في المعلوماتية", "sector": "services"},
-    "formation_langues": {"fr": "Formation en langues", "ar": "تكوين في اللغات", "sector": "services"},
-    "centre_marketing": {"fr": "Centre de marketing numérique", "ar": "مركز التسويق الرقمي", "sector": "services"},
-    "coiffure": {"fr": "Salon de coiffure", "ar": "صالون حلاقة", "sector": "services"},
-    "esthetique": {"fr": "Institut de beauté", "ar": "معهد التجميل", "sector": "services"},
-    "repetiteur": {"fr": "Répétiteur à domicile", "ar": "مدرس خصوصي", "sector": "services"},
-    "comptable": {"fr": "Bureau comptable", "ar": "مكتب محاسبة", "sector": "services"},
-    "couture": {"fr": "Atelier de couture", "ar": "ورشة خياطة", "sector": "services"},
-    # IT
-    "developpement_web": {"fr": "Développement web", "ar": "تطوير المواقع الإلكترونية", "sector": "numérique"},
-    "maintenance_informatique": {"fr": "Maintenance informatique", "ar": "صيانة الحواسيب", "sector": "numérique"},
-    "photographie": {"fr": "Photographie et production", "ar": "تصوير وإنتاج", "sector": "numérique"},
-    "graphisme": {"fr": "Graphisme et design", "ar": "تصميم grafique", "sector": "numérique"},
-    "marketing_digital": {"fr": "Marketing digital", "ar": "التسويق الرقمي", "sector": "numérique"},
-    # Environment
-    "solaire": {"fr": "Installation solaire", "ar": "تركيب الطاقة الشمسية", "sector": "environnement"},
-    "recyclage": {"fr": "Recyclage des déchets", "ar": "إعادة تدوير النفايات", "sector": "environnement"},
-    "eau_usee": {"fr": "Traitement des eaux usées", "ar": "معالجة المياه العادمة", "sector": "environnement"},
-}
+# Pull from nesda_catalog as single source of truth
+try:
+    from nesda_catalog import CATALOG as _CATALOG, NESDAActivity
+    def _catalog_to_legacy(key: str) -> dict | None:
+        a = _CATALOG.get(key)
+        if not a:
+            return None
+        return {"fr": a.name_fr, "ar": a.name_ar, "sector": a.sector}
+    NESDA_ACTIVITIES = {k: _catalog_to_legacy(k) for k in _CATALOG if _catalog_to_legacy(k)}
+except ImportError:
+    NESDA_ACTIVITIES = {}
 
 NESDA_SECTORS = {
     "industrie": {"fr": "Industrie", "ar": "الصناعات", "priority": "high"},

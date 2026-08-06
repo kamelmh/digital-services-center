@@ -216,13 +216,13 @@ class ProjectionsEngine:
         contribution_margin = 1 - self.cogs_pct - (self.operating_pct * 0.4)
         proj.breakeven_revenue = int(annual_fixed / contribution_margin) if contribution_margin > 0 else 0
 
-        # VAN (NPV at 10% discount rate)
-        discount_rate = 0.10
+        # VAN (NPV at 12% discount rate — Algerian market rate)
+        discount_rate = 0.12
         cash_flows = [-self.equity] + [y.cash_flow for y in proj.years]
         proj.van = sum(cf / (1 + discount_rate) ** t for t, cf in enumerate(cash_flows))
 
-        # TRI (IRR via Newton-Raphson)
-        proj.tri = self._irr(cash_flows)
+        # TRI (IRR via Newton-Raphson with bisection fallback)
+        proj.tri = self._irr(cash_flows) / 100  # Convert to decimal
 
         # Summary
         proj.total_profit = sum(y.net_income for y in proj.years)
@@ -241,26 +241,44 @@ class ProjectionsEngine:
         return int(payment)
 
     @staticmethod
-    def _irr(cash_flows: list, max_iter: int = 100, tol: float = 1e-6) -> float:
-        """Calculate IRR using Newton-Raphson."""
-        if not cash_flows or cash_flows[0] >= 0:
-            return 0.0
+    def _irr(cash_flows: list, tolerance: float = 1e-6, max_iter: int = 1000) -> float:
+        """Calculate IRR using Newton-Raphson with bisection fallback.
+        
+        Returns as percentage (e.g., 15.3 for 15.3%).
+        """
+        if not cash_flows or len(cash_flows) < 2:
+            return 0
 
-        # Initial guess
-        rate = 0.10
+        def npv_at(r):
+            return sum(cf / (1 + r) ** t for t, cf in enumerate(cash_flows))
 
+        def npv_derivative(r):
+            return sum(-t * cf / (1 + r) ** (t + 1) for t, cf in enumerate(cash_flows))
+
+        # Newton-Raphson with clamping
+        r = 0.10
         for _ in range(max_iter):
-            npv = sum(cf / (1 + rate) ** t for t, cf in enumerate(cash_flows))
-            dnpv = sum(-t * cf / (1 + rate) ** (t + 1) for t, cf in enumerate(cash_flows))
-
-            if abs(dnpv) < 1e-12:
+            f = npv_at(r)
+            if abs(f) < tolerance:
+                return r * 100
+            df = npv_derivative(r)
+            if abs(df) < 1e-12:
                 break
+            r -= f / df
+            r = max(-0.99, min(r, 10))  # Clamp
 
-            rate -= npv / dnpv
-            if abs(npv) < tol:
-                break
-
-        return rate
+        # Bisection fallback
+        low, high = -0.5, 5.0
+        for _ in range(max_iter):
+            mid = (low + high) / 2
+            f_mid = npv_at(mid)
+            if abs(f_mid) < tolerance:
+                return mid * 100
+            if npv_at(low) * f_mid < 0:
+                high = mid
+            else:
+                low = mid
+        return r * 100
 
 
 def format_projections(proj: FinancialProjections) -> str:

@@ -161,7 +161,7 @@ BUSINESS_DEFAULTS = {
     },
     "plombier": {
         "name_fr": "Plombier / Installateur Sanitaire",
-        "name_ar": "سباك / مouldi",
+        "name_ar": "سبّاك",
         "cogs_pct": 0.35,
         "operating_pct": 0.15,
         "monthly_revenue_estimate": 350_000,

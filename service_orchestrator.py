@@ -78,16 +78,51 @@ class ServiceOrchestrator:
             "client_name": client_name,
             "defaults_used": defaults,
             "monthly_revenue_estimated": monthly_revenue,
-        }}
+        }, "quality": {}}
 
         # ── Stage 1: Feasibility Study (with retry) ──────────────────────────
         self._emit("Feasibility", "Generating 9-section study...", 10)
         max_retries = 3
+
+        # Check if NESDA-eligible activity → use NESDA dossier generator
+        nesda_activity_key = None
+        try:
+            from nesda_catalog import CATALOG
+            # Try to match business_type to a NESDA activity
+            for key, act in CATALOG.items():
+                if key == business_type or business_type.replace(" ", "_") == key:
+                    nesda_activity_key = key
+                    break
+        except ImportError:
+            pass
+
         for attempt in range(1, max_retries + 1):
             try:
-                from feasibility_generator import FeasibilityGenerator
-                gen = FeasibilityGenerator(provider=self.provider, model=self.model)
-                feasibility = gen.generate_full_study(business_type, location, wilaya, investment)
+                if nesda_activity_key:
+                    # NESDA-compliant 9-part dossier (Decree 26-154)
+                    from nesda_dossier_generator import NESDADossierGenerator
+                    nesda_gen = NESDADossierGenerator()
+                    nesda_params = {
+                        "activity_key": nesda_activity_key,
+                        "business_type": business_type,
+                        "wilaya": wilaya,
+                        "location": location,
+                        "investment": investment,
+                        "client_name": client_name,
+                        "description": f"Projet {business_type} à {location}, {wilaya}",
+                    }
+                    nesda_dossier = nesda_gen.generate(nesda_params)
+                    # Convert to feasibility-compatible format
+                    feasibility = {
+                        "sections": {
+                            part.get("title", f"Part {i+1}"): part.get("content", "")
+                            for i, part in enumerate(nesda_dossier.get("parts", []))
+                        }
+                    }
+                else:
+                    from feasibility_generator import FeasibilityGenerator
+                    gen = FeasibilityGenerator(provider=self.provider, model=self.model)
+                    feasibility = gen.generate_full_study(business_type, location, wilaya, investment)
 
                 # Quality check
                 feas_content = "\n\n".join(
