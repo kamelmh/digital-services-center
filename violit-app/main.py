@@ -34,6 +34,7 @@ from g11_bic_generator import G11Data, calculate_g11, generate_g11_html
 from g29_irg_salaires_generator import G29Data, EmployeeData, calculate_irg, generate_g29_html
 from g1_ggr_generator import G1Data, calculate_g1, generate_g1_html
 from g8_existence_generator import G8Data, generate_g8_html
+from tax_form_pdf_exporter import generate_tax_pdf
 
 app = vl.App(title="Digital Services Center", theme="ocean")
 
@@ -507,6 +508,13 @@ def g12_page():
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.html(f"<p style='color:#28a745;'>Saved: {html_path}</p>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+        try:
+            pdf = generate_tax_pdf("g12", data, is_definitive=is_definitive)
+            pdf_path = html_path.with_suffix(".pdf")
+            pdf_path.write_bytes(pdf)
+            app.download_button("Download PDF", data=pdf, file_name=pdf_path.name, mime="application/pdf")
+        except Exception as e:
+            app.html(f"<p style='color:#dc3545;'>PDF error: {e}</p>")
 
 
 def g50_page():
@@ -631,6 +639,13 @@ def g50_page():
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.html(f"<p style='color:#28a745;'>Saved: {html_path}</p>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+        try:
+            pdf = generate_tax_pdf("g50", data)
+            pdf_path = html_path.with_suffix(".pdf")
+            pdf_path.write_bytes(pdf)
+            app.download_button("Download PDF", data=pdf, file_name=pdf_path.name, mime="application/pdf")
+        except Exception as e:
+            app.html(f"<p style='color:#dc3545;'>PDF error: {e}</p>")
 
 
 def g4_page():
@@ -718,6 +733,13 @@ def g4_page():
         app.markdown("### G4 Generated")
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+        try:
+            pdf = generate_tax_pdf("g4", data)
+            pdf_path = html_path.with_suffix(".pdf")
+            pdf_path.write_bytes(pdf)
+            app.download_button("Download PDF", data=pdf, file_name=pdf_path.name, mime="application/pdf")
+        except Exception as e:
+            app.html(f"<p style='color:#dc3545;'>PDF error: {e}</p>")
 
 
 def g11_page():
@@ -795,6 +817,13 @@ def g11_page():
         app.markdown("### G11 Generated")
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+        try:
+            pdf = generate_tax_pdf("g11", data)
+            pdf_path = html_path.with_suffix(".pdf")
+            pdf_path.write_bytes(pdf)
+            app.download_button("Download PDF", data=pdf, file_name=pdf_path.name, mime="application/pdf")
+        except Exception as e:
+            app.html(f"<p style='color:#dc3545;'>PDF error: {e}</p>")
 
 
 def g29_page():
@@ -866,6 +895,13 @@ def g29_page():
         app.markdown("### G29 Generated")
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+        try:
+            pdf = generate_tax_pdf("g29", data)
+            pdf_path = html_path.with_suffix(".pdf")
+            pdf_path.write_bytes(pdf)
+            app.download_button("Download PDF", data=pdf, file_name=pdf_path.name, mime="application/pdf")
+        except Exception as e:
+            app.html(f"<p style='color:#dc3545;'>PDF error: {e}</p>")
 
 
 def g1_page():
@@ -952,6 +988,13 @@ def g1_page():
         app.markdown("### G1 Generated")
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+        try:
+            pdf = generate_tax_pdf("g1", data)
+            pdf_path = html_path.with_suffix(".pdf")
+            pdf_path.write_bytes(pdf)
+            app.download_button("Download PDF", data=pdf, file_name=pdf_path.name, mime="application/pdf")
+        except Exception as e:
+            app.html(f"<p style='color:#dc3545;'>PDF error: {e}</p>")
 
 
 def g8_page():
@@ -1026,6 +1069,13 @@ def g8_page():
         app.markdown("### G8 Generated")
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+        try:
+            pdf = generate_tax_pdf("g8", data)
+            pdf_path = html_path.with_suffix(".pdf")
+            pdf_path.write_bytes(pdf)
+            app.download_button("Download PDF", data=pdf, file_name=pdf_path.name, mime="application/pdf")
+        except Exception as e:
+            app.html(f"<p style='color:#dc3545;'>PDF error: {e}</p>")
 
 
 def invoice_page():
