@@ -26,7 +26,6 @@ from linkedin_automation import LinkedInContentGenerator
 from pricing_calculator import calculate_quote, SERVICES as PRICING_SERVICES, PACKAGES
 from batch_processor import BatchManager
 from training_data_collector import TrainingDataCollector
-from g12_generator import G12Data, calculate_ifu, generate_g12_html, generate_g12_text, IFU_RATES
 from g12_official import G12FormData, calculate_g12, generate_g12_prévisionnelle, generate_g12_définitive, WILAYAS as G12_WILAYAS
 from g50_generator import G50Data, calculate_g50, generate_g50_html, generate_g50_text, MONTHS_FR, MONTHS_AR
 from g4_ibs_generator import G4Data, calculate_g4, generate_g4_html
@@ -37,6 +36,13 @@ from g8_existence_generator import G8Data, generate_g8_html
 from tax_form_pdf_exporter import generate_tax_pdf
 
 app = vl.App(title="Digital Services Center", theme="ocean")
+
+
+def _fmt(n):
+    """Format number with thousand separators."""
+    if n == int(n):
+        return f"{int(n):,}".replace(",", " ")
+    return f"{n:,.2f}".replace(",", " ")
 
 
 def _sidebar():

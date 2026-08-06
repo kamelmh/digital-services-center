@@ -26,8 +26,16 @@ Usage:
 
 from __future__ import annotations
 
+import html as _html_mod
 from dataclasses import dataclass, field
 from datetime import datetime
+
+
+def _esc(value: object, default: str = "") -> str:
+    """HTML-escape a value for safe rendering."""
+    if value is None:
+        return default
+    return _html_mod.escape(str(value))
 from typing import Optional
 
 
@@ -654,21 +662,21 @@ def _dgi_hierarchy_html(data: G50Data) -> str:
   <table>
     <tr>
       <td class="dgi-label">Wilaya de :</td>
-      <td class="dgi-value">{data.wilaya or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.wilaya) or _blank(40)}</td>
       <td class="dgi-label">Mois :</td>
       <td class="dgi-value">{MONTHS_FR[data.month] if data.month else _blank(15)}</td>
     </tr>
     <tr>
       <td class="dgi-label">Inspection des impôts de :</td>
-      <td class="dgi-value">{data.inspection or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.inspection) or _blank(40)}</td>
       <td class="dgi-label">Année :</td>
       <td class="dgi-value">{data.year or _blank(15)}</td>
     </tr>
     <tr>
       <td class="dgi-label">Recette des impôts de :</td>
-      <td class="dgi-value">{data.recette or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.recette) or _blank(40)}</td>
       <td class="dgi-label">Service CDI :</td>
-      <td class="dgi-value">{data.service_cdi or _blank(15)}</td>
+      <td class="dgi-value">{_esc(data.service_cdi) or _blank(15)}</td>
     </tr>
   </table>
 </div>"""
@@ -680,29 +688,29 @@ def _identification_html(data: G50Data) -> str:
   <table>
     <tr>
       <td class="field-label">NIF :</td>
-      <td class="field-value">{data.nif or _blank(25)}</td>
+      <td class="field-value">{_esc(data.nif) or _blank(25)}</td>
       <td class="field-label">Code Activité :</td>
-      <td class="field-value">{data.code_activite or _blank(20)}</td>
+      <td class="field-value">{_esc(data.code_activite) or _blank(20)}</td>
     </tr>
     <tr>
       <td class="field-label">Article d'imposition :</td>
-      <td class="field-value" colspan="3">{data.article_imposition or _blank(50)}</td>
+      <td class="field-value" colspan="3">{_esc(data.article_imposition) or _blank(50)}</td>
     </tr>
     <tr>
       <td class="field-label">M. / Nom et Prénom / Raison sociale :</td>
-      <td class="field-value" colspan="3">{data.nom_prenom or _blank(50)}</td>
+      <td class="field-value" colspan="3">{_esc(data.nom_prenom) or _blank(50)}</td>
     </tr>
     <tr>
       <td class="field-label">Activité / Profession :</td>
-      <td class="field-value" colspan="3">{data.activite or _blank(50)}</td>
+      <td class="field-value" colspan="3">{_esc(data.activite) or _blank(50)}</td>
     </tr>
     <tr>
       <td class="field-label">Adresse :</td>
-      <td class="field-value" colspan="3">{data.adresse or _blank(50)}</td>
+      <td class="field-value" colspan="3">{_esc(data.adresse) or _blank(50)}</td>
     </tr>
     <tr>
       <td class="field-label">Commune :</td>
-      <td class="field-value" colspan="3">{data.commune or _blank(50)}</td>
+      <td class="field-value" colspan="3">{_esc(data.commune) or _blank(50)}</td>
     </tr>
   </table>
 </div>"""
@@ -1493,23 +1501,23 @@ def _payment_section_html(data: G50Data, result: G50Result) -> str:
     <table>
       <tr>
         <td class="field-label">Payée par Chq banque N° :</td>
-        <td class="field-value">{data.cheque_banque_numero or _blank(25)}</td>
+        <td class="field-value">{_esc(data.cheque_banque_numero) or _blank(25)}</td>
         <td class="field-label">du :</td>
-        <td class="field-value">{data.cheque_banque_date or '....../....../......'}</td>
+        <td class="field-value">{_esc(data.cheque_banque_date) or '....../....../......'}</td>
       </tr>
       <tr>
         <td class="field-label">tiré sur l'Agence :</td>
-        <td class="field-value" colspan="3">{data.cheque_banque_agence or _blank(50)}</td>
+        <td class="field-value" colspan="3">{_esc(data.cheque_banque_agence) or _blank(50)}</td>
       </tr>
       <tr>
         <td class="field-label">par Chèque postal N° :</td>
-        <td class="field-value" colspan="3">{data.cheque_postal_numero or _blank(50)}</td>
+        <td class="field-value" colspan="3">{_esc(data.cheque_postal_numero) or _blank(50)}</td>
       </tr>
       <tr>
         <td class="field-label">En numéraire :</td>
         <td class="field-value">{_fmt_cell(data.numeraire)}</td>
         <td class="field-label">Prise en recette par quittance N° :</td>
-        <td class="field-value">{data.quittance_numero or _blank(25)}</td>
+        <td class="field-value">{_esc(data.quittance_numero) or _blank(25)}</td>
       </tr>
     </table>
   </div>
@@ -1524,7 +1532,7 @@ def _signature_blocks_html(data: G50Data) -> str:
     <div class="title">Le Contribuable</div>
     <br><br><br><br>
     Cachet et signature<br>
-    {data.beneficiaire or data.nom_prenom or '________________'}<br>
+    {_esc(data.beneficiaire) or _esc(data.nom_prenom) or '________________'}<br>
     Le {now}
   </div>
   <div class="sig-box">

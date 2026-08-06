@@ -26,8 +26,16 @@ Usage:
 
 from __future__ import annotations
 
+import html as _html_mod
 from dataclasses import dataclass, field
 from datetime import datetime
+
+
+def _esc(value: object, default: str = "") -> str:
+    """HTML-escape a value for safe rendering."""
+    if value is None:
+        return default
+    return _html_mod.escape(str(value))
 from typing import List, Optional
 
 
@@ -418,31 +426,31 @@ def _dgi_hierarchy_html(data: G11Data) -> str:
   <table>
     <tr>
       <td class="dgi-label">Wilaya :</td>
-      <td class="dgi-value">{data.wilaya or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.wilaya) or _blank(40)}</td>
       <td class="dgi-label">Année :</td>
       <td class="dgi-value">{data.annee}</td>
     </tr>
     <tr>
       <td class="dgi-label">DIW :</td>
-      <td class="dgi-value">{data.diw or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.diw) or _blank(40)}</td>
       <td class="dgi-label">Période :</td>
-      <td class="dgi-value">{data.periode or _blank(15)}</td>
+      <td class="dgi-value">{_esc(data.periode) or _blank(15)}</td>
     </tr>
     <tr>
       <td class="dgi-label">Structure :</td>
-      <td class="dgi-value">{data.structure or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.structure) or _blank(40)}</td>
       <td class="dgi-label"></td>
       <td class="dgi-value"></td>
     </tr>
     <tr>
       <td class="dgi-label">Inspection des impôts de :</td>
-      <td class="dgi-value">{data.inspection or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.inspection) or _blank(40)}</td>
       <td class="dgi-label"></td>
       <td class="dgi-value"></td>
     </tr>
     <tr>
       <td class="dgi-label">Recette des Impôts de :</td>
-      <td class="dgi-value">{data.recette or _blank(40)}</td>
+      <td class="dgi-value">{_esc(data.recette) or _blank(40)}</td>
       <td class="dgi-label"></td>
       <td class="dgi-value"></td>
     </tr>
@@ -467,53 +475,53 @@ def _section1_identification_html(data: G11Data) -> str:
   <table class="id-table">
     <tr>
       <td class="field-label">NIF :</td>
-      <td class="field-value">{data.nif or _blank(25)}</td>
-      <td class="field-label">NIN :</td>
-      <td class="field-value">{data.nin or _blank(20)}</td>
+      <td class="field-value">{_esc(data.nif) or _blank(25)}</td>
+      <td class="field-label">N.I.N :</td>
+      <td class="field-value">{_esc(data.nin) or _blank(20)}</td>
     </tr>
     <tr>
       <td class="field-label">Nom, Prénom / Raison sociale :</td>
-      <td class="field-value" colspan="3">{data.nom_prenoms or _blank(60)}</td>
+      <td class="field-value" colspan="3">{_esc(data.nom_prenoms) or _blank(60)}</td>
     </tr>
     <tr>
       <td class="field-label">Date et lieu de Naissance :</td>
-      <td class="field-value" colspan="3">{data.date_lieu_naissance or _blank(40)}</td>
+      <td class="field-value" colspan="3">{_esc(data.date_lieu_naissance) or _blank(40)}</td>
     </tr>
     <tr>
       <td class="field-label">Nature des activités exercées :</td>
-      <td class="field-value" colspan="3">{data.nature_activites or _blank(60)}</td>
+      <td class="field-value" colspan="3">{_esc(data.nature_activites) or _blank(60)}</td>
     </tr>
     <tr>
       <td class="field-label">Code Activité :</td>
-      <td class="field-value">{data.code_activite or _blank(15)}</td>
-      <td class="field-label">N° Registre de Commerce :</td>
-      <td class="field-value">{data.registre_commerce or _blank(20)}</td>
+      <td class="field-value">{_esc(data.code_activite) or _blank(15)}</td>
+      <td class="field-label">Registre de commerce :</td>
+      <td class="field-value">{_esc(data.registre_commerce) or _blank(20)}</td>
     </tr>
     <tr>
       <td class="field-label">N° compte(s) bancaire(s) ou CCP :</td>
-      <td class="field-value" colspan="3">{data.comptes_bancaires or _blank(40)}</td>
+      <td class="field-value" colspan="3">{_esc(data.comptes_bancaires) or _blank(40)}</td>
     </tr>
     <tr>
       <td class="field-label">Adresse du siège au 1er janvier :</td>
-      <td class="field-value" colspan="3">{data.adresse_siege_1er_janvier or _blank(60)}</td>
+      <td class="field-value" colspan="3">{_esc(data.adresse_siege_1er_janvier) or _blank(60)}</td>
     </tr>
     <tr>
       <td class="field-label">Adresse du siège au 1er janvier N+1 :</td>
-      <td class="field-value" colspan="3">{data.adresse_siege_1er_janvier_n1 or _blank(60)}</td>
+      <td class="field-value" colspan="3">{_esc(data.adresse_siege_1er_janvier_n1) or _blank(60)}</td>
     </tr>
     <tr>
       <td class="field-label">Téléphone :</td>
-      <td class="field-value">{data.telephone or _blank(15)}</td>
+      <td class="field-value">{_esc(data.telephone) or _blank(15)}</td>
       <td class="field-label">Fax :</td>
-      <td class="field-value">{data.fax or _blank(15)}</td>
+      <td class="field-value">{_esc(data.fax) or _blank(15)}</td>
     </tr>
     <tr>
       <td class="field-label">Email :</td>
-      <td class="field-value" colspan="3">{data.email or _blank(40)}</td>
+      <td class="field-value" colspan="3">{_esc(data.email) or _blank(40)}</td>
     </tr>
     <tr>
       <td class="field-label">Adresse établissements secondaires :</td>
-      <td class="field-value" colspan="3">{data.adresse_etablissements_secondaires or _blank(60)}</td>
+      <td class="field-value" colspan="3">{_esc(data.adresse_etablissements_secondaires) or _blank(60)}</td>
     </tr>
     <tr>
       <td class="field-label">Activité exonérée :</td>
@@ -541,10 +549,10 @@ def _section2_associes_html(data: G11Data) -> str:
         rows_html = ""
         for a in data.associes:
             rows_html += f"""<tr>
-        <td>{a.nom_prenoms or _blank(25)}</td>
+        <td>{_esc(a.nom_prenoms) or _blank(25)}</td>
         <td class="num">{a.pourcentage if a.pourcentage else ""}</td>
-        <td>{a.adresse_domicile_fiscal or _blank(30)}</td>
-        <td>{a.nif or _blank(15)}</td>
+        <td>{_esc(a.adresse_domicile_fiscal) or _blank(30)}</td>
+        <td>{_esc(a.nif) or _blank(15)}</td>
       </tr>"""
 
     return f"""<div class="section">
@@ -576,13 +584,13 @@ def _section3_comptable_html(data: G11Data) -> str:
     <table>
       <tr>
         <td class="field-label">Nom :</td>
-        <td class="field-value">{data.comptable_nom or _blank(30)}</td>
-        <td class="field-label">NIF :</td>
-        <td class="field-value">{data.comptable_nif or _blank(15)}</td>
+      <td class="field-value">{_esc(data.comptable_nom) or _blank(30)}</td>
+      <td class="field-label">NIF :</td>
+      <td class="field-value">{_esc(data.comptable_nif) or _blank(15)}</td>
       </tr>
       <tr>
         <td class="field-label">Adresse :</td>
-        <td class="field-value" colspan="3">{data.comptable_adresse or _blank(50)}</td>
+        <td class="field-value" colspan="3">{_esc(data.comptable_adresse) or _blank(50)}</td>
       </tr>
       <tr>
         <td class="field-label">Personnel salarié :</td>
@@ -843,9 +851,9 @@ def _irg_liquidation_html(data: G11Data, calc: G11Calculations) -> str:
 
 def _signature_html(data: G11Data) -> str:
     """Signature block and administrative frame."""
-    lieu = data.lieu_declaration or "..........................."
-    date = data.date_declaration or "....../....../......"
-    beneficiaire = data.beneficiaire or "..........................."
+    lieu = _esc(data.lieu_declaration) or "..........................."
+    date = _esc(data.date_declaration) or "....../....../......"
+    beneficiaire = _esc(data.beneficiaire) or "..........................."
 
     return f"""<div class="section" style="margin-top:20px;">
   <div style="display:flex; justify-content:space-between;">

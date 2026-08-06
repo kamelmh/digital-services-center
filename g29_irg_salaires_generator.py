@@ -14,10 +14,18 @@ Usage:
 
 from __future__ import annotations
 
+import html as _html_mod
 import math
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
+
+
+def _esc(value: object, default: str = "") -> str:
+    """HTML-escape a value for safe rendering."""
+    if value is None:
+        return default
+    return _html_mod.escape(str(value))
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -328,19 +336,19 @@ def _dgi_hierarchy_html(data: G29Data) -> str:
   <table class="dgi-table">
     <tr>
       <td class="dgi-label">Wilaya :</td>
-      <td class="dgi-value">{data.wilaya or blank}</td>
+      <td class="dgi-value">{_esc(data.wilaya) or blank}</td>
       <td class="dgi-label">DIW :</td>
-      <td class="dgi-value">{data.diw or blank}</td>
+      <td class="dgi-value">{_esc(data.diw) or blank}</td>
     </tr>
     <tr>
       <td class="dgi-label">Structure :</td>
-      <td class="dgi-value">{data.structure or blank}</td>
+      <td class="dgi-value">{_esc(data.structure) or blank}</td>
       <td class="dgi-label">Inspection :</td>
-      <td class="dgi-value">{data.inspection or blank}</td>
+      <td class="dgi-value">{_esc(data.inspection) or blank}</td>
     </tr>
     <tr>
       <td class="dgi-label">Recette des Impôts :</td>
-      <td class="dgi-value">{data.recette or blank}</td>
+      <td class="dgi-value">{_esc(data.recette) or blank}</td>
       <td class="dgi-label">Année d'imposition :</td>
       <td class="dgi-value">{data.annee_imposition}</td>
     </tr>
@@ -356,27 +364,27 @@ def _identification_employeur_html(data: G29Data) -> str:
   <table class="fields-table">
     <tr>
       <td class="field-label">NIF :</td>
-      <td class="field-value">{data.nif or blank}</td>
+      <td class="field-value">{_esc(data.nif) or blank}</td>
     </tr>
     <tr>
       <td class="field-label">Raison sociale / Nom :</td>
-      <td class="field-value">{data.raison_sociale or blank}</td>
+      <td class="field-value">{_esc(data.raison_sociale) or blank}</td>
     </tr>
     <tr>
       <td class="field-label">Adresse :</td>
-      <td class="field-value">{data.adresse or blank}</td>
+      <td class="field-value">{_esc(data.adresse) or blank}</td>
     </tr>
     <tr>
       <td class="field-label">Activité :</td>
-      <td class="field-value">{data.activite or blank}</td>
+      <td class="field-value">{_esc(data.activite) or blank}</td>
     </tr>
     <tr>
       <td class="field-label">Code Activité :</td>
-      <td class="field-value">{data.code_activite or blank}</td>
+      <td class="field-value">{_esc(data.code_activite) or blank}</td>
     </tr>
     <tr>
       <td class="field-label">Nombre de salariés :</td>
-      <td class="field-value">{data.nombre_salaries or len(data.salaries) or blank}</td>
+      <td class="field-value">{_esc(data.nombre_salaries) or len(data.salaries) or blank}</td>
     </tr>
   </table>
 </div>"""
@@ -492,14 +500,14 @@ def _employee_detail_table_html(data: G29Data) -> str:
 
         rows += f"""      <tr>
         <td>{i}</td>
-        <td class="text-left">{emp.nom_prenom}</td>
-        <td>{emp.nif_salarie}</td>
-        <td>{emp.date_naissance}</td>
-        <td>{emp.sexe}</td>
-        <td>{emp.situation_familiale}</td>
-        <td>{emp.nombre_parts}</td>
-        <td>{emp.categorie}</td>
-        <td class="text-left">{emp.periode_emploi}</td>
+        <td class="text-left">{_esc(emp.nom_prenom)}</td>
+        <td>{_esc(emp.nif_salarie)}</td>
+        <td>{_esc(emp.date_naissance)}</td>
+        <td>{_esc(emp.sexe)}</td>
+        <td>{_esc(emp.situation_familiale)}</td>
+        <td>{_esc(emp.nombre_parts)}</td>
+        <td>{_esc(emp.categorie)}</td>
+        <td class="text-left">{_esc(emp.periode_emploi)}</td>
         <td class="num">{_fmt_cell(emp.salaire_brut_base)}</td>
         <td class="num">{_fmt_cell(emp.indemnites_logement)}</td>
         <td class="num">{_fmt_cell(emp.indemnites_transport)}</td>

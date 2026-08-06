@@ -14,10 +14,18 @@ Usage:
 """
 
 from __future__ import annotations
+import html as _html_mod
 
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
+
+
+def _esc(value, default=""):
+    """Escape HTML to prevent XSS. Returns default if value is falsy."""
+    if value:
+        return _html_mod.escape(str(value))
+    return default
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -116,9 +124,9 @@ def _checkbox(condition: bool) -> str:
 
 
 def _field(value: str, width: int = 40) -> str:
-    """Return filled value or dotted line placeholder."""
+    """Return filled value or dotted line placeholder (HTML-escaped)."""
     if value:
-        return value
+        return html.escape(str(value))
     return "." * width
 
 

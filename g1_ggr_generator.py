@@ -17,9 +17,17 @@ Usage:
 
 from __future__ import annotations
 
+import html as _html_mod
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
+
+
+def _esc(value: object, default: str = "") -> str:
+    """HTML-escape a value for safe rendering."""
+    if value is None:
+        return default
+    return _html_mod.escape(str(value))
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -427,23 +435,23 @@ def _dgi_hierarchy_html(data: G1Data) -> str:
   <table class="dgi-table">
     <tr>
       <td class="dgi-label">Wilaya :</td>
-      <td class="dgi-value">{data.wilaya or '...................................................'}</td>
+      <td class="dgi-value">{_esc(data.wilaya) or '...................................................'}</td>
     </tr>
     <tr>
       <td class="dgi-label">DIW :</td>
-      <td class="dgi-value">{data.diw or '...................................................'}</td>
+      <td class="dgi-value">{_esc(data.diw) or '...................................................'}</td>
     </tr>
     <tr>
       <td class="dgi-label">Structure :</td>
-      <td class="dgi-value">{data.structure or '...................................................'}</td>
+      <td class="dgi-value">{_esc(data.structure) or '...................................................'}</td>
     </tr>
     <tr>
       <td class="dgi-label">Inspection :</td>
-      <td class="dgi-value">{data.inspection or '...................................................'}</td>
+      <td class="dgi-value">{_esc(data.inspection) or '...................................................'}</td>
     </tr>
     <tr>
       <td class="dgi-label">Recette :</td>
-      <td class="dgi-value">{data.recette or '...................................................'}</td>
+      <td class="dgi-value">{_esc(data.recette) or '...................................................'}</td>
     </tr>
     <tr>
       <td class="dgi-label">Année d'imposition :</td>
@@ -462,19 +470,19 @@ def _identification_html(data: G1Data) -> str:
   <table class="fields-table">
     <tr>
       <td class="field-label">NIF :</td>
-      <td class="field-value">{data.nif or '................................'}</td>
+      <td class="field-value">{_esc(data.nif) or '................................'}</td>
     </tr>
     <tr>
       <td class="field-label">NIN (Numéro Identification Nationale) :</td>
-      <td class="field-value">{data.nin or '................................'}</td>
+      <td class="field-value">{_esc(data.nin) or '................................'}</td>
     </tr>
     <tr>
       <td class="field-label">Nom et Prénom :</td>
-      <td class="field-value">{data.nom_prenoms or '................................'}</td>
+      <td class="field-value">{_esc(data.nom_prenoms) or '................................'}</td>
     </tr>
     <tr>
       <td class="field-label">Date de naissance :</td>
-      <td class="field-value">{data.date_naissance or '....../....../......'}</td>
+      <td class="field-value">{_esc(data.date_naissance) or '....../....../......'}</td>
     </tr>
     <tr>
       <td class="field-label">Situation familiale :</td>
@@ -493,19 +501,19 @@ def _identification_html(data: G1Data) -> str:
     </tr>
     <tr>
       <td class="field-label">Activité principale :</td>
-      <td class="field-value">{data.activite_principale or '................................'}</td>
+      <td class="field-value">{_esc(data.activite_principale) or '................................'}</td>
     </tr>
     <tr>
       <td class="field-label">Adresse du domicile fiscal :</td>
-      <td class="field-value">{data.adresse_domicile or '................................'}</td>
+      <td class="field-value">{_esc(data.adresse_domicile) or '................................'}</td>
     </tr>
     <tr>
       <td class="field-label">Code Commune :</td>
-      <td class="field-value">{data.code_commune or '......'}</td>
+      <td class="field-value">{_esc(data.code_commune) or '......'}</td>
     </tr>
     <tr>
       <td class="field-label">Téléphone / Email :</td>
-      <td class="field-value">{data.telephone or '................................'} {('/ ' + data.email) if data.email else ''}</td>
+      <td class="field-value">{_esc(data.telephone) or '................................'} {('/ ' + _esc(data.email)) if data.email else ''}</td>
     </tr>
   </table>
   <div class="section" style="margin-top: 5px; padding: 5px; border: 1px solid #ccc;">
@@ -513,15 +521,15 @@ def _identification_html(data: G1Data) -> str:
     <table class="fields-table">
       <tr>
         <td class="field-label">Date de mariage :</td>
-        <td class="field-value">{data.date_mariage or '....../....../......'}</td>
+        <td class="field-value">{_esc(data.date_mariage) or '....../....../......'}</td>
       </tr>
       <tr>
         <td class="field-label">Nom du conjoint :</td>
-        <td class="field-value">{data.nom_conjoint or '................................'}</td>
+        <td class="field-value">{_esc(data.nom_conjoint) or '................................'}</td>
       </tr>
       <tr>
         <td class="field-label">NIF du conjoint :</td>
-        <td class="field-value">{data.nif_conjoint or '................................'}</td>
+        <td class="field-value">{_esc(data.nif_conjoint) or '................................'}</td>
       </tr>
     </table>
   </div>
@@ -534,8 +542,8 @@ def _section1_salaires_html(data: G1Data, calc: G1Calculations) -> str:
     for i, s in enumerate(data.salaires, 1):
         rows += f"""<tr>
         <td class="num">{i}</td>
-        <td class="num">{s.nif_employeur or ''}</td>
-        <td style="text-align:left">{s.nom_employeur or ''}</td>
+        <td class="num">{_esc(s.nif_employeur) or ''}</td>
+        <td style="text-align:left">{_esc(s.nom_employeur) or ''}</td>
         <td class="num">{_fmt_cell(s.salaire_brut)}</td>
         <td class="num">{_fmt_cell(s.cotisations_salarié)}</td>
         <td class="num">{_fmt_cell(s.cotisations_employeur)}</td>
@@ -804,8 +812,8 @@ def _section7_agricoles_html(data: G1Data, calc: G1Calculations) -> str:
         rows += f"""<tr>
         <td class="num">{i}</td>
         <td class="num">{a.superficie if a.superficie else ''}</td>
-        <td style="text-align:left">{a.culture or ''}</td>
-        <td style="text-align:left">{a.production or ''}</td>
+        <td style="text-align:left">{_esc(a.culture) or ''}</td>
+        <td style="text-align:left">{_esc(a.production) or ''}</td>
         <td class="num">{_fmt_cell(a.recettes)}</td>
         <td class="num">{_fmt_cell(a.charges)}</td>
         <td class="num">{_fmt_cell(a.resultat)}</td>

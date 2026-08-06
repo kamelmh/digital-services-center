@@ -15,9 +15,17 @@ Usage:
 
 from __future__ import annotations
 
+import html as _html_mod
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
+
+
+def _esc(value: object, default: str = "") -> str:
+    """HTML-escape a value for safe rendering."""
+    if value is None:
+        return default
+    return _html_mod.escape(str(value))
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -320,19 +328,19 @@ def _dgi_hierarchy_html(data: G12FormData) -> str:
     <table class="dgi-table">
       <tr>
         <td class="dgi-label">DIW DE :</td>
-        <td class="dgi-value">{data.diw or '...................................................'}</td>
+        <td class="dgi-value">{_esc(data.diw) or '...................................................'}</td>
       </tr>
       <tr>
         <td class="dgi-label">Structure :</td>
-        <td class="dgi-value">{data.structure or '...................................................'}</td>
+        <td class="dgi-value">{_esc(data.structure) or '...................................................'}</td>
       </tr>
       <tr>
         <td class="dgi-label">Recette des Impôts de :</td>
-        <td class="dgi-value">{data.recette or '...................................................'}</td>
+        <td class="dgi-value">{_esc(data.recette) or '...................................................'}</td>
       </tr>
       <tr>
         <td class="dgi-label">Commune de :</td>
-        <td class="dgi-value">{data.commune or '...................................................'}</td>
+        <td class="dgi-value">{_esc(data.commune) or '...................................................'}</td>
       </tr>
     </table>
   </div>
@@ -357,7 +365,7 @@ def _identification_html(data: G12FormData, show_phone: bool = False, show_nouve
     if show_phone:
         phone = f"""<tr>
           <td class="field-label">Numéro de téléphone :</td>
-          <td class="field-value">{data.telephone or '................................'}</td>
+          <td class="field-value">{_esc(data.telephone) or '................................'}</td>
           <td class="field-label">الهاتف :</td>
         </tr>"""
 
@@ -367,17 +375,17 @@ def _identification_html(data: G12FormData, show_phone: bool = False, show_nouve
   <table class="fields-table">
     <tr>
       <td class="field-label">Nom, Prénoms / Raison sociale :</td>
-      <td class="field-value" colspan="2">{data.nom_prenoms or '................................'}</td>
+      <td class="field-value" colspan="2">{_esc(data.nom_prenoms) or '................................'}</td>
       <td class="field-label">الاسم واللقب / الاسم التجاري :</td>
     </tr>
     <tr>
       <td class="field-label">Activité(s) exercée(s) :</td>
-      <td class="field-value" colspan="2">{data.activite_exercee or '................................'}</td>
+      <td class="field-value" colspan="2">{_esc(data.activite_exercee) or '................................'}</td>
       <td class="field-label">النشاط(ات) الممارسة :</td>
     </tr>
     <tr>
       <td class="field-label">Date du début d'activité :</td>
-      <td class="field-value">{data.date_debut or '....../....../......'}</td>
+      <td class="field-value">{_esc(data.date_debut) or '....../....../......'}</td>
       <td class="field-label">تاريخ بدء النشاط :</td>
     </tr>
     <tr>
@@ -389,37 +397,37 @@ def _identification_html(data: G12FormData, show_phone: bool = False, show_nouve
     </tr>
     <tr>
       <td class="field-label">Adresse du lieu d'exercice de l'activité :</td>
-      <td class="field-value" colspan="2">{data.adresse_activite or '................................'}</td>
+      <td class="field-value" colspan="2">{_esc(data.adresse_activite) or '................................'}</td>
       <td class="field-label">عنوان ممارسة النشاط :</td>
     </tr>
     <tr>
       <td class="field-label">Wilaya :</td>
-      <td class="field-value">{data.wilaya_activite or '......'}</td>
+      <td class="field-value">{_esc(data.wilaya_activite) or '......'}</td>
       <td class="field-label">الولاية :</td>
     </tr>
     <tr>
       <td class="field-label">Adresse du domicile du contribuable :</td>
-      <td class="field-value" colspan="2">{data.adresse_domicile or '................................'}</td>
+      <td class="field-value" colspan="2">{_esc(data.adresse_domicile) or '................................'}</td>
       <td class="field-label">عنوان إقامة المكلف :</td>
     </tr>
     <tr>
       <td class="field-label">Wilaya :</td>
-      <td class="field-value">{data.wilaya_domicile or '......'}</td>
+      <td class="field-value">{_esc(data.wilaya_domicile) or '......'}</td>
       <td class="field-label">الولاية :</td>
     </tr>
     <tr>
       <td class="field-label">Numéro d'Identification Fiscale (NIF) :</td>
-      <td class="field-value">{data.nif or '................................'}</td>
+      <td class="field-value">{_esc(data.nif) or '................................'}</td>
       <td class="field-label">رقم التعريف الجبائي :</td>
     </tr>
     <tr>
       <td class="field-label">Numéro d'Identification National (NIN) :</td>
-      <td class="field-value">{data.nin or '................................'}</td>
+      <td class="field-value">{_esc(data.nin) or '................................'}</td>
       <td class="field-label">رقم التعريف الوطني :</td>
     </tr>
     <tr>
       <td class="field-label">Numéro d'article d'imposition :</td>
-      <td class="field-value">{data.article_imposition or '................................'}</td>
+      <td class="field-value">{_esc(data.article_imposition) or '................................'}</td>
       <td class="field-label">رقم المقالة الجبائية :</td>
     </tr>
     {phone}
@@ -623,7 +631,7 @@ def _salaires_html(data: G12FormData) -> str:
   <table class="fields-table">
     <tr>
       <td class="field-label">Nombre de salariés :</td>
-      <td class="field-value">{data.nombre_salaries or '......'}</td>
+      <td class="field-value">{_esc(data.nombre_salaries) or '......'}</td>
       <td class="field-label">عدد الموظفين :</td>
     </tr>
     <tr>
@@ -672,11 +680,11 @@ def _payment_integral_html(calc: G12Calculations, data: G12FormData) -> str:
         </tr>
         <tr>
           <td class="field-label">Quittance N° :</td>
-          <td class="field-value">{data.quittance_1 or '................................'}</td>
+          <td class="field-value">{_esc(data.quittance_1) or '................................'}</td>
         </tr>
         <tr>
           <td class="field-label">du :</td>
-          <td class="field-value">{data.date_quittance_1 or '....../....../......'}</td>
+          <td class="field-value">{_esc(data.date_quittance_1) or '....../....../......'}</td>
         </tr>
       </table>
       <div class="signature-block">
@@ -731,8 +739,8 @@ def _payment_fractionne_html(calc: G12Calculations, data: G12FormData) -> str:
           <tr><td class="field-label">Montant total de l'IFU acquitté :</td><td class="field-value"><strong>{_fmt(calc.tranche_1)} DA</strong></td></tr>
           <tr><td class="field-label">En chiffres :</td><td class="field-value">{_fmt(calc.tranche_1)} DA</td></tr>
           <tr><td class="field-label">En lettres :</td><td class="field-value">........................................................</td></tr>
-          <tr><td class="field-label">Quittance N° :</td><td class="field-value">{data.quittance_1 or '................................'}</td></tr>
-          <tr><td class="field-label">du :</td><td class="field-value">{data.date_quittance_1 or '....../....../......'}</td></tr>
+          <tr><td class="field-label">Quittance N° :</td><td class="field-value">{_esc(data.quittance_1) or '................................'}</td></tr>
+          <tr><td class="field-label">du :</td><td class="field-value">{_esc(data.date_quittance_1) or '....../....../......'}</td></tr>
         </table>
         <div class="signature-block">
           <div class="sig-box">Le Contribuable<br><br><br>Cachet et signature</div>
@@ -746,8 +754,8 @@ def _payment_fractionne_html(calc: G12Calculations, data: G12FormData) -> str:
           <tr><td class="field-label">Montant total de l'IFU acquitté :</td><td class="field-value"><strong>{_fmt(calc.tranche_2)} DA</strong></td></tr>
           <tr><td class="field-label">En chiffres :</td><td class="field-value">{_fmt(calc.tranche_2)} DA</td></tr>
           <tr><td class="field-label">En lettres :</td><td class="field-value">........................................................</td></tr>
-          <tr><td class="field-label">Quittance N° :</td><td class="field-value">{data.quittance_2 or '................................'}</td></tr>
-          <tr><td class="field-label">du :</td><td class="field-value">{data.date_quittance_2 or '....../....../......'}</td></tr>
+          <tr><td class="field-label">Quittance N° :</td><td class="field-value">{_esc(data.quittance_2) or '................................'}</td></tr>
+          <tr><td class="field-label">du :</td><td class="field-value">{_esc(data.date_quittance_2) or '....../....../......'}</td></tr>
         </table>
         <div class="signature-block">
           <div class="sig-box">Le Contribuable<br><br><br>Cachet et signature</div>
@@ -761,8 +769,8 @@ def _payment_fractionne_html(calc: G12Calculations, data: G12FormData) -> str:
           <tr><td class="field-label">Montant total de l'IFU acquitté :</td><td class="field-value"><strong>{_fmt(calc.tranche_3)} DA</strong></td></tr>
           <tr><td class="field-label">En chiffres :</td><td class="field-value">{_fmt(calc.tranche_3)} DA</td></tr>
           <tr><td class="field-label">En lettres :</td><td class="field-value">........................................................</td></tr>
-          <tr><td class="field-label">Quittance N° :</td><td class="field-value">{data.quittance_3 or '................................'}</td></tr>
-          <tr><td class="field-label">du :</td><td class="field-value">{data.date_quittance_3 or '....../....../......'}</td></tr>
+          <tr><td class="field-label">Quittance N° :</td><td class="field-value">{_esc(data.quittance_3) or '................................'}</td></tr>
+          <tr><td class="field-label">du :</td><td class="field-value">{_esc(data.date_quittance_3) or '....../....../......'}</td></tr>
         </table>
         <div class="signature-block">
           <div class="sig-box">Le Contribuable<br><br><br>Cachet et signature</div>

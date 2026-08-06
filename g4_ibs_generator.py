@@ -13,9 +13,17 @@ Usage:
 
 from __future__ import annotations
 
+import html as _html_mod
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
+
+
+def _esc(value: object, default: str = "") -> str:
+    """HTML-escape a value for safe rendering."""
+    if value is None:
+        return default
+    return _html_mod.escape(str(value))
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -408,31 +416,31 @@ def _dgi_hierarchy_html(data: G4Data) -> str:
   <table>
     <tr>
       <td class="dgi-label">Wilaya de :</td>
-      <td class="dgi-value">{data.wilaya or _blank(35)}</td>
+      <td class="dgi-value">{_esc(data.wilaya) or _blank(35)}</td>
       <td class="dgi-label">Année d'imposition :</td>
       <td class="dgi-value">{data.annee_imposition or _blank(15)}</td>
     </tr>
     <tr>
       <td class="dgi-label">DIW de :</td>
-      <td class="dgi-value">{data.diw or _blank(35)}</td>
+      <td class="dgi-value">{_esc(data.diw) or _blank(35)}</td>
       <td class="dgi-label">Période du :</td>
-      <td class="dgi-value">{data.periode_debut or '....../....../......'} au {data.periode_fin or '....../....../......'}</td>
+      <td class="dgi-value">{_esc(data.periode_debut) or '....../....../......'} au {_esc(data.periode_fin) or '....../....../......'}</td>
     </tr>
     <tr>
       <td class="dgi-label">Structure :</td>
-      <td class="dgi-value">{data.structure or _blank(35)}</td>
+      <td class="dgi-value">{_esc(data.structure) or _blank(35)}</td>
       <td class="dgi-label"></td>
       <td class="dgi-value"></td>
     </tr>
     <tr>
       <td class="dgi-label">Inspection des impôts de :</td>
-      <td class="dgi-value">{data.inspection or _blank(35)}</td>
+      <td class="dgi-value">{_esc(data.inspection) or _blank(35)}</td>
       <td class="dgi-label"></td>
       <td class="dgi-value"></td>
     </tr>
     <tr>
       <td class="dgi-label">Recette des impôts de :</td>
-      <td class="dgi-value">{data.recette or _blank(35)}</td>
+      <td class="dgi-value">{_esc(data.recette) or _blank(35)}</td>
       <td class="dgi-label"></td>
       <td class="dgi-value"></td>
     </tr>
@@ -449,47 +457,47 @@ def _section_a_identification_html(data: G4Data) -> str:
     <table>
       <tr>
         <td class="field-label">NIF :</td>
-        <td class="field-value">{data.nif or _blank(25)}</td>
+        <td class="field-value">{_esc(data.nif) or _blank(25)}</td>
       </tr>
       <tr>
         <td class="field-label">Raison sociale et forme juridique :</td>
-        <td class="field-value">{data.raison_sociale or _blank(25)} — {data.forme_juridique or _blank(15)}</td>
+        <td class="field-value">{_esc(data.raison_sociale) or _blank(25)} — {_esc(data.forme_juridique) or _blank(15)}</td>
       </tr>
       <tr>
         <td class="field-label">Activités exercées (souligner l'activité principale) :</td>
-        <td class="field-value">{data.activites or _blank(45)}</td>
+        <td class="field-value">{_esc(data.activites) or _blank(45)}</td>
       </tr>
       <tr>
         <td class="field-label">Code Activité :</td>
-        <td class="field-value">{data.code_activite or _blank(20)}</td>
+        <td class="field-value">{_esc(data.code_activite) or _blank(20)}</td>
       </tr>
       <tr>
         <td class="field-label">Numéro du Registre de Commerce :</td>
-        <td class="field-value">{data.numero_rc or _blank(25)}</td>
+        <td class="field-value">{_esc(data.numero_rc) or _blank(25)}</td>
       </tr>
       <tr>
         <td class="field-label">Numéro(s) de compte(s) bancaire(s) ou CCP :</td>
-        <td class="field-value">{data.comptes_bancaires or _blank(35)}</td>
+        <td class="field-value">{_esc(data.comptes_bancaires) or _blank(35)}</td>
       </tr>
       <tr>
         <td class="field-label">Adresse du siège social — Au 1er janvier :</td>
-        <td class="field-value">{data.adresse_siege_janvier or _blank(45)}</td>
+        <td class="field-value">{_esc(data.adresse_siege_janvier) or _blank(45)}</td>
       </tr>
       <tr>
         <td class="field-label">Adresse du siège social — Au 1er janvier de l'année N+1 :</td>
-        <td class="field-value">{data.adresse_siege_fin_annee or _blank(45)}</td>
+        <td class="field-value">{_esc(data.adresse_siege_fin_annee) or _blank(45)}</td>
       </tr>
       <tr>
         <td class="field-label">Téléphone / Fax / Email :</td>
-        <td class="field-value">{data.telephone or _blank(15)} / {data.fax or _blank(15)} / {data.email or _blank(25)}</td>
+        <td class="field-value">{_esc(data.telephone) or _blank(15)} / {_esc(data.fax) or _blank(15)} / {_esc(data.email) or _blank(25)}</td>
       </tr>
       <tr>
         <td class="field-label">Adresse des établissements secondaires :</td>
-        <td class="field-value">{data.adresse_etablissements_secondaires or _blank(45)}</td>
+        <td class="field-value">{_esc(data.adresse_etablissements_secondaires) or _blank(45)}</td>
       </tr>
       <tr>
         <td class="field-label">Nom, Prénom et Adresse du représentant légal :</td>
-        <td class="field-value">{data.representant_legal or _blank(25)} — {data.adresse_representant or _blank(25)}</td>
+        <td class="field-value">{_esc(data.representant_legal) or _blank(25)} — {_esc(data.adresse_representant) or _blank(25)}</td>
       </tr>
     </table>
   </div>
@@ -519,7 +527,7 @@ def _section_b_resultat_fiscal_html(data: G4Data, calc: G4Calculations) -> str:
       </tr>
       <tr>
         <td class="desc" style="padding-left:20px;font-size:7.5pt;">Détail des réintégrations :</td>
-        <td class="desc" style="font-size:7.5pt;text-align:left;">{data.reintegrations_detail or _blank(40)}</td>
+        <td class="desc" style="font-size:7.5pt;text-align:left;">{_esc(data.reintegrations_detail) or _blank(40)}</td>
       </tr>
       <tr>
         <td class="desc">Déductions (corrections en moins)<br><span class="ar">الخصوم (تصحيحات تناقصية)</span></td>
@@ -527,7 +535,7 @@ def _section_b_resultat_fiscal_html(data: G4Data, calc: G4Calculations) -> str:
       </tr>
       <tr>
         <td class="desc" style="padding-left:20px;font-size:7.5pt;">Détail des déductions :</td>
-        <td class="desc" style="font-size:7.5pt;text-align:left;">{data.deductions_detail or _blank(40)}</td>
+        <td class="desc" style="font-size:7.5pt;text-align:left;">{_esc(data.deductions_detail) or _blank(40)}</td>
       </tr>
       <tr>
         <td class="desc">Reports déficitaires déductibles<br><span class="ar">الخسائر العالقة القابلة للخصم</span></td>
@@ -775,8 +783,8 @@ def _section_d_ca_html(data: G4Data, calc: G4Calculations) -> str:
     <tbody>
       <tr>
         <td class="desc">Sous-traitant(s)<br><span class="ar">المقاولون من الباطن</span></td>
-        <td class="desc">{data.sous_traitance_nif or _blank(20)}</td>
-        <td class="desc">{data.sous_traitance_designation or _blank(20)}</td>
+        <td class="desc">{_esc(data.sous_traitance_nif) or _blank(20)}</td>
+        <td class="desc">{_esc(data.sous_traitance_designation) or _blank(20)}</td>
         <td class="num">{_fmt_cell(data.sous_traitance_montant)}</td>
       </tr>
     </tbody>
@@ -907,20 +915,20 @@ def _acomptes_html(data: G4Data, calc: G4Calculations) -> str:
       <tr>
         <td class="desc">1er acompte (Mars)<br><span class="ar">الدفعة الأولى (مارس)</span></td>
         <td class="num">{_fmt_cell(data.acompte_1)}</td>
-        <td class="desc">{data.acompte_1_date or '....../....../......'}</td>
-        <td class="desc">{data.acompte_1_quittance or _blank(20)}</td>
+        <td class="desc">{_esc(data.acompte_1_date) or '....../....../......'}</td>
+        <td class="desc">{_esc(data.acompte_1_quittance) or _blank(20)}</td>
       </tr>
       <tr>
         <td class="desc">2ème acompte (Juin)<br><span class="ar">الدفعة الثانية (جوان)</span></td>
         <td class="num">{_fmt_cell(data.acompte_2)}</td>
-        <td class="desc">{data.acompte_2_date or '....../....../......'}</td>
-        <td class="desc">{data.acompte_2_quittance or _blank(20)}</td>
+        <td class="desc">{_esc(data.acompte_2_date) or '....../....../......'}</td>
+        <td class="desc">{_esc(data.acompte_2_quittance) or _blank(20)}</td>
       </tr>
       <tr>
         <td class="desc">3ème acompte (Novembre)<br><span class="ar">الدفعة الثالثة (نوفمبر)</span></td>
         <td class="num">{_fmt_cell(data.acompte_3)}</td>
-        <td class="desc">{data.acompte_3_date or '....../....../......'}</td>
-        <td class="desc">{data.acompte_3_quittance or _blank(20)}</td>
+        <td class="desc">{_esc(data.acompte_3_date) or '....../....../......'}</td>
+        <td class="desc">{_esc(data.acompte_3_quittance) or _blank(20)}</td>
       </tr>
       <tr class="total-row">
         <td class="desc"><strong>TOTAL ACOMPTES VERSÉS</strong></td>
@@ -943,7 +951,7 @@ def _signature_html(data: G4Data, calc: G4Calculations) -> str:
 
   <div style="display:flex;justify-content:space-between;margin:10px 0;">
     <div style="width:45%;">
-      <strong>Fait à</strong> {data.lieu_declaration or _blank(25)} <strong>le</strong> {data.date_declaration or '....../....../......'}
+      <strong>Fait à</strong> {_esc(data.lieu_declaration) or _blank(25)} <strong>le</strong> {_esc(data.date_declaration) or '....../....../......'}
     </div>
     <div style="width:45%;text-align:right;">
     </div>
