@@ -53,10 +53,15 @@ SERVICES = {
     "cv_french": {"name_fr": "CV professionnel français", "name_ar": "سيرة ذاتية فرنسية", "price_min": 2_000, "price_max": 4_000, "delivery_days": 1, "category": "documents", "includes": ["CV 2 pages", "Lettre de motivation", "PDF professionnel"]},
     "cover_letter": {"name_fr": "Lettre de motivation", "name_ar": "رسالة تعريفية", "price_min": 1_000, "price_max": 3_000, "delivery_days": 1, "category": "documents", "includes": ["4 templates", "Personnalisé", "PDF"]},
 
-    # Tax & Admin
-    "tax_declaration": {"name_fr": "Déclarations fiscales", "name_ar": "تصريحات ضريبية", "price_min": 3_000, "price_max": 8_000, "delivery_days": 3, "category": "admin", "includes": ["G12", "G50", "CNAS", "CASNOS"]},
+    # Tax & Admin (G12/G50 are the big-ticket recurring services)
+    "tax_declaration": {"name_fr": "Déclarations fiscales (guides LLM)", "name_ar": "تصريحات ضريبية (أدلة)", "price_min": 3_000, "price_max": 5_000, "delivery_days": 1, "category": "admin", "includes": ["G12 guide", "G50 guide", "CNAS guide", "CASNOS guide"]},
+    "g12_declaration": {"name_fr": "G12 Déclaration IFU (formulaire rempli)", "name_ar": "تصريح G12 IFU (نموذج مكتمل)", "price_min": 3_000, "price_max": 5_000, "delivery_days": 1, "category": "admin", "includes": ["Formulaire G12 rempli", "Calcul IFU", "Échéancier fractionné", "PDF"]},
+    "g50_declaration": {"name_fr": "G50 Déclaration mensuelle (formulaire rempli)", "name_ar": "تصريح G50 الشهري (نموذج مكتمل)", "price_min": 5_000, "price_max": 8_000, "delivery_days": 1, "category": "admin", "includes": ["Formulaire G50 rempli", "TVA + IRG + IBS", "Récapitulatif", "PDF"]},
+    "g50_retainer": {"name_fr": "Forfait mensuel G50 (TVA+IRG+IBS)", "name_ar": "اشتراك شهري G50 (TVA+IRG+IBS)", "price_min": 5_000, "price_max": 10_000, "delivery_days": 1, "category": "admin", "includes": ["Préparation mensuelle G50", "TVA nette", "IRG salaires", "Rappels deadlines"]},
+    "cnas_retainer": {"name_fr": "Forfait mensuel CNAS (salariés)", "name_ar": "اشتراك شهري CNAS (موظفين)", "price_min": 5_000, "price_max": 10_000, "delivery_days": 1, "category": "admin", "includes": ["Déclaration mensuelle CNAS", "Affiliation nouveaux", "CHIFA", "Annuel"]},
+    "carnet_entreprise": {"name_fr": "Pack création entreprise (SARL/AE)", "name_ar": "باقة إنشاء مؤسسة (SARL/AE)", "price_min": 15_000, "price_max": 30_000, "delivery_days": 14, "category": "admin", "includes": ["Sidjilcom inscription", "NIF", "CASNOS", "NIS", "Guide complet"]},
     "invoice_quote": {"name_fr": "Facture / Devis", "name_ar": "فاتورة / عرض سعر", "price_min": 1_500, "price_max": 3_000, "delivery_days": 1, "category": "admin", "includes": ["Facture TVA", "Devis", "PDF"]},
-    "gov_paperwork": {"name_fr": "Aide paperasse administrative", "name_ar": "مساعدة إدارية", "price_min": 1_000, "price_max": 2_000, "delivery_days": 2, "category": "admin", "includes": ["ANEM", "CACI", "CNAS", "Checklist"]},
+    "gov_paperwork": {"name_fr": "Aide paperasse administrative", "name_ar": "مساعدة إدارية", "price_min": 1_000, "price_max": 3_000, "delivery_days": 2, "category": "admin", "includes": ["ANEM", "CACI", "CNAS", "Carte grise", "Checklist"]},
 
     # Design & Web
     "logo_design": {"name_fr": "Design logo", "name_ar": "تصميم شعار", "price_min": 8_000, "price_max": 20_000, "delivery_days": 5, "category": "design", "includes": ["3 propositions", "SVG/PNG", "Charte graphique"]},

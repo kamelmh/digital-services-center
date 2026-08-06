@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<title>G50 — Série G N°50 — Juillet 2026</title>
+<style>
+  @page { size: A4; margin: 10mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Times New Roman', 'Noto Sans Arabic', serif;
+    font-size: 9pt; color: #1a1a1a; margin: 0; padding: 10px;
+    line-height: 1.3;
+  }
+
+  /* Header */
+  .header {
+    text-align: center; border: 2px solid #0A1628; padding: 6px 8px;
+    margin-bottom: 8px; background: linear-gradient(180deg, #0A1628 0%, #162d54 100%);
+    color: #fff;
+  }
+  .header .republique { font-size: 8pt; letter-spacing: 2px; text-transform: uppercase; }
+  .header .dgi { font-size: 10pt; font-weight: bold; margin: 2px 0; color: #D4AF37; }
+  .header h1 { font-size: 13pt; margin: 4px 0; color: #fff; }
+  .header .serie { font-size: 10pt; font-weight: bold; color: #D4AF37; margin: 2px 0; }
+  .header .subtitle { font-size: 8.5pt; color: #ccc; margin: 1px 0; }
+  .header .deadline { font-size: 8pt; font-weight: bold; margin-top: 5px; padding: 3px 6px; border: 1px solid #D4AF37; background: rgba(212,175,55,0.1); color: #D4AF37; }
+
+  /* DGI Hierarchy */
+  .dgi-hierarchy { margin: 6px 0; }
+  .dgi-hierarchy table { width: 100%; border-collapse: collapse; }
+  .dgi-hierarchy td { padding: 2px 5px; font-size: 8pt; border: none; }
+  .dgi-hierarchy .dgi-label { font-weight: bold; width: 35%; }
+  .dgi-hierarchy .dgi-value { border-bottom: 1px dotted #999; width: 65%; }
+
+  /* Identification */
+  .identification { margin: 6px 0; border: 1px solid #0A1628; padding: 6px; }
+  .identification table { width: 100%; border-collapse: collapse; }
+  .identification td { padding: 2px 5px; font-size: 8.5pt; }
+  .identification .field-label { font-weight: bold; width: 30%; }
+  .identification .field-value { border-bottom: 1px dotted #999; width: 70%; }
+
+  /* Section titles */
+  .section-title {
+    font-size: 9pt; font-weight: bold; color: #0A1628;
+    border-bottom: 2px solid #0A1628; padding-bottom: 2px; margin: 8px 0 4px;
+    background: linear-gradient(90deg, #0A1628, #162d54); color: #fff;
+    padding: 3px 6px;
+  }
+  .section-title-ar { font-size: 8pt; color: #666; text-align: right; direction: rtl; margin-bottom: 4px; }
+
+  /* Tables */
+  .g50-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  .g50-table th, .g50-table td {
+    border: 1px solid #333; padding: 3px 5px; font-size: 8pt; text-align: center;
+  }
+  .g50-table th { background: #e8e8e8; font-weight: bold; font-size: 8pt; }
+  .g50-table .code { width: 10%; text-align: left; font-size: 7.5pt; color: #555; }
+  .g50-table .desc { text-align: left; width: 35%; }
+  .g50-table .desc .ar { font-size: 7pt; color: #888; direction: rtl; }
+  .g50-table .num { font-family: 'Courier New', monospace; font-size: 8pt; width: 15%; }
+  .g50-table .total-row { background: #f0f0f0; font-weight: bold; }
+  .g50-table .subtotal-row { background: #f8f8f0; font-weight: bold; }
+  .g50-table .note { font-size: 7pt; color: #888; font-style: italic; font-weight: normal; }
+
+  /* Notes */
+  .note { font-size: 7.5pt; color: #666; font-style: italic; margin: 2px 0; }
+
+  /* Récapitulation */
+  .recap { margin: 8px 0; }
+  .recap table { width: 100%; border-collapse: collapse; }
+  .recap th, .recap td { border: 1px solid #333; padding: 3px 5px; font-size: 8pt; }
+  .recap th { background: #e8e8e8; font-weight: bold; }
+  .recap .total-line { background: #0A1628; color: #fff; font-weight: bold; font-size: 10pt; }
+
+  /* Signature */
+  .signature-block { display: flex; justify-content: space-between; margin: 12px 0; }
+  .sig-box { width: 30%; text-align: center; font-size: 8pt; border-top: 1px solid #333; padding-top: 4px; }
+  .sig-box .title { font-weight: bold; margin-bottom: 5px; }
+
+  /* Payment */
+  .payment-section { margin: 8px 0; border: 1px solid #ccc; padding: 6px; }
+  .payment-section table { width: 100%; border-collapse: collapse; }
+  .payment-section td { padding: 2px 5px; font-size: 8pt; }
+  .payment-section .field-label { font-weight: bold; width: 35%; }
+  .payment-section .field-value { border-bottom: 1px dotted #999; width: 65%; }
+
+  /* Attestation */
+  .attestation { font-size: 8pt; font-style: italic; margin: 8px 0; padding: 5px; border: 1px solid #ccc; text-align: center; }
+
+  /* Highlight */
+  .highlight { background: #fffde7; font-weight: bold; }
+  .negative { color: #c62828; }
+  .positive { color: #2e7d32; }
+  .amount { font-family: 'Courier New', monospace; font-weight: bold; }
+
+  /* Print */
+  @media print {
+    body { padding: 0; font-size: 8pt; }
+    .no-print { display: none; }
+    .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section-title { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .recap .total-line { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="republique">République Algérienne Démocratique et Populaire</div>
+  <div class="dgi">DIRECTION GÉNÉRALE DES IMPÔTS</div>
+  <h1>IMPÔTS ET TAXES PERÇUS AU COMPTANT OU PAR VOIE DE RETENUE À LA SOURCE</h1>
+  <div class="serie">Série G N°50 — 2026</div>
+  <div class="subtitle">DÉCLARATION TENANT LIEU DE BORDEREAU — AVIS DE VERSEMENT</div>
+  <div class="deadline">La présente déclaration doit être déposée à la recette des impôts dans les VINGT PREMIERS JOURS DU MOIS</div>
+</div>
+<div class="dgi-hierarchy">
+  <table>
+    <tr>
+      <td class="dgi-label">Wilaya de :</td>
+      <td class="dgi-value">32-El Bayadh</td>
+      <td class="dgi-label">Mois :</td>
+      <td class="dgi-value">Juillet</td>
+    </tr>
+    <tr>
+      <td class="dgi-label">Inspection des impôts de :</td>
+      <td class="dgi-value">........................................</td>
+      <td class="dgi-label">Année :</td>
+      <td class="dgi-value">2026</td>
+    </tr>
+    <tr>
+      <td class="dgi-label">Recette des impôts de :</td>
+      <td class="dgi-value">........................................</td>
+      <td class="dgi-label">Service CDI :</td>
+      <td class="dgi-value">...............</td>
+    </tr>
+  </table>
+</div>
+<div class="identification">
+  <table>
+    <tr>
+      <td class="field-label">NIF :</td>
+      <td class="field-value">1234567890</td>
+      <td class="field-label">Code Activité :</td>
+      <td class="field-value">....................</td>
+    </tr>
+    <tr>
+      <td class="field-label">Article d'imposition :</td>
+      <td class="field-value" colspan="3">..................................................</td>
+    </tr>
+    <tr>
+      <td class="field-label">M. / Nom et Prénom / Raison sociale :</td>
+      <td class="field-value" colspan="3">SARL TECH PLUS</td>
+    </tr>
+    <tr>
+      <td class="field-label">Activité / Profession :</td>
+      <td class="field-value" colspan="3">Services informatiques</td>
+    </tr>
+    <tr>
+      <td class="field-label">Adresse :</td>
+      <td class="field-value" colspan="3">123 Rue Didouche Mourad</td>
+    </tr>
+    <tr>
+      <td class="field-label">Commune :</td>
+      <td class="field-value" colspan="3">El Bayadh Centre</td>
+    </tr>
+  </table>
+</div>
+
+<div class="section">
+  <div class="section-title">TABLEAU 1 — IMPÔT SUR L'ACTIVITÉ PROFESSIONNELLE (TAP) / الضرائب على النشاط المهني</div>
+  <div class="section-title-ar">TABLEAU 1 — TAP</div>
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th class="code">Code</th>
+        <th class="desc">Nature de la taxe</th>
+        <th>Base d'imposition</th>
+        <th>Tarif</th>
+        <th>Montant à payer (DA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="code">C/500026/A</td>
+        <td class="desc">Taxe sur l'activité professionnelle (TAP)<br><span class="ar">الضريبة على النشاط المهني</span></td>
+        <td class="num"></td>
+        <td class="num">—</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td colspan="5" class="note" style="text-align:center;">⚠ TAP supprimée depuis la Loi de Finances 2024 — Article 8 du CGI</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">TABLEAU 2 — ACOMPTES ET SOLDE I.B.S / الدفعة المقدمة ورصيد الضريبة على الدخل</div>
+  <div class="section-title-ar">TABLEAU 2 — ACOMPTES IBS</div>
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th class="code">Code</th>
+        <th class="desc">Acomptes et solde I.B.S</th>
+        <th>Montant (DA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="code">E1M10</td>
+        <td class="desc">Acompte provisionnel<br><span class="ar">الدفعة المقدمة التقريبية</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="note" style="text-align:center;">Période : Non (hors période d'acompte) — 3 acomptes (mars, juin, nov) = 30% de l'IBS des années antérieures</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">TABLEAU 3 — IRG SALAIRES ET AUTRES RETENUES À LA SOURCE (IRG / IBS)</div>
+  <div class="section-title-ar">TABLEAU 3 — ضريبة الدخل الاستقطاعية على الأجور والمكافآت</div>
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th class="code">Code</th>
+        <th class="desc">Catégorie de revenus soumis à la retenue à la source</th>
+        <th>Revenus imposables</th>
+        <th>Taux</th>
+        <th>Montant à payer (DA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="code">E1L20</td>
+        <td class="desc">IRG / Traitements, salaires, pensions et rentes viagères<br><span class="ar">ضريبة الدخل / الأشغال والأجور والمعاشات</span></td>
+        <td class="num">800 000</td>
+        <td class="num">Barème</td>
+        <td class="num">56 000</td>
+      </tr>
+      <tr>
+        <td class="code">E1L30</td>
+        <td class="desc">IRG / Location de locaux à usage commercial ou professionnel<br><span class="ar">ضريبة الدخل / إيجار محلات商用 أو مهني</span></td>
+        <td class="num"></td>
+        <td class="num">15%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E1L40</td>
+        <td class="desc">IRG / Les revenus issus de la location de salles des fêtes<br><span class="ar">ضريبة الدخل / إيرادات استئجار قاعات الأفراح</span></td>
+        <td class="num"></td>
+        <td class="num">15%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E1L60</td>
+        <td class="desc">IRG / Revenus des bons de caisse anonymes<br><span class="ar">ضريبة الدخل / إيرادات سندات الخزينة المجهولة</span></td>
+        <td class="num"></td>
+        <td class="num">50%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E1L80</td>
+        <td class="desc">IRG / Autres retenues à la source<br><span class="ar">ضريبة الدخل / استقطاعات أخرى</span></td>
+        <td class="num">150 000</td>
+        <td class="num">10%</td>
+        <td class="num">15 000</td>
+      </tr>
+      <tr>
+        <td class="code">E1M30</td>
+        <td class="desc">IBS / Entreprises étrangères non installées (Prest. services)<br><span class="ar">الضريبة على الدخل / المؤسسات الأجنبية غير المقيمة</span></td>
+        <td class="num"></td>
+        <td class="num">24%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E1M40</td>
+        <td class="desc">IBS / Autres retenues à la source<br><span class="ar">الضريبة على الدخل / استقطاعات أخرى</span></td>
+        <td class="num"></td>
+        <td class="num">25%</td>
+        <td class="num"></td>
+      </tr>
+      <tr class="total-row">
+        <td class="code"></td>
+        <td class="desc"><strong>TOTAL</strong></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"><strong>71 000</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">TABLEAU 4 — DROITS ET TAXES INDIRECTS / الضرائب غير المباشرة</div>
+  <div class="section-title-ar">TABLEAU 4 — DROITS ET TAXES INDIRECTS</div>
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th class="code">Code</th>
+        <th class="desc">Droits et Taxes Indirects</th>
+        <th>Base d'imposition</th>
+        <th>Tarif</th>
+        <th>Montant à payer (DA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="5" style="background:#f0f0f0;font-weight:bold;text-align:left;font-size:8pt;">Section A — Impôts sur le produit</td>
+      </tr>
+      <tr>
+        <td colspan="5" class="note" style="text-align:center;">Alcools, sucres, vins, tabacs, bières, pétrole — Codes C/500001 à C/500025</td>
+      </tr>
+      <tr>
+        <td colspan="5" style="background:#f0f0f0;font-weight:bold;text-align:left;font-size:8pt;">Section B — Taxe intérieure de consommation (TIC)</td>
+      </tr>
+      <tr>
+        <td colspan="5" class="note" style="text-align:center;">Taxe intérieure de consommation — Codes C/500027 à C/500039</td>
+      </tr>
+      <tr>
+        <td colspan="5" style="background:#f0f0f0;font-weight:bold;text-align:left;font-size:8pt;">Section C — Autres contributions indirectes</td>
+      </tr>
+      <tr>
+        <td class="code">E2E11</td>
+        <td class="desc">Taxe sur les recharges téléphoniques<br><span class="ar">ضريبة إعادة شحن الهواتف النقالة</span></td>
+        <td class="num"></td>
+        <td class="num">7%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E12</td>
+        <td class="desc">Taxe pour usage des appareils récepteurs de radiodiffusion et télévision<br><span class="ar">ضريبة استعمال أجهزة الاستقبال</span></td>
+        <td class="num"></td>
+        <td class="num">DA</td>
+        <td class="num"></td>
+      </tr>
+      <tr class="subtotal-row">
+        <td class="code"></td>
+        <td class="desc"><strong>Sous Total</strong></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"><strong>0</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">TABLEAU 5 — CHIFFRE D'AFFAIRES / DROIT DE TIMBRE / رسم الطوابع</div>
+  <div class="section-title-ar">TABLEAU 5 — رقم الأعمال / رسم الطوابع</div>
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th class="code">Code</th>
+        <th class="desc">Opérations imposables</th>
+        <th>Chiffre d'affaires imposable</th>
+        <th>Taux</th>
+        <th>Montant à payer (DA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="code">E2E13</td>
+        <td class="desc">Taxe de formation</td>
+        <td class="num"></td>
+        <td class="num">1%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E14</td>
+        <td class="desc">Taxe d'apprentissage</td>
+        <td class="num"></td>
+        <td class="num">1%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E15</td>
+        <td class="desc">Taxe sur les véhicules neufs</td>
+        <td class="num"></td>
+        <td class="num">Barème</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E16</td>
+        <td class="desc">Contribution des concessionnaires</td>
+        <td class="num"></td>
+        <td class="num">1%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E17</td>
+        <td class="desc">Taxe d'habitation</td>
+        <td class="num"></td>
+        <td class="num">Barème</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E18</td>
+        <td class="desc">Taxe sur les pneus neufs ou importés</td>
+        <td class="num"></td>
+        <td class="num">10DA ou 5DA/unité</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E19</td>
+        <td class="desc">Prélèvement sur les recettes des jeux à gains et divertissement</td>
+        <td class="num"></td>
+        <td class="num">40%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E20</td>
+        <td class="desc">Taxe sur les huiles, lubrifiants</td>
+        <td class="num"></td>
+        <td class="num">12500DA/T</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E21</td>
+        <td class="desc">Taxe sur le CA des opérations de téléphonie mobile</td>
+        <td class="num"></td>
+        <td class="num">1%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E22</td>
+        <td class="desc">Taxe sur les bénéfices nets des importateurs et distributeurs en gros médicaments</td>
+        <td class="num"></td>
+        <td class="num">5%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E23</td>
+        <td class="desc">Taxe de publicité</td>
+        <td class="num"></td>
+        <td class="num">1%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E24</td>
+        <td class="desc">Taxe sur le CA des entreprises de production et d'importation de boissons gazeuses</td>
+        <td class="num"></td>
+        <td class="num">0,50%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E25</td>
+        <td class="desc">Autres voitures particulières (VP) de moins de cinq (5) années figurant dans le bilan des sociétés</td>
+        <td class="num"></td>
+        <td class="num">Barème d'âge</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E26</td>
+        <td class="desc">Taxe sur carburant</td>
+        <td class="num"></td>
+        <td class="num">Barème</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E27</td>
+        <td class="desc">Taxe sur la vente d'Electricité et du gaz</td>
+        <td class="num"></td>
+        <td class="num">Barème</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E28</td>
+        <td class="desc">Taxe annuelle pour tous opérations économiques algériens inscrits au registre de commerce</td>
+        <td class="num"></td>
+        <td class="num">200/500/1000</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E29</td>
+        <td class="desc">Redevance sur les céréales</td>
+        <td class="num"></td>
+        <td class="num">Barème</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E30</td>
+        <td class="desc">Taxe appui à l'investissement des activités touristiques</td>
+        <td class="num"></td>
+        <td class="num">0,50%</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E31</td>
+        <td class="desc">Taxe sur l'usage des appareils récepteurs de radiodiffusion et de télévision</td>
+        <td class="num"></td>
+        <td class="num">Barème</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E32</td>
+        <td class="desc">Taxe d'efficacité énergétique (sans classification)</td>
+        <td class="num"></td>
+        <td class="num">LF2017</td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E2E34</td>
+        <td class="desc">Taxe sur contrats de production et diffusion de publicité</td>
+        <td class="num"></td>
+        <td class="num">10%</td>
+        <td class="num"></td>
+      </tr>
+      <tr class="subtotal-row">
+        <td class="code"></td>
+        <td class="desc"><strong>Sous Total</strong></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"><strong>0</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section recap">
+  <div class="section-title">RÉCAPITULATIF — MONTANTS DES DROITS DÉCLARÉS</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:15%;">Rubrique</th>
+        <th style="width:40%;">Cadre réservé au contribuable</th>
+        <th style="width:22%;">Cadre réservé à la recette des impôts</th>
+        <th style="width:23%;">Cadre réservé à l'inspection</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="font-weight:bold;">1 — TAP</td>
+        <td class="num">0</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">2 — AP / IBS</td>
+        <td class="num">0</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">3.1 — IRG / Salaires</td>
+        <td class="num">56 000</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">3.2 — IRG / Autres retenues</td>
+        <td class="num">15 000</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">3.3 — IBS / Ret. à la source</td>
+        <td class="num">0</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">4 — TIC / Autres</td>
+        <td class="num">0</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">5 — Droit de timbre</td>
+        <td class="num">0</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td style="font-weight:bold;">6 — TVA</td>
+        <td class="num">0</td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr class="total-line">
+        <td colspan="2" style="font-size:10pt;"><strong>MONTANT TOTAL À PAYER</strong></td>
+        <td colspan="2" class="num" style="font-size:12pt;"><strong>71 000 DA</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="attestation">
+    Certifie sincère et véritable le contenu de la présente déclaration conforme aux documents comptables
+  </div>
+</div>
+
+<div class="section" style="page-break-before:always;">
+  <div class="section-title">TABLEAU 6 — TAXE SUR LA VALEUR AJOUTÉE (TVA) / ضريبة القيمة المضافة</div>
+  <div class="section-title-ar">TABLEAU 6 — TVA</div>
+</div>
+<div class="section">
+  <div class="section-title">A/ Chiffres d'affaires imposables — رقم الأعمال الخاضع للضريبة</div>
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th class="code">Code</th>
+        <th class="desc">Opérations assujetties à la TVA</th>
+        <th>Total</th>
+        <th>Exonéré</th>
+        <th>Imposable</th>
+        <th>Taux</th>
+        <th>Montant des droits (DA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="7" style="background:#0A1628;color:#fff;font-weight:bold;text-align:left;font-size:8pt;padding:4px;">9% — Taux réduit</td></tr><tr>
+        <td class="code">E3B11</td>
+        <td class="desc">Biens produits et denrées (art. 23 du CTVA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">9%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B12</td>
+        <td class="desc">Prestations de services (art. 23 du CTVA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">9%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B13</td>
+        <td class="desc">Opérations immobilières (art. 23 du CTVA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">9%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B14</td>
+        <td class="desc">Actes Médicaux</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">9%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B15</td>
+        <td class="desc">Commissionnaires et courtiers</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">9%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B16</td>
+        <td class="desc">Fourniture d'énergie</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">9%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B17</td>
+        <td class="desc">Autres</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">9%</td>
+        <td class="num"></td>
+      </tr><tr><td colspan="7" style="background:#0A1628;color:#fff;font-weight:bold;text-align:left;font-size:8pt;padding:4px;">19% — Taux normal</td></tr><tr>
+        <td class="code">E3B21</td>
+        <td class="desc">Production : biens, produits et denrées (art. 21 CTCA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B22</td>
+        <td class="desc">Revente en l'état : biens, produits et denrées (art. 21 CTCA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B23</td>
+        <td class="desc">Travaux immobiliers autres que ceux soumis au taux 7%</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B24</td>
+        <td class="desc">Professions libérales</td>
+        <td class="num">570 000</td>
+        <td class="num"></td>
+        <td class="num">570 000</td>
+        <td class="num">19%</td>
+        <td class="num">108 300</td>
+      </tr><tr>
+        <td class="code">E3B25</td>
+        <td class="desc">Opérations de banques et assurances</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B26</td>
+        <td class="desc">Prestations de téléphone et télex</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B28</td>
+        <td class="desc">Autres prestations de services</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B31</td>
+        <td class="desc">Débits de boissons</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B32</td>
+        <td class="desc">Production biens et denrées (art. 21 CTCA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B33</td>
+        <td class="desc">Reventes en l'état (art. 21 CTCA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B34</td>
+        <td class="desc">Tabacs et allumettes</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B35</td>
+        <td class="desc">Spectacles, jeux et divertissements autres</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B36</td>
+        <td class="desc">Autres prestations (art. 21 CTCA)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B37</td>
+        <td class="desc">Consommations sur place</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">19%</td>
+        <td class="num"></td>
+      </tr><tr><td colspan="7" style="background:#D4AF37;color:#0A1628;font-weight:bold;text-align:left;font-size:8pt;padding:4px;">Non imposables (Article 9 du CTCA)</td></tr><tr>
+        <td class="code">E3B41</td>
+        <td class="desc">Secteur pétrolier art 9/9 du CTCA</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B42</td>
+        <td class="desc">Produits de première nécessité Art 9/2 du CTCA</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B43</td>
+        <td class="desc">Opérations de crédit bail</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B44</td>
+        <td class="desc">Opération de réassurance</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B45</td>
+        <td class="desc">Opération d'assurances des personnes</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B46</td>
+        <td class="desc">Opérations Intragroupe(*)</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B47</td>
+        <td class="desc">Exportation</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B48</td>
+        <td class="desc">Médicament</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B49</td>
+        <td class="desc">Autres</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr><td colspan="7" style="background:#D4AF37;color:#0A1628;font-weight:bold;text-align:left;font-size:8pt;padding:4px;">Exonéré</td></tr><tr>
+        <td class="code">E3B51</td>
+        <td class="desc">Secteur pétrolier</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B52</td>
+        <td class="desc">Andi</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B53</td>
+        <td class="desc">Ansej</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B54</td>
+        <td class="desc">Angem</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B55</td>
+        <td class="desc">Cnac</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr>
+        <td class="code">E3B56</td>
+        <td class="desc">Exportation</td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num"></td>
+        <td class="num">0%</td>
+        <td class="num"></td>
+      </tr><tr class="total-row">
+        <td class="code"></td>
+        <td class="desc"><strong>TOTAL GENERAL DES C.A</strong></td>
+        <td class="num"><strong>570 000</strong></td>
+        <td class="num"><strong></strong></td>
+        <td class="num"><strong>570 000</strong></td>
+        <td class="num"></td>
+        <td class="num"><strong>108 300</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">B/ Déductions à opérer — الخصومات المراد القيام بها</div>
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th class="code">Code</th>
+        <th class="desc" style="width:55%;">NATURE DES DÉDUCTIONS</th>
+        <th>Montant (DA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="code">E3B91</td>
+        <td class="desc">Précompte antérieur<br><span class="ar">اقتطاع سابق</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E3B92</td>
+        <td class="desc">TVA / achats de matières et services (art.29 CTCA)<br><span class="ar">ضريبة القيمة المضافة / مشتريات المواد والخدمات</span></td>
+        <td class="num">380 000</td>
+      </tr>
+      <tr>
+        <td class="code">E3B93</td>
+        <td class="desc">TVA / achats biens amortissables (art.38 CTCA)<br><span class="ar">ضريبة القيمة المضافة / مشتريات الأصول المستهلكة</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E3B94</td>
+        <td class="desc">Régularisation prorata déduction (art.40 CTCA)<br><span class="ar">تنقيط النسبة المخصومة</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E3B95</td>
+        <td class="desc">TVA / factures annulées ou impayées (art.18 CTCA)<br><span class="ar">ضريبة القيمة المضافة / فواتير ملغاة أو غير مدفوعة</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E3B96</td>
+        <td class="desc">Autres déductions (Notification de précomptes, etc.)<br><span class="ar">خصومات أخرى</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr class="total-row">
+        <td class="code"></td>
+        <td class="desc"><strong>Total des déductions à opérer (B)</strong></td>
+        <td class="num"><strong>380 000</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="section">
+  <div class="section-title">C/ TVA à Payer — ضريبة القيمة المضافة المدفوعة</div>
+  <table class="g50-table">
+    <tbody>
+      <tr>
+        <td class="code" style="width:12%;">E3B97</td>
+        <td class="desc" style="width:55%;">Régularisation du prorata (art.40 C/TCA)(+)(Déduction excédentaire)<br><span class="ar">تنقيط النسبة / خصم إضافي</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E3B98</td>
+        <td class="desc">Régularisation (régime des acomptes)<br><span class="ar">تنقيط (نظام الدفعات المقدمة)</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E3B99</td>
+        <td class="desc">Reversement de la déduction (art 38 C/TCA)<br><span class="ar">إعادة خصم</span></td>
+        <td class="num"></td>
+      </tr>
+      <tr>
+        <td class="code">E3B100</td>
+        <td class="desc">(+) total à rappeler (C)<br><span class="ar">إجمالي المبلغ المستحق</span></td>
+        <td class="num">-271 700</td>
+      </tr>
+      <tr>
+        <td class="code">E3B110</td>
+        <td class="desc">Total des déductions à opérer (B)<br><span class="ar">إجمالي الخصومات</span></td>
+        <td class="num">380 000</td>
+      </tr>
+      <tr class="total-row">
+        <td class="code">E3B120</td>
+        <td class="desc"><strong>TVA à payer au titre du mois (C - B)</strong><br><span class="ar">ضريبة القيمة المضافة المدفوعة عن الشهر</span></td>
+        <td class="num"><strong>0</strong></td>
+      </tr>
+      <tr>
+        <td class="code">E3B130</td>
+        <td class="desc">Précompte à reporter sur le mois suivant (B - C)<br><span class="ar">اقتطاع تأجيل للشهر التالي</span></td>
+        <td class="num">651 700</td>
+      </tr>
+      <tr>
+        <td class="code">E3B140</td>
+        <td class="desc">TVA auto-liquidée à payer (article 83 du CTCA)<br><span class="ar">ضريبة القيمة المضافة الذاتية</span></td>
+        <td class="num"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section" style="page-break-before:always;">
+  <div class="section-title">RÉCAPITULATIF GÉNÉRAL — MONTANT TOTAL À PAYER</div>
+
+  <table class="g50-table">
+    <thead>
+      <tr>
+        <th style="width:50%;">Désignation</th>
+        <th style="width:25%;">Montant (DA)</th>
+        <th style="width:25%;">Code</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align:left;">1 — TAP (supprimée LF2024)</td>
+        <td class="num">0</td>
+        <td class="code">C/500026/A</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">2 — Acomptes IBS</td>
+        <td class="num">0</td>
+        <td class="code">E1M10</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">3.1 — IRG Salaires</td>
+        <td class="num">56 000</td>
+        <td class="code">E1L20</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">3.2 — IRG Autres retenues</td>
+        <td class="num">15 000</td>
+        <td class="code">E1L30-E1L80</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">3.3 — IBS Retenues à la source</td>
+        <td class="num">0</td>
+        <td class="code">E1M30-E1M40</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">4 — Droits et Taxes Indirects</td>
+        <td class="num">0</td>
+        <td class="code">E2E11-E2E12</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">5 — Droit de Timbre / Taxes</td>
+        <td class="num">0</td>
+        <td class="code">E2E13-E2E34</td>
+      </tr>
+      <tr>
+        <td style="text-align:left;">6 — TVA</td>
+        <td class="num">0</td>
+        <td class="code">E3B120</td>
+      </tr>
+      <tr class="total-row" style="background:#0A1628;color:#fff;">
+        <td style="text-align:left;font-size:10pt;"><strong>MONTANT TOTAL À PAYER</strong></td>
+        <td class="num" style="font-size:12pt;"><strong>71 000 DA</strong></td>
+        <td class="code" style="color:#D4AF37;"><strong></strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="attestation" style="margin-top:10px;">
+    Certifie sincère et véritable le contenu de la présente déclaration conforme aux documents comptables
+  </div>
+</div>
+<div class="section">
+  <div class="section-title">MODE DE PAIEMENT — طريقة الدفع</div>
+  <div class="payment-section">
+    <table>
+      <tr>
+        <td class="field-label">Payée par Chq banque N° :</td>
+        <td class="field-value">.........................</td>
+        <td class="field-label">du :</td>
+        <td class="field-value">....../....../......</td>
+      </tr>
+      <tr>
+        <td class="field-label">tiré sur l'Agence :</td>
+        <td class="field-value" colspan="3">..................................................</td>
+      </tr>
+      <tr>
+        <td class="field-label">par Chèque postal N° :</td>
+        <td class="field-value" colspan="3">..................................................</td>
+      </tr>
+      <tr>
+        <td class="field-label">En numéraire :</td>
+        <td class="field-value"></td>
+        <td class="field-label">Prise en recette par quittance N° :</td>
+        <td class="field-value">.........................</td>
+      </tr>
+    </table>
+  </div>
+</div>
+<div class="signature-block">
+  <div class="sig-box">
+    <div class="title">Le Contribuable</div>
+    <br><br><br><br>
+    Cachet et signature<br>
+    SARL TECH PLUS<br>
+    Le 06/08/2026
+  </div>
+  <div class="sig-box">
+    <div class="title">Le Receveur des Impôts</div>
+    <br><br><br><br>
+    Reçu ce jour la présente déclaration<br>
+    enregistrée sous le n°...<br>
+    Cachet et signature<br>
+    Le 06/08/2026
+  </div>
+  <div class="sig-box">
+    <div class="title">L'Inspection des Impôts</div>
+    <br><br><br><br>
+    Déclaration enregistrée le...<br>
+    Observations éventuelles :<br>
+    <br><br>
+    Signature
+  </div>
+</div>
+
+<div style="text-align:center;font-size:7pt;color:#999;margin-top:15px;border-top:1px solid #D4AF37;padding-top:4px;">
+  Document généré le 06/08/2026 à 19:23 — Série G N°50 Official Form Generator
+</div>
+
+</body>
+</html>

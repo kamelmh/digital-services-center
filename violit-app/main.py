@@ -26,6 +26,9 @@ from linkedin_automation import LinkedInContentGenerator
 from pricing_calculator import calculate_quote, SERVICES as PRICING_SERVICES, PACKAGES
 from batch_processor import BatchManager
 from training_data_collector import TrainingDataCollector
+from g12_generator import G12Data, calculate_ifu, generate_g12_html, generate_g12_text, IFU_RATES
+from g12_official import G12FormData, calculate_g12, generate_g12_prévisionnelle, generate_g12_définitive, WILAYAS as G12_WILAYAS
+from g50_generator import G50Data, calculate_g50, generate_g50_html, generate_g50_text, MONTHS_FR, MONTHS_AR
 
 app = vl.App(title="Digital Services Center", theme="ocean")
 
@@ -48,7 +51,7 @@ def home_page():
     <div style="text-align:center;padding:25px 0;">
         <h1 style="color:#0A1628;margin-bottom:5px;">Digital Services Center</h1>
         <p style="color:#D4AF37;font-size:1.1em;margin-top:0;">مركز الخدمات الرقمية — الجزائر</p>
-        <p style="color:#888;font-size:0.9em;margin-top:5px;">23 Tools • 20 Pages • One-Click Dossier Pipeline</p>
+        <p style="color:#888;font-size:0.9em;margin-top:5px;">25 Tools • 25 Pages • One-Click Dossier Pipeline</p>
     </div>
     """)
 
@@ -70,7 +73,9 @@ def home_page():
         ("💰 Pricing & Quotes", "#28a745", [
             ("Pricing", "حاسبة أسعار + واتساب"),
             ("Invoice/Quote", "فواتير وعروض سعر"),
-            ("Tax Helper", "تصريحات ضريبية"),
+            ("G12 IFU", "تصريح G12"),
+            ("G50 Monthly", "تصريح G50"),
+            ("Tax Guides", "تصريحات ضريبية"),
         ]),
         ("📣 Marketing", "#e83e8c", [
             ("Marketing Plan", "خطط تسويقية"),
@@ -104,7 +109,7 @@ def home_page():
     # Stats
     app.html("""<div style="text-align:center;padding:20px;margin-top:15px;background:#f8f9fa;border-radius:8px;">
         <div style="display:flex;justify-content:center;gap:30px;">
-            <div><strong style="font-size:1.5em;color:#0A1628;">23</strong><div style="font-size:0.8em;color:#888;">Generator</div></div>
+            <div><strong style="font-size:1.5em;color:#0A1628;">25</strong><div style="font-size:0.8em;color:#888;">Generator</div></div>
             <div><strong style="font-size:1.5em;color:#D4AF37;">51</strong><div style="font-size:0.8em;color:#888;">NESDA Activities</div></div>
             <div><strong style="font-size:1.5em;color:#28a745;">20</strong><div style="font-size:0.8em;color:#888;">Services</div></div>
             <div><strong style="font-size:1.5em;color:#e83e8c;">4</strong><div style="font-size:0.8em;color:#888;">Packages</div></div>
@@ -341,6 +346,286 @@ def tax_declaration_page():
             _save_output("tax_guide", dt["name_en"], result["content"])
         except Exception as e:
             app.toast(f"Error: {e}", type="error")
+
+
+def g12_page():
+    """G12 Official Form — matches DGI printable forms exactly."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">G12 — Déclaration IFU (Formulaire Officiel)</h2>
+        <p style="margin:3px 0 0;color:#888;">Série G N°12 — Impôt Forfaitaire Unique — conforme DGI</p>
+    </div>
+    """)
+
+    # Form type
+    form_type = app.selectbox("Type de déclaration", options=["Prévisionnelle (forecast)", "Définitive (final)"], index=0)
+    is_definitive = "Définitive" in form_type.value
+
+    # DGI hierarchy
+    app.markdown("### Hierarchie DGI")
+    col1, col2 = app.columns(2)
+    with col1:
+        diw = app.text_input("DIW DE", placeholder="DIW D'EL BAYADH")
+        recette = app.text_input("Recette des Impôts de", placeholder="Recette des Impôts d'El Bayadh Centre")
+    with col2:
+        commune = app.text_input("Commune de", placeholder="El Bayadh Centre")
+        structure = app.text_input("Structure", placeholder="...")
+
+    # Section I — Identification
+    app.markdown("### Section I — Identification")
+    col1, col2 = app.columns(2)
+    with col1:
+        nom_prenoms = app.text_input("Nom, Prénoms / Raison sociale")
+        activite_exercee = app.text_input("Activité(s) exercée(s)")
+        date_debut = app.text_input("Date du début d'activité", placeholder="JJ/MM/AAAA")
+        adresse_activite = app.text_input("Adresse du lieu d'exercice")
+        wilaya_activite = app.selectbox("Wilaya activité", options=G12_WILAYAS, index=31)
+    with col2:
+        nif = app.text_input("NIF", placeholder="1234567890")
+        nin = app.text_input("NIN", placeholder="199603061234567")
+        article_imposition = app.text_input("Article d'imposition")
+        telephone = app.text_input("Téléphone") if is_definitive else None
+        nouveau = app.checkbox("Nouveau contribuable") if is_definitive else False
+
+    exonere = app.checkbox("Activité exonérée")
+    exoneration_type = ""
+    if exonere:
+        exoneration_type = app.selectbox("Type d'exonération", options=["anade", "cnac", "angem", "artisanale", "autre"], index=0)
+
+    # Section II — CA
+    app.markdown(f"### Section {'III' if is_definitive else 'II'} — Chiffre d'affaires")
+    col1, col2 = app.columns(2)
+    with col1:
+        app.html("<strong>CA Prévisionnel (estimé pour l'année)</strong>")
+        ca_prod_imp = app.number_input("Production/Vente imposable (DA)", min_value=0, value=0, step=100_000, key="ca_prod_prev")
+        ca_prod_exo = app.number_input("Production/Vente exonéré (DA)", min_value=0, value=0, step=100_000, key="ca_prod_exo")
+        ca_serv_imp = app.number_input("Services imposable (DA)", min_value=0, value=0, step=100_000, key="ca_serv_prev")
+        ca_serv_exo = app.number_input("Services exonéré (DA)", min_value=0, value=0, step=100_000, key="ca_serv_exo")
+        ca_auto_imp = app.number_input("Auto-entrepreneur imposable (DA)", min_value=0, value=0, step=100_000, key="ca_auto_prev")
+        ca_auto_exo = app.number_input("Auto-entrepreneur exonéré (DA)", min_value=0, value=0, step=100_000, key="ca_auto_exo")
+
+    ca_realise = (0, 0, 0, 0, 0, 0)
+    if is_definitive:
+        with col2:
+            app.html("<strong>CA Réalisé (chiffres réels de l'année)</strong>")
+            r_prod_imp = app.number_input("Prod/Vente réalisé imposable", min_value=0, value=0, step=100_000, key="r_prod_imp")
+            r_prod_exo = app.number_input("Prod/Vente réalisé exonéré", min_value=0, value=0, step=100_000, key="r_prod_exo")
+            r_serv_imp = app.number_input("Services réalisé imposable", min_value=0, value=0, step=100_000, key="r_serv_imp")
+            r_serv_exo = app.number_input("Services réalisé exonéré", min_value=0, value=0, step=100_000, key="r_serv_exo")
+            r_auto_imp = app.number_input("Auto-entrepreneur réalisé imposable", min_value=0, value=0, step=100_000, key="r_auto_imp")
+            r_auto_exo = app.number_input("Auto-entrepreneur réalisé exonéré", min_value=0, value=0, step=100_000, key="r_auto_exo")
+        ca_realise = (r_prod_imp.value, r_prod_exo.value, r_serv_imp.value, r_serv_exo.value, r_auto_imp.value, r_auto_exo.value)
+
+    # Section — Salaires (Définitive only)
+    nombre_salaries = 0
+    salaires_brut = 0
+    charges_sociales = 0
+    irg_annuel = 0
+    if is_definitive:
+        app.markdown("### Section II — Salaires")
+        col1, col2, col3, col4 = app.columns(4)
+        with col1:
+            nombre_salaries = app.number_input("Nombre de salariés", min_value=0, value=0)
+        with col2:
+            salaires_brut = app.number_input("Salaires bruts (DA)", min_value=0, value=0, step=10_000)
+        with col3:
+            charges_sociales = app.number_input("Charges sociales (DA)", min_value=0, value=0, step=10_000)
+        with col4:
+            irg_annuel = app.number_input("IRG annuel (DA)", min_value=0, value=0, step=10_000)
+
+    # Payment
+    app.markdown("### Paiement")
+    mode_paiement = app.selectbox("Mode de paiement", options=["integral", "fractionne"], index=1)
+    year = app.number_input("Année", min_value=2024, max_value=2030, value=2025)
+
+    # Build data
+    data = G12FormData(
+        diw=diw.value, recette=recette.value, commune=commune.value, structure=structure.value,
+        nom_prenoms=nom_prenoms.value, activite_exercee=activite_exercee.value,
+        date_debut=date_debut.value, exonere=exonere, exoneration_type=exoneration_type,
+        adresse_activite=adresse_activite.value, wilaya_activite=wilaya_activite.value,
+        nif=nif.value, nin=nin.value, article_imposition=article_imposition.value,
+        telephone=telephone.value if telephone else "",
+        nouveau_contribuable=nouveau,
+        ca_production_imposable=float(ca_prod_imp.value), ca_production_exonere=float(ca_prod_exo.value),
+        ca_services_imposable=float(ca_serv_imp.value), ca_services_exonere=float(ca_serv_exo.value),
+        ca_auto_entrepreneur_imposable=float(ca_auto_imp.value), ca_auto_entrepreneur_exonere=float(ca_auto_exo.value),
+        ca_realise_production_imposable=float(ca_realise[0]), ca_realise_production_exonere=float(ca_realise[1]),
+        ca_realise_services_imposable=float(ca_realise[2]), ca_realise_services_exonere=float(ca_realise[3]),
+        ca_realise_auto_imposable=float(ca_realise[4]), ca_realise_auto_exonere=float(ca_realise[5]),
+        nombre_salaries=int(nombre_salaries.value), salaires_brut=float(salaires_brut.value),
+        charges_sociales=float(charges_sociales.value), irg_annuel=float(irg_annuel.value),
+        mode_paiement=mode_paiement.value, year=int(year.value),
+    )
+
+    # Preview
+    calc = calculate_g12(data, is_definitive=is_definitive)
+    app.html(f"""<div style="padding:15px;background:#e8f5e9;border-radius:8px;margin:15px 0;">
+        <div style="font-weight:bold;color:#2e7d32;margin-bottom:5px;">IFU Total: {_fmt(calc.ifu_total)} DA</div>
+        <div style="font-size:0.85em;color:#555;">
+            Production: {_fmt(calc.ifu_production)} DA | Services: {_fmt(calc.ifu_services)} DA | Auto: {_fmt(calc.ifu_auto)} DA<br>
+            Minimum: {_fmt(calc.ifu_minimum)} DA
+        </div>
+    </div>""")
+
+    if is_definitive and calc.ifu_complementaire > 0:
+        app.html(f"""<div style="padding:10px;background:#fff3e0;border-radius:6px;margin:8px 0;font-size:0.85em;">
+            <strong>IFU Complémentaire:</strong> {_fmt(calc.ifu_complementaire)} DA (réalisé > prévisionnel)
+        </div>""")
+
+    if mode_paiement.value == "fractionne":
+        app.html(f"""<div style="padding:10px;background:#e3f2fd;border-radius:6px;margin:8px 0;font-size:0.85em;">
+            <strong>Échéancier:</strong><br>
+            1ère tranche (50%): {_fmt(calc.tranche_1)} DA — 30/06/{year.value}<br>
+            2ème tranche (25%): {_fmt(calc.tranche_2)} DA — 15/09/{year.value}<br>
+            3ème tranche (25%): {_fmt(calc.tranche_3)} DA — 15/12/{year.value}
+        </div>""")
+
+    # Generate
+    if app.button("Generate G12 Form", primary=True):
+        if not nif.value or not nom_prenoms.value:
+            app.toast("NIF and Nom/Raison sociale required", type="error")
+            return
+        app.toast("Generating official G12 form...", type="info")
+        if is_definitive:
+            html = generate_g12_définitive(data)
+            label = "G12_Définitive"
+        else:
+            html = generate_g12_prévisionnelle(data)
+            label = "G12_Prévisionnelle"
+        out = Path(__file__).parent.parent / "generated_output"
+        out.mkdir(exist_ok=True)
+        html_path = out / f"{label}_{nom_prenoms.value.replace(' ', '_') or 'client'}_{year.value}.html"
+        html_path.write_text(html, encoding="utf-8")
+        app.markdown(f"### {label} Generated")
+        app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
+        app.html(f"<p style='color:#28a745;'>Saved: {html_path}</p>")
+        app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+
+
+def g50_page():
+    """G50 Multi-Tax Monthly Declaration — template-based (no LLM)."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">G50 — Déclaration Mensuelle</h2>
+        <p style="margin:3px 0 0;color:#888;">Série G N°50 — TVA / IRG / IBS / Timbre</p>
+    </div>
+    """)
+
+    # Company info
+    app.markdown("### Identité")
+    col1, col2 = app.columns(2)
+    with col1:
+        nif = app.text_input("NIF", placeholder="1234567890")
+        nom_prenom = app.text_input("Nom et Prénom / Raison sociale")
+        activite = app.text_input("Activité / Profession")
+    with col2:
+        adresse = app.text_input("Adresse")
+        commune = app.text_input("Commune")
+        wilaya = app.text_input("Wilaya", placeholder="32-El Bayadh")
+
+    col1, col2 = app.columns(2)
+    with col1:
+        code_activite = app.text_input("Code Activité", placeholder="6201")
+        article_imposition = app.text_input("Article d'imposition")
+    with col2:
+        month_idx = app.selectbox("Mois", options=list(range(1, 13)), format_func=lambda x: MONTHS_FR[x], index=5)
+        year = app.number_input("Année", min_value=2024, max_value=2030, value=2026)
+
+    # TVA
+    app.markdown("### TVA — Chiffre d'affaires")
+    col1, col2 = app.columns(2)
+    with col1:
+        tva_9_biens = app.number_input("CA TVA 9% — Biens, produits, denrées (DA)", min_value=0, value=0, step=1000)
+        tva_9_prestations = app.number_input("CA TVA 9% — Prestations de services (DA)", min_value=0, value=0, step=1000)
+        tva_19_production = app.number_input("CA TVA 19% — Production (DA)", min_value=0, value=0, step=1000)
+        tva_19_revente = app.number_input("CA TVA 19% — Revente en l'état (DA)", min_value=0, value=0, step=1000)
+    with col2:
+        tva_19_liberales = app.number_input("CA TVA 19% — Professions libérales (DA)", min_value=0, value=0, step=1000)
+        tva_19_telephone = app.number_input("CA TVA 19% — Téléphone (DA)", min_value=0, value=0, step=1000)
+        tva_19_autres = app.number_input("CA TVA 19% — Autres prestations (DA)", min_value=0, value=0, step=1000)
+
+    app.markdown("### TVA — Déductions")
+    col1, col2 = app.columns(2)
+    with col1:
+        tva_achats_matieres = app.number_input("TVA achats matières et services (DA)", min_value=0, value=0, step=1000)
+        tva_achats_amortissables = app.number_input("TVA achats biens amortissables (DA)", min_value=0, value=0, step=1000)
+    with col2:
+        tva_precompte = app.number_input("Précompte antérieur (DA)", min_value=0, value=0, step=1000)
+        tva_autres_deductions = app.number_input("Autres déductions (DA)", min_value=0, value=0, step=1000)
+
+    # IRG Salaires
+    app.markdown("### IRG Salaires")
+    col1, col2 = app.columns(2)
+    with col1:
+        irg_salaires_revenus = app.number_input("Revenus imposables salaires (DA)", min_value=0, value=0, step=10000)
+    with col2:
+        irg_salaires_irg = app.number_input("IRG retenu sur salaires (DA)", min_value=0, value=0, step=1000)
+
+    # Retenues à la source
+    app.markdown("### Retenues à la source")
+    col1, col2, col3 = app.columns(3)
+    with col1:
+        irg_location_revenus = app.number_input("Loyers — Revenus (DA)", min_value=0, value=0, step=10000)
+        irg_location_irg = app.number_input("Loyers — IRG retenu (DA)", min_value=0, value=0, step=1000)
+    with col2:
+        irg_autres_ras_revenus = app.number_input("Autres retenues — Revenus (DA)", min_value=0, value=0, step=10000)
+        irg_autres_ras_irg = app.number_input("Autres retenues — IRG retenu (DA)", min_value=0, value=0, step=1000)
+    with col3:
+        ibs_prestations_revenus = app.number_input("IBS étrangères — Revenus (DA)", min_value=0, value=0, step=10000)
+        ibs_prestations_irg = app.number_input("IBS étrangères — IBS retenu (DA)", min_value=0, value=0, step=1000)
+
+    # Build G50Data
+    data = G50Data(
+        nif=nif.value, nom_prenom=nom_prenom.value, activite=activite.value,
+        adresse=adresse.value, commune=commune.value, wilaya=wilaya.value,
+        code_activite=code_activite.value, article_imposition=article_imposition.value,
+        month=int(month_idx.value), year=int(year.value),
+        tva_9_biens_total=float(tva_9_biens.value), tva_9_prestations_total=float(tva_9_prestations.value),
+        tva_19_production_total=float(tva_19_production.value), tva_19_revente_total=float(tva_19_revente.value),
+        tva_19_liberales_total=float(tva_19_liberales.value), tva_19_telephone_total=float(tva_19_telephone.value),
+        tva_19_autres_serv_total=float(tva_19_autres.value),
+        tva_precompte_anterieur=float(tva_precompte.value),
+        tva_achats_matieres=float(tva_achats_matieres.value),
+        tva_achats_amortissables=float(tva_achats_amortissables.value),
+        tva_autres_deductions=float(tva_autres_deductions.value),
+        irg_salaires_revenus=float(irg_salaires_revenus.value), irg_salaires_irg=float(irg_salaires_irg.value),
+        irg_location_commerciale_revenus=float(irg_location_revenus.value),
+        irg_location_commerciale_irg=float(irg_location_irg.value),
+        irg_autres_ras_revenus=float(irg_autres_ras_revenus.value),
+        irg_autres_ras_irg=float(irg_autres_ras_irg.value),
+        ibs_prestations_revenus=float(ibs_prestations_revenus.value),
+        ibs_prestations_irg=float(ibs_prestations_irg.value),
+    )
+    result = calculate_g50(data)
+
+    app.html(f"""<div style="padding:15px;background:#e8f5e9;border-radius:8px;margin:15px 0;">
+        <div style="font-weight:bold;color:#2e7d32;margin-bottom:5px;">Total à payer: {result.total_a_payer:,.0f} DA</div>
+        <div style="font-size:0.85em;color:#555;">
+            TVA: {result.tva_a_payer:,.0f} DA | IRG: {result.irg_salaires:,.0f} DA |
+            Retenues: {result.total_retenues_source:,.0f} DA | Timbre: {result.total_table5:,.0f} DA
+        </div>
+    </div>""")
+
+    # Generate
+    if app.button("Generate G50 Form", primary=True):
+        if not nif.value or not nom_prenom.value:
+            app.toast("NIF and name required", type="error")
+            return
+        app.toast("Generating G50 form...", type="info")
+        html = generate_g50_html(data)
+        text = generate_g50_text(data)
+        out = Path(__file__).parent.parent / "generated_output"
+        out.mkdir(exist_ok=True)
+        month_name = MONTHS_FR[int(month_idx.value)]
+        html_path = out / f"G50_{nom_prenom.value.replace(' ', '_') or 'client'}_{month_name}_{year.value}.html"
+        html_path.write_text(html, encoding="utf-8")
+        app.markdown("### G50 Generated")
+        app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
+        app.html(f"<p style='color:#28a745;'>Saved: {html_path}</p>")
+        app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
 
 
 def invoice_page():
@@ -1218,11 +1503,13 @@ app.navigation([
     vl.Page(pricing_page, title="Pricing", icon="dollar-sign"),
     vl.Page(marketing_plan_page, title="Marketing Plan", icon="megaphone"),
     vl.Page(social_media_page, title="Social Media", icon="share-2"),
-    vl.Page(tax_helper_page, title="Tax Helper", icon="calculator"),
-    vl.Page(invoice_quote_page, title="Invoice/Quote", icon="file"),
+    vl.Page(g12_page, title="G12 IFU", icon="file-text"),
+    vl.Page(g50_page, title="G50 Monthly", icon="file"),
+    vl.Page(tax_declaration_page, title="Tax Guides", icon="book"),
+    vl.Page(invoice_page, title="Invoice/Quote", icon="file"),
     vl.Page(cv_page, title="CV Generator", icon="user"),
     vl.Page(cover_letter_page, title="Cover Letter", icon="mail"),
-    vl.Page(gov_paperwork_page, title="Gov Paperwork", icon="building"),
+    vl.Page(government_page, title="Gov Paperwork", icon="building"),
     vl.Page(calculators_page, title="Calculators", icon="calculator"),
     vl.Page(aapi_page, title="AAPI Scorer", icon="award"),
     vl.Page(linkedin_page, title="LinkedIn", icon="linkedin"),

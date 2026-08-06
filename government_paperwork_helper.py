@@ -108,89 +108,97 @@ PROCEDURES = {
         "name_fr": "Affiliation CNAS (Caisse Nationale des Assurances Sociales)",
         "name_ar": "الانتماء CNAS (الصندوق الوطني للتأمينات الاجتماعية)",
         "category": "social",
-        "description_fr": "Déclaration d'activité et affiliation à la sécurité sociale pour travailleurs indépendants",
-        "description_ar": "تصريح النشاط والانتماء للضمان الاجتماعي للم.workers الحر",
+        "description_fr": "Affiliation employeur et déclarations mensuelles CNAS (26% du salaire brut)",
+        "description_ar": "انتماء صاحب العمل والتصريحات الشهرية CNAS (26% من الأجر الإجمالي)",
         "documents_fr": [
-            "CNI en cours de validité",
-            "Attestation de déclaration d'activité (CACI)",
+            "CNI du dirigeant",
+            "Extrait de commerce ou RC",
+            "Attestation de domiciliation",
             "Relevé d'identité bancaire (RIB)",
-            "Photo d'identité",
-            "Contrat de bail ou attestation de domicile"
+            "Contrats de travail des salariés",
+            "Bulletins de paie du mois"
         ],
         "documents_ar": [
-            "بطاقة التعريف الوطنية السارية",
-            "شهادة تصريح النشاط (CACI)",
+            "بطاقة التعريف الوطنية للمدير",
+            "extract من سجل التجارة أو رقم السجلCommerce",
+            "شهادة الإقامة",
             "كشف الحساب البنكي (RIB)",
-            "صورة بحجم جواز السفر",
-            "عقد الإيجار أو شهادة الإقامة"
+            "عقود عمل الموظفين",
+            "كشوفات الرواتب الشهرية"
         ],
-        "cost_fr": "Cotisation: 26% du revenu annuel (toutes activités confondues)",
-        "cost_ar": "الاشتراكات: 26% من الدخل السنوي (جميع الأنشطة مجتمعة)",
-        "duration_fr": "Immédiat à 15 jours",
-        "duration_ar": "فوري إلى 15 يوماً",
-        "link_fr": "https://www.cnas.dz",
-        "link_ar": "https://www.cnas.dz",
+        "cost_fr": "Cotisation: 26% du salaire brut mensuel (12% retraite + 12.35% ass. sociales + 1.5% décès + 0.15% accident)",
+        "cost_ar": "اشتراكات: 26% من الأجر الإجمالي الشهري (12% تقاعد + 12.35% تأمينات + 1.5% وفاة + 0.15% حوادث)",
+        "duration_fr": "Affiliation: 10 jours / Déclaration: mensuelle avant fin du mois suivant",
+        "duration_ar": "الانتماء: 10 أيام / التصريح: شهري قبل نهاية الشهر التالي",
+        "link_fr": "https://teledeclaration.cnas.dz",
+        "link_ar": "https://teledeclaration.cnas.dz",
         "steps_fr": [
-            "1. Créer un compte sur le portail CNAS (www.cnas.dz)",
-            "2. Remplir le formulaire d'affiliation",
-            "3. Joindre les documents requis",
-            "4. Soumettre la déclaration en ligne ou au guichet",
-            "5. Recevoir le numéro d'affiliation",
-            "6. Payer les cotisations mensuelles via CCP ou banque"
+            "1. S'affilier via la CNAS dans les 10 jours suivant l'embauche (SÉCU 01)",
+            "2. Créer un compte sur teledeclaration.cnas.dz",
+            "3. Déclarer mensuellement les salariés et salaires",
+            "4. Payer la cotisation (26% du brut) via CCP, BaridiMob ou virement",
+            "5. Attester les bulletins de paie avec IRG retenu",
+            "6. Demander la CHIFA (carte santé) pour chaque salarié"
         ],
         "steps_ar": [
-            "1. إنشاء حساب على بوابة CNAS (www.cnas.dz)",
-            "2. ملء نموذج الانتماء",
-            "3. إرفاق الوثائق المطلوبة",
-            "4. تقديم التصريح عبر الإنترنت أو عند النافذة",
-            "5. الحصول على رقم الانتماء",
-            "6. دفع الاشتراكات الشهرية عبر CCP أو البنك"
+            "1. التسجيل في CNAS خلال 10 أيام من التوظيف (SÉCU 01)",
+            "2. إنشاء حساب على teledeclaration.cnas.dz",
+            "3. التصريح الشهري بالموظفين والرواتب",
+            "4. دفع الاشتراكات (26% من الإجمالي) عبر CCP أو BaridiMob أو تحويل بنكي",
+            "5. تأكيد كشوفات الرواتب مع IRG المحتسب",
+            "6. طلب CHIFA (بطاقة صحية) لكل موظف"
         ],
-        "notes_fr": "Obligatoire pour tout travailleur indépendant. Couvre: maladie, maternité, retraite, accident du travail. Cotisation minimale basée sur le SMIG (20,000 DA/mois).",
-        "notes_ar": "إلزامي لكل عامل حر. يشمل: المرض، الأمومة، التقاعد، حوادث العمل. الاشتراكات تعتمد على SMIG (20,000 دج/شهر)."
+        "notes_fr": "Obligatoire pour tout employeur. CHIFA = carte santé pour les salariés. Pénalité: 5% en retard. Télédéclaration obligatoire depuis 2024.",
+        "notes_ar": "إلزامي لكل صاحب عمل. CHIFA = بطاقة صحية للموظفين. غرامة: 5% في حالة التأخر. التصريح الإلكتروني إلزامي منذ 2024."
     },
     "casisd_declaration": {
         "name_fr": "Déclaration CASNOS (Caisse de Sécurité Sociale des Non-Salariés)",
         "name_ar": "تصريح CASNOS (صندوق الضمان الاجتماعي لغير الموظفين)",
         "category": "social",
-        "description_fr": "Assurance maladie obligatoire pour les travailleurs indépendants non affiliés à la CNAS",
-        "description_ar": "التأمين الصحي الإلزامي للم.workers الحر غير المنتمين لـ CNAS",
+        "description_fr": "Affiliation et cotisations pour travailleurs indépendants, commerçants, professions libérales",
+        "description_ar": "الانتماء والاشتراكات للعمال المستقلين والتجار والمهن الحرة",
         "documents_fr": [
             "CNI en cours de validité",
-            "Attestation de déclaration d'activité",
-            "Justificatif de domicile",
+            "Extrait de commerce ou RC",
+            "Agrément ou autorisation (si activité réglementée)",
+            "Attestation de existence DGI",
+            "Carte d'artisan/agriculteur (si applicable)",
             "Relevé d'identité bancaire (RIB)",
-            "Photo d'identité"
+            "2 photos d'identité"
         ],
         "documents_ar": [
             "بطاقة التعريف الوطنية السارية",
-            "شهادة تصريح النشاط",
-            "إثبات الإقامة",
+            "extract من سجل التجارة أو رقم السجل",
+            "رخصة أو ترخيص (إذا كان النشاط منظماً)",
+            "شهادة الوجود من DGI",
+            "بطاقة حرفي/فلاح (إذا كان معملاً)",
             "كشف الحساب البنكي (RIB)",
-            "صورة بحجم جواز السفر"
+            "صورتان بحجم جواز السفر"
         ],
-        "cost_fr": "Cotisation: ~5,000 DA/an (tarif forfaitaire)",
-        "cost_ar": "اشتراك: ~5,000 دج/سنة (سعر ثابت)",
-        "duration_fr": "Immédiat",
-        "duration_ar": "فوري",
-        "link_fr": "https://www.casnos.dz",
-        "link_ar": "https://www.casnos.dz",
+        "cost_fr": "Cotisation: 15% du revenu annuel (7.5% ass. sociales + 7.5% retraite). Min: 43,200 DA/an. Auto-entrepreneur: 24,000 DA/an forfaitaire.",
+        "cost_ar": "اشتراكات: 15% من الدخل السنوي (7.5% تأمينات + 7.5% تقاعد). الحد الأدنى: 43,200 دج/سنة. مؤسسة فردية: 24,000 دج/سنة ثابتة.",
+        "duration_fr": "Affiliation: 10 jours / Paiement: trimestriel ou annuel / Déclaration annuelle: avant le 1er mars",
+        "duration_ar": "الانتماء: 10 أيام / الدفع: ربع سنوي أو سنوي / التصريح السنوي: قبل 1 مارس",
+        "link_fr": "https://damancom.casnos.dz",
+        "link_ar": "https://damancom.casnos.dz",
         "steps_fr": [
-            "1. Se rendre à la CIR (Caisse Inter-Régionale) CASNOS la plus proche",
-            "2. Remplir le formulaire d'inscription",
-            "3. Soumettre les documents requis",
-            "4. Payer la cotisation annuelle",
-            "5. Recevoir la carte d'assurance maladie"
+            "1. S'affilier via damancom.casnos.dz (e-affiliation) ou au guichet CIR",
+            "2. Remplir le formulaire d'inscription (10 jours max après démarrage)",
+            "3. Soumettre les documents (RC, CNI, RIB, photos)",
+            "4. Payer la cotisation (trimestrielle ou annuelle)",
+            "5. Recevoir la CHIFA (carte d'assurance maladie)",
+            "6. Déclarer annuellement le revenu avant le 1er mars"
         ],
         "steps_ar": [
-            "1. التوجه لأقرب CIR (الصندوق بين الجهوي) CASNOS",
-            "2. ملء نموذج التسجيل",
-            "3. تقديم الوثائق المطلوبة",
-            "4. دفع الاشتراك السنوي",
-            "5. الحصول على بطاقة التأمين الصحي"
+            "1. التسجيل عبر damancom.casnos.dz (إلكتروني) أو عند نافذة CIR",
+            "2. ملء نموذج التسجيل (10 أيام كحد أقصى بعد بدء النشاط)",
+            "3. تقديم الوثائق (سجل التجارة، بطاقة التعريف، حساب بنكي، صور)",
+            "4. دفع الاشتراك (ربع سنوي أو سنوي)",
+            "5. الحصول على CHIFA (بطاقة التأمين الصحي)",
+            "6. التصريح السنوي بالدخل قبل 1 مارس"
         ],
-        "notes_fr": "Obligatoire si vous n'êtes pas affilié à la CNAS. Couvre les soins médicaux de base. Renouvellement annuel.",
-        "notes_ar": "إلزامي إذا كنت غير منتمي لـ CNAS. يشمل الرعاية الصحية الأساسية. تجديد سنوي."
+        "notes_fr": "Obligatoire pour tout non-salarié. Pénalité retard: 11% 1er mois + 1%/mois. Déclaration annuelle tardive: 162,000 DA. Auto-entrepreneur: forfait 24,000 DA/an.",
+        "notes_ar": "إلزامي لكل غير موظف. غرامة التأخر: 11% أول شهر + 1%/شهر. التصريح السنوي المتأخر: 162,000 دج. مؤسسة فردية: 24,000 دج/سنة."
     },
     "entreprise_creation": {
         "name_fr": "Création d'entreprise (SARL, SARLAU, Auto-entreprise)",
@@ -246,51 +254,53 @@ PROCEDURES = {
         "notes_ar": "مؤسسة فردية: رأس مال حر، رقم أعمال أقل من 5 ملايين دج/سنة. SARL: رأس مال أدنى 100,000 دج، شريكان على الأقل. SARLAU: رأس مال أدنى 1,000,000 دج."
     },
     "carte_grise": {
-        "name_fr": "Carte grise (Certificat d'immatriculation)",
-        "name_ar": "بطاقة رمادية (شهادة التسجيل)",
+        "name_fr": "Carte grise — Immatriculation véhicule (SINNV 2026)",
+        "name_ar": "بطاقة رمادية — تسجيل مركبة (SINNV 2026)",
         "category": "vehicule",
-        "description_fr": "Immatriculation ou transfert de propriété d'un véhicule",
-        "description_ar": "تسجيل أو نقل ملكية مركبة",
+        "description_fr": "Immatriculation ou transfert de propriété via le nouveau système SINNV (avril 2026). Tout au guichet de la Daïra.",
+        "description_ar": "تسجيل أو نقل ملكية عبر النظام الجديد SINNV (أبريل 2026). كل الإجراءات عند نافذة الدائرة.",
         "documents_fr": [
-            "CNI du propriétaire",
-            "Certificat de conformité du véhicule",
-            "Attestation d'assurance automobile",
-            "Facture d'achat du véhicule",
-            "Contrat de vente (si transfert)",
-            "Visite technique (si occasion)"
+            "CNIBE biométrique du vendeur + acheteur (tous les deux présents)",
+            "Certificat de résidence récent (même wilaya ou wilaya d'origine)",
+            "Carte grise originale barrée (si transfert)",
+            "Photos d'identité (2 par personne)",
+            "Timbre fiscal (~800 DA selon puissance)",
+            "Contrat de vente généré automatiquement par le système"
         ],
         "documents_ar": [
-            "بطاقة التعريف الوطنية للمالك",
-            "شهادة مطابقة المركبة",
-            "شهادة التأمين على السيارة",
-            "فاتورة شراء المركبة",
-            "عقد البيع (في حالة النقل)",
-            "الفحص الفني (إذا كانت مستعملة)"
+            "CNIBE بيومترية للمبيع + المشتري (كلاهما حاضر)",
+            "شهادة إقامة حديثة (نفس الولاية أو ولاية المنشأ)",
+            "بطاقة رمادية أصلية مخطوطة (في حالة النقل)",
+            "صور تعريف (2 لكل شخص)",
+            "طابع بريدي (~800 دج حسب القوة)",
+            "عقد بيع يُولّد تلقائياً من النظام"
         ],
-        "cost_fr": "~5,000 – 15,000 DA selon le type de véhicule",
-        "cost_ar": "~5,000 – 15,000 دج حسب نوع المركبة",
-        "duration_fr": "1-5 jours ouvrables",
-        "duration_ar": "1-5 أيام عمل",
+        "cost_fr": "~5,200 DA (digital) + ~1,500 DA (timbre) — total ~6,700 DA selon puissance",
+        "cost_ar": "~5,200 دج (رقمي) + ~1,500 دج (طابع بريدي) — الإجمالي ~6,700 دج حسب القوة",
+        "duration_fr": "Même wilaya: 1-3 semaines / Autre wilaya: 3-5 semaines / Importé: 2-6 semaines",
+        "duration_ar": "نفس الولاية: 1-3 أسابيع / ولاية أخرى: 3-5 أسابيع / مستورد: 2-6 أسابيع",
         "link_fr": "https://www.service-public.dz",
         "link_ar": "https://www.service-public.dz",
         "steps_fr": [
-            "1. Passer la visite technique (véhicules d'occasion)",
-            "2. Obtenir l'attestation d'assurance",
-            "3. Remplir le formulaire de demande de carte grise",
-            "4. Déposer les documents au guichet de la wilaya ou de la commune",
-            "5. Payer les frais de immatriculation",
-            "6. Recevoir la carte grise sous 1-5 jours"
+            "1. Vendeur + acheteur se rendent ENSEMBLE au guichet de la Daïra (mairie)",
+            "2. Le vendeur présente sa CNIBE + carte grise barrée + certificat de résidence",
+            "3. L'acheteur présente sa CNIBE + certificat de résidence + photos",
+            "4. Le système SINNV génère automatiquement la déclaration de vente",
+            "5. Paiement du timbre fiscal et des frais d'immatriculation",
+            "6. Réception de la nouvelle carte grise avec QR code",
+            "⚠️ NOUVEAU: Ne peut plus se faire à la mairie — uniquement au guichet Daïra (depuis avril 2026)"
         ],
         "steps_ar": [
-            "1. خضوع الفحص الفني (المركبات المستعملة)",
-            "2. الحصول على شهادة التأمين",
-            "3. ملء نموذج طلب البطاقة الرمادية",
-            "4. تقديم الوثائق عند نافذة الولاية أو البلدية",
-            "5. دفع رسوم التسجيل",
-            "6. الحصول على البطاقة الرمادية خلال 1-5 أيام"
+            "1. المبيع + المشتري يذهبون معاً لنافذة الدائرة ( البلدية )",
+            "2. المبيع يقدم CNIBE + بطاقة رمادية مخطوطة + شهادة إقامة",
+            "3. المشتري يقدم CNIBE + شهادة إقامة + صور",
+            "4. نظام SINNV يولّد تلقائياً عقد البيع",
+            "5. دفع الطابع البريدي ورسوم التسجيل",
+            "6. استلام البطاقة الرمادية الجديدة مع رمز QR",
+            "⚠️ جديد: لم يعد ممكناً في البلدية — فقط عند نافذة الدائرة (منذ أبريل 2026)"
         ],
-        "notes_fr": "Obligatoire pour circuler. Renouvellement si changement d'adresse ou de propriétaire.",
-        "notes_ar": "إلزامي للتنقل. التجديد عند تغيير العنوان أو المالك."
+        "notes_fr": "SINNV: nouveau système national numérique depuis avril 2026. QR code sur chaque carte. Obligatoire pour vente, changement adresse, héritage, modification technique.",
+        "notes_ar": "SINNV: النظام الرقمي الوطني الجديد منذ أبريل 2026. رمز QR على كل بطاقة. إلزامي للبيع، تغيير العنوان، الإرث، التعديل التقني."
     },
     "amende_routiere": {
         "name_fr": "Paiement d'amende routière",
