@@ -1,5 +1,20 @@
 __pycache__/
 *.pyc
+*.pyo
 test_output.md
 .env
 *.env
+
+# Generated outputs (not source code)
+generated_output/
+training_data/
+
+# Sample HTML outputs (generated, not source)
+g*_official.html
+g*_sample.html
+g*_sample.pdf
+g*_data_*.json
+
+# Keep docs/ (GitHub Pages source)
+# Keep gallery/ (portfolio samples)
+# Keep assets/ (print materials)
