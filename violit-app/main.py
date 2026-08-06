@@ -29,6 +29,11 @@ from training_data_collector import TrainingDataCollector
 from g12_generator import G12Data, calculate_ifu, generate_g12_html, generate_g12_text, IFU_RATES
 from g12_official import G12FormData, calculate_g12, generate_g12_prévisionnelle, generate_g12_définitive, WILAYAS as G12_WILAYAS
 from g50_generator import G50Data, calculate_g50, generate_g50_html, generate_g50_text, MONTHS_FR, MONTHS_AR
+from g4_ibs_generator import G4Data, calculate_g4, generate_g4_html
+from g11_bic_generator import G11Data, calculate_g11, generate_g11_html
+from g29_irg_salaires_generator import G29Data, EmployeeData, calculate_irg, generate_g29_html
+from g1_ggr_generator import G1Data, calculate_g1, generate_g1_html
+from g8_existence_generator import G8Data, generate_g8_html
 
 app = vl.App(title="Digital Services Center", theme="ocean")
 
@@ -625,6 +630,401 @@ def g50_page():
         app.markdown("### G50 Generated")
         app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.html(f"<p style='color:#28a745;'>Saved: {html_path}</p>")
+        app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+
+
+def g4_page():
+    """G4 IBS — Annual Corporate Tax Declaration."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">G4 — Déclaration IBS (Sociétés)</h2>
+        <p style="margin:3px 0 0;color:#888;">Série G N°4 — Impôt sur les Bénéfices des Sociétés</p>
+    </div>
+    """)
+
+    app.markdown("### Identité")
+    col1, col2 = app.columns(2)
+    with col1:
+        nif = app.text_input("NIF", key="g4_nif")
+        raison_sociale = app.text_input("Raison sociale")
+        forme_juridique = app.selectbox("Forme juridique", options=["SARL", "EURL", "SPA", "SNC", "SAS", "EPE", "EPIC", "Coopérative", "Autre"], index=0)
+        activite = app.text_input("Activité(s) exercée(s)")
+        code_activite = app.text_input("Code Activité", key="g4_code")
+    with col2:
+        rc = app.text_input("N° Registre de Commerce")
+        compte_bancaire = app.text_input("N° Compte bancaire/CCP")
+        adresse = app.text_input("Adresse siège social")
+        telephone = app.text_input("Téléphone / Email")
+        wilaya = app.text_input("Wilaya", key="g4_wilaya")
+
+    app.markdown("### Résultat fiscal")
+    col1, col2 = app.columns(2)
+    with col1:
+        resultat_comptable = app.number_input("Résultat comptable (DA)", min_value=-1_000_000_000, value=0, step=100_000)
+        reintegrations = app.number_input("Total réintégrations (DA)", min_value=0, value=0, step=10_000)
+        deductions = app.number_input("Total déductions (DA)", min_value=0, value=0, step=10_000)
+    with col2:
+        benefices_exoneres = app.number_input("Bénéfices exonérés (DA)", min_value=0, value=0, step=100_000)
+        benefices_reinvestis = app.number_input("Bénéfices réinvestis (DA)", min_value=0, value=0, step=100_000)
+        taux_exoneration = app.number_input("Taux exonération (%)", min_value=0, max_value=100, value=0, step=5)
+
+    app.markdown("### IBS — Calcul")
+    col1, col2 = app.columns(2)
+    with col1:
+        ibs_19 = app.number_input("IBS 19% (production) (DA)", min_value=0, value=0, step=10_000)
+        ibs_23 = app.number_input("IBS 23% (BTP/tourisme) (DA)", min_value=0, value=0, step=10_000)
+        ibs_26 = app.number_input("IBS 26% (commerce/services) (DA)", min_value=0, value=0, step=10_000)
+    with col2:
+        ibs_minimum = app.number_input("Minimum d'impôt (DA)", min_value=0, value=0, step=10_000)
+        credit_impot = app.number_input("Crédit d'impôt (DA)", min_value=0, value=0, step=10_000)
+        acomptes_versement = app.number_input("Acomptes versés (DA)", min_value=0, value=0, step=10_000)
+
+    annee = app.number_input("Année d'imposition", min_value=2024, max_value=2030, value=2026, key="g4_annee")
+
+    data = G4Data(
+        nif=nif.value, raison_sociale=raison_sociale.value, forme_juridique=forme_juridique.value,
+        activite=activite.value, code_activite=code_activite.value, numero_rc=rc.value,
+        compte_bancaire=compte_bancaire.value, adresse=adresse.value, telephone=telephone.value,
+        wilaya=wilaya.value,
+        resultat_comptable=float(resultat_comptable.value), reintegration_total=float(reintegrations.value),
+        deduction_total=float(deductions.value), benefices_exoneres=float(benefices_exoneres.value),
+        taux_exoneration=float(taux_exoneration.value), benefices_reinvestis=float(benefices_reinvestis.value),
+        ibs_taux19=float(ibs_19.value), ibs_taux23=float(ibs_23.value), ibs_taux26=float(ibs_26.value),
+        ibs_minimum=float(ibs_minimum.value), credit_impot=float(credit_impot.value),
+        acomptes_verses=float(acomptes_versement.value),
+        wilaya_nom=wilaya.value, diw="", inspection="", recette="", structure="",
+        date_creation="", capital_social="", email="", telefax="",
+        annee_imposition=int(annee.value), exercice_debut="", exercice_fin="",
+    )
+
+    calc = calculate_g4(data)
+    app.html(f"""<div style="padding:15px;background:#e8f5e9;border-radius:8px;margin:15px 0;">
+        <div style="font-weight:bold;color:#2e7d32;margin-bottom:5px;">Solde IBS à payer: {calc.solde_ibs:,.0f} DA</div>
+        <div style="font-size:0.85em;color:#555;">
+            IBS total: {calc.ibs_total:,.0f} DA | Minimum: {calc.minimum_impot:,.0f} DA | Crédit: {calc.credit_impot:,.0f} DA | Acomptes: {calc.acomptes_versement:,.0f} DA
+        </div>
+    </div>""")
+
+    if app.button("Generate G4 Form", primary=True):
+        if not nif.value or not raison_sociale.value:
+            app.toast("NIF and Raison sociale required", type="error")
+            return
+        html = generate_g4_html(data)
+        out = Path(__file__).parent.parent / "generated_output"
+        out.mkdir(exist_ok=True)
+        html_path = out / f"G4_{raison_sociale.value.replace(' ', '_') or 'client'}_{annee.value}.html"
+        html_path.write_text(html, encoding="utf-8")
+        app.markdown("### G4 Generated")
+        app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
+        app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+
+
+def g11_page():
+    """G11 BIC — Annual BIC Régime Réel Declaration."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">G11 — Déclaration BIC (Régime Réel)</h2>
+        <p style="margin:3px 0 0;color:#888;">Série G N°11 — Bénéfices Industriels et Commerciaux</p>
+    </div>
+    """)
+
+    app.markdown("### Identité")
+    col1, col2 = app.columns(2)
+    with col1:
+        nif = app.text_input("NIF", key="g11_nif")
+        nom = app.text_input("Nom, Prénom / Raison sociale")
+        activite = app.text_input("Activité", key="g11_act")
+        code = app.text_input("Code Activité", key="g11_code")
+    with col2:
+        rc = app.text_input("N° Registre de Commerce", key="g11_rc")
+        adresse = app.text_input("Adresse", key="g11_addr")
+        telephone = app.text_input("Téléphone / Email", key="g11_tel")
+
+    app.markdown("### Résultat fiscal")
+    col1, col2 = app.columns(2)
+    with col1:
+        resultat_comptable = app.number_input("Résultat comptable (DA)", min_value=-1_000_000_000, value=0, step=100_000, key="g11_rc_value")
+        reintegration = app.number_input("Réintégrations (DA)", min_value=0, value=0, step=10_000, key="g11_reint")
+    with col2:
+        deduction = app.number_input("Déductions (DA)", min_value=0, value=0, step=10_000, key="g11_ded")
+        benefices_exoneres = app.number_input("Bénéfices exonérés (DA)", min_value=0, value=0, step=100_000, key="g11_exo")
+
+    app.markdown("### IRG — Calcul")
+    col1, col2 = app.columns(2)
+    with col1:
+        irg_taux19 = app.number_input("IRG 19% (DA)", min_value=0, value=0, step=10_000, key="g11_irg19")
+        irg_taux23 = app.number_input("IRG 23% (DA)", min_value=0, value=0, step=10_000, key="g11_irg23")
+        irg_taux26 = app.number_input("IRG 26% (DA)", min_value=0, value=0, step=10_000, key="g11_irg26")
+    with col2:
+        acompte1 = app.number_input("1er acompte (DA)", min_value=0, value=0, step=10_000, key="g11_ac1")
+        acompte2 = app.number_input("2ème acompte (DA)", min_value=0, value=0, step=10_000, key="g11_ac2")
+
+    annee = app.number_input("Année", min_value=2024, max_value=2030, value=2026, key="g11_annee")
+
+    data = G11Data(
+        nif=nif.value, nom_raison_sociale=nom.value, activite=activite.value,
+        code_activite=code.value, numero_rc=rc.value, adresse=adresse.value, telephone=telephone.value,
+        resultat_comptable=float(resultat_comptable.value), reintegration=float(reintegration.value),
+        deduction=float(deduction.value), benefices_exoneres=float(benefices_exoneres.value),
+        irg_taux19=float(irg_taux19.value), irg_taux23=float(irg_taux23.value), irg_taux26=float(irg_taux26.value),
+        acompte1=float(acompte1.value), acompte2=float(acompte2.value),
+        wilaya="", diw="", inspection="", recette="", structure="",
+        date_debut="", date_fin="", activite_code="",
+        benefices_reinvestis=0.0, taux_exoneration=0.0,
+    )
+
+    calc = calculate_g11(data)
+    app.html(f"""<div style="padding:15px;background:#e8f5e9;border-radius:8px;margin:15px 0;">
+        <div style="font-weight:bold;color:#2e7d32;margin-bottom:5px;">Solde IRG à payer: {calc.solde_irg:,.0f} DA</div>
+        <div style="font-size:0.85em;color:#555;">
+            IRG dû: {calc.irg_total:,.0f} DA | Acomptes: {calc.acomptes_verses:,.0f} DA
+        </div>
+    </div>""")
+
+    if app.button("Generate G11 Form", primary=True):
+        if not nif.value or not nom.value:
+            app.toast("NIF and Nom required", type="error")
+            return
+        html = generate_g11_html(data)
+        out = Path(__file__).parent.parent / "generated_output"
+        out.mkdir(exist_ok=True)
+        html_path = out / f"G11_{nom.value.replace(' ', '_') or 'client'}_{annee.value}.html"
+        html_path.write_text(html, encoding="utf-8")
+        app.markdown("### G11 Generated")
+        app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
+        app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+
+
+def g29_page():
+    """G29/G30 — IRG Salaires Annual Declaration."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">G29 — Déclaration IRG Salaires</h2>
+        <p style="margin:3px 0 0;color:#888;">Série G N°29 + G N°30 — État nominatif des salariés</p>
+    </div>
+    """)
+
+    app.markdown("### Identité Employeur")
+    col1, col2 = app.columns(2)
+    with col1:
+        nif = app.text_input("NIF", key="g29_nif")
+        raison_sociale = app.text_input("Raison sociale")
+    with col2:
+        activite = app.text_input("Activité", key="g29_act")
+        adresse = app.text_input("Adresse", key="g29_addr")
+
+    # Employee input
+    app.markdown("### Salariés")
+    num_emp = app.number_input("Nombre de salariés", min_value=1, max_value=500, value=1, step=1)
+
+    employees = []
+    for i in range(int(num_emp.value)):
+        app.html(f"<hr style='margin:10px 0;'><strong>Salarié {i+1}</strong>")
+        c1, c2, c3 = app.columns(3)
+        with c1:
+            nom_emp = app.text_input(f"Nom complet", key=f"emp_nom_{i}")
+            salaire_brut = app.number_input(f"Salaire brut (DA)", min_value=0, value=20000, step=1000, key=f"emp_brut_{i}")
+            avantages = app.number_input(f"Avantages en nature", min_value=0, value=0, step=1000, key=f"emp_av_{i}")
+        with c2:
+            cotisations = app.number_input(f"Cotisations salariales", min_value=0, value=0, step=1000, key=f"emp_cot_{i}")
+            nb_parts = app.number_input(f"Parts fiscales", min_value=0.5, value=1.0, step=0.5, key=f"emp_parts_{i}")
+        with c3:
+            indemnites = app.number_input(f"Indemnités", min_value=0, value=0, step=1000, key=f"emp_ind_{i}")
+        if nom_emp.value:
+            employees.append(EmployeeData(
+                nom=nom_emp.value, salaire_brut=float(salaire_brut.value),
+                avantages_en_nature=float(avantages.value), indemnites=float(indemnites.value),
+                cotisations_salariales=float(cotisations.value), parts=float(nb_parts.value),
+            ))
+
+    annee = app.number_input("Année", min_value=2024, max_value=2030, value=2026, key="g29_annee")
+
+    if employees:
+        total_brut = sum(e.salaire_brut + e.avantages_en_nature + e.indemnites for e in employees)
+        total_irg = sum(calculate_irg((e.salaire_brut + e.avantages_en_nature + e.indemnites - e.cotisations_salariales), e.parts) for e in employees)
+        app.html(f"""<div style="padding:15px;background:#e8f5e9;border-radius:8px;margin:15px 0;">
+            <div style="font-weight:bold;color:#2e7d32;margin-bottom:5px;">Masse salariale brute: {total_brut:,.0f} DA | IRG total: {total_irg:,.0f} DA</div>
+            <div style="font-size:0.85em;color:#555;">{len(employees)} salarié(s) déclaré(s)</div>
+        </div>""")
+
+    if app.button("Generate G29 Form", primary=True):
+        if not nif.value or not raison_sociale.value or not employees:
+            app.toast("NIF, raison sociale, and at least 1 salarié required", type="error")
+            return
+        data = G29Data(
+            nif=nif.value, raison_sociale=raison_sociale.value, activite=activite.value,
+            adresse=adresse.value, nombre_salaries=len(employees), salaries=employees,
+        )
+        html = generate_g29_html(data)
+        out = Path(__file__).parent.parent / "generated_output"
+        out.mkdir(exist_ok=True)
+        html_path = out / f"G29_{raison_sociale.value.replace(' ', '_') or 'client'}_{annee.value}.html"
+        html_path.write_text(html, encoding="utf-8")
+        app.markdown("### G29 Generated")
+        app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
+        app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+
+
+def g1_page():
+    """G1 — Déclaration Globale des Revenus."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">G1 — Déclaration Générale des Revenus</h2>
+        <p style="margin:3px 0 0;color:#888;">Série G N°1 — IRG annuel des particuliers</p>
+    </div>
+    """)
+
+    app.markdown("### Identité")
+    col1, col2 = app.columns(2)
+    with col1:
+        nif = app.text_input("NIF", key="g1_nif")
+        nom = app.text_input("Nom et Prénom")
+        date_naissance = app.text_input("Date de naissance (JJ/MM/AAAA)")
+    with col2:
+        situation = app.selectbox("Situation familiale", options=["Célibataire", "Marié(e)", "Divorcé(e)", "Veuf(ve)"], index=0)
+        nb_parts = app.number_input("Nombre de parts", min_value=0.5, value=1.0, step=0.5)
+        activite = app.text_input("Activité principale", key="g1_act")
+        adresse = app.text_input("Adresse domicile fiscal", key="g1_addr")
+
+    app.markdown("### Revenus salariaux")
+    col1, col2 = app.columns(2)
+    with col1:
+        salaire_brut = app.number_input("Salaire brut annuel (DA)", min_value=0, value=0, step=10_000, key="g1_sal_brut")
+    with col2:
+        cotisations = app.number_input("Cotisations salariales (DA)", min_value=0, value=0, step=1_000, key="g1_cot")
+        irg_retenu = app.number_input("IRG retenu par employeur (DA)", min_value=0, value=0, step=1_000, key="g1_irg_ret")
+
+    app.markdown("### Autres revenus")
+    col1, col2, col3 = app.columns(3)
+    with col1:
+        revenus_fonciers = app.number_input("Revenus fonciers (DA)", min_value=0, value=0, step=10_000, key="g1_fonc")
+    with col2:
+        revenus_bic = app.number_input("BIC (DA)", min_value=0, value=0, step=10_000, key="g1_bic")
+    with col3:
+        revenus_bnc = app.number_input("BNC (DA)", min_value=0, value=0, step=10_000, key="g1_bnc")
+
+    col1, col2, col3 = app.columns(3)
+    with col1:
+        revenus_capitaux = app.number_input("Revenus capitaux mobiliers (DA)", min_value=0, value=0, step=10_000, key="g1_cap")
+    with col2:
+        plus_values = app.number_input("Plus-values (DA)", min_value=0, value=0, step=10_000, key="g1_pv")
+    with col3:
+        revenus_agricoles = app.number_input("Revenus agricoles (DA)", min_value=0, value=0, step=10_000, key="g1_agr")
+
+    charges = app.number_input("Charges déductibles (DA)", min_value=0, value=0, step=10_000, key="g1_charges")
+    acomptes = app.number_input("Acomptes versés (DA)", min_value=0, value=0, step=10_000, key="g1_ac")
+    annee = app.number_input("Année", min_value=2024, max_value=2030, value=2026, key="g1_annee")
+
+    data = G1Data(
+        nif=nif.value, nom=nom.value, date_naissance=date_naissance.value,
+        situation_familiale=situation.value, nombre_parts=float(nb_parts.value),
+        activite=activite.value, adresse=adresse.value,
+        salaire_brut=float(salaire_brut.value), cotisations_salariales=float(cotisations.value),
+        irg_retenu=float(irg_retenu.value),
+        revenus_fonciers=float(revenus_fonciers.value),
+        revenus_bic=float(revenus_bic.value),
+        revenus_bnc=float(revenus_bnc.value),
+        revenus_capitaux_mobiliers=float(revenus_capitaux.value),
+        plus_values=float(plus_values.value),
+        revenus_agricoles=float(revenus_agricoles.value),
+        charges_deductibles=float(charges.value), acomptes_verses=float(acomptes.value),
+    )
+
+    calc = calculate_g1(data)
+    app.html(f"""<div style="padding:15px;background:#e8f5e9;border-radius:8px;margin:15px 0;">
+        <div style="font-weight:bold;color:#2e7d32;margin-bottom:5px;">Revenu net imposable: {calc.revenu_net_imposable:,.0f} DA | IRG: {calc.irg_total:,.0f} DA</div>
+        <div style="font-size:0.85em;color:#555;">Solde: {calc.solde_irg:,.0f} DA ({'à payer' if calc.solde_irg > 0 else 'remboursement'})</div>
+    </div>""")
+
+    if app.button("Generate G1 Form", primary=True):
+        if not nif.value or not nom.value:
+            app.toast("NIF and Nom required", type="error")
+            return
+        html = generate_g1_html(data)
+        out = Path(__file__).parent.parent / "generated_output"
+        out.mkdir(exist_ok=True)
+        html_path = out / f"G1_{nom.value.replace(' ', '_') or 'client'}_{annee.value}.html"
+        html_path.write_text(html, encoding="utf-8")
+        app.markdown("### G1 Generated")
+        app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
+        app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
+
+
+def g8_page():
+    """G8 — Déclaration d'Existence."""
+    _sidebar()
+    app.html("""
+    <div style="padding:15px 0;border-bottom:1px solid #ddd;margin-bottom:15px;">
+        <h2 style="margin:0;color:#0A1628;">G8 — Déclaration d'Existence</h2>
+        <p style="margin:3px 0 0;color:#888;">Série G N°8 — À souscrire dans les 30 jours</p>
+    </div>
+    """)
+
+    app.markdown("### Identité")
+    col1, col2 = app.columns(2)
+    with col1:
+        nif = app.text_input("NIF (si existant)", key="g8_nif")
+        nouveau = app.checkbox("Nouveau contribuable", value=True)
+        nom = app.text_input("Nom et Prénom")
+        prenom = app.text_input("Prénom")
+        date_naissance = app.text_input("Date de naissance (JJ/MM/AAAA)", key="g8_dn")
+        lieu_naissance = app.text_input("Lieu de naissance")
+    with col2:
+        situation = app.selectbox("Situation familiale", options=["Célibataire", "Marié(e)", "Divorcé(e)", "Veuf(ve)"], index=0, key="g8_sit")
+        activite = app.text_input("Activité principale", key="g8_act")
+        code_activite = app.text_input("Code Activité", key="g8_code")
+        date_debut = app.text_input("Date de commencement (JJ/MM/AAAA)")
+        rc = app.text_input("N° Registre de Commerce")
+        compte = app.text_input("N° Compte bancaire/CCP")
+
+    app.markdown("### Adresse")
+    col1, col2 = app.columns(2)
+    with col1:
+        adresse_siege = app.text_input("Adresse siège social", key="g8_addr")
+        commune = app.text_input("Commune", key="g8_commune")
+    with col2:
+        wilaya = app.text_input("Wilaya", key="g8_wilaya")
+        telephone = app.text_input("Téléphone / Email", key="g8_tel")
+
+    app.markdown("### Activité")
+    col1, col2 = app.columns(2)
+    with col1:
+        nature = app.selectbox("Nature de l'activité", options=["Commerciale", "Industrielle", "Libérale", "Agricole", "Autre"], index=0)
+        forme_juridique = app.text_input("Forme juridique", key="g8_forme")
+    with col2:
+        capital_social = app.text_input("Capital social (DA)", key="g8_cap")
+        nb_salaries = app.number_input("Nombre de salariés", min_value=0, value=0, key="g8_sal")
+
+    data = G8Data(
+        nif=nif.value if not nouveau else "",
+        nom=nom.value, prenom=prenom.value,
+        date_naissance=date_naissance.value, lieu_naissance=lieu_naissance.value,
+        situation_familiale=situation.value, activite=activite.value,
+        code_activite=code_activite.value, date_debut=date_debut.value,
+        numero_rc=rc.value, compte_bancaire=compte.value,
+        adresse_siege=adresse_siege.value, commune=commune.value,
+        wilaya=wilaya.value, telephone=telephone.value,
+        nature_activite=nature.value, forme_juridique=forme_juridique.value,
+        capital_social=capital_social.value, nombre_salaries=int(nb_salaries.value),
+        nouveau_contribuable=nouveau,
+    )
+
+    if app.button("Generate G8 Form", primary=True):
+        if not nom.value or not prenom.value:
+            app.toast("Nom and Prénom required", type="error")
+            return
+        html = generate_g8_html(data)
+        out = Path(__file__).parent.parent / "generated_output"
+        out.mkdir(exist_ok=True)
+        full_name = f"{nom.value}_{prenom.value}".replace(' ', '_') if prenom.value else nom.value.replace(' ', '_')
+        html_path = out / f"G8_{full_name or 'client'}.html"
+        html_path.write_text(html, encoding="utf-8")
+        app.markdown("### G8 Generated")
+        app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;max-height:500px;overflow-y:auto;'>{html}</div>")
         app.download_button("Download HTML", data=html.encode(), file_name=html_path.name, mime="text/html")
 
 
@@ -1505,6 +1905,11 @@ app.navigation([
     vl.Page(social_media_page, title="Social Media", icon="share-2"),
     vl.Page(g12_page, title="G12 IFU", icon="file-text"),
     vl.Page(g50_page, title="G50 Monthly", icon="file"),
+    vl.Page(g4_page, title="G4 IBS", icon="briefcase"),
+    vl.Page(g11_page, title="G11 BIC", icon="file-text"),
+    vl.Page(g29_page, title="G29 IRG", icon="users"),
+    vl.Page(g1_page, title="G1 GGR", icon="file"),
+    vl.Page(g8_page, title="G8 Existence", icon="check-circle"),
     vl.Page(tax_declaration_page, title="Tax Guides", icon="book"),
     vl.Page(invoice_page, title="Invoice/Quote", icon="file"),
     vl.Page(cv_page, title="CV Generator", icon="user"),
