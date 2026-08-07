@@ -1,9 +1,0 @@
-ID,Name,Phone,Email,Wilaya,Business,Investment,Service,Status,Created,Referrals
-client-0001,Ahmed Benali,0555123456,,El Bayadh,quincaillerie,4600000,feasibility,new,2026-08-05T23:48:51.678622,0
-client-0002,Fatima Bouchama,0666789012,,El Bayadh,boulangerie,2500000,feasibility,new,2026-08-05T23:48:51.679622,0
-client-0003,Mohamed Touati,0777345678,,Oran,restaurant,8000000,feasibility,new,2026-08-05T23:48:51.679622,0
-client-0004,Amina Hadj,0555901234,,Oran,cybercafe,3500000,feasibility,new,2026-08-05T23:48:51.680622,0
-client-0005,Youcef Mebarki,0666567890,,Alger,pharmacie,7000000,feasibility,new,2026-08-05T23:48:51.680622,0
-client-0006,Sara Khelifi,0777234567,,Alger,salon_coiffure,2500000,feasibility,new,2026-08-05T23:48:51.681621,0
-client-0007,Karim Zeroual,0555890123,,Sétif,garage,5000000,feasibility,new,2026-08-05T23:48:51.681621,0
-client-0008,Nadia Belkacem,0666456789,,Sétif,epicerie,2000000,feasibility,new,2026-08-05T23:48:51.682621,0

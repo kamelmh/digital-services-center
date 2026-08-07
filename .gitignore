@@ -1,13 +1,13 @@
 __pycache__/
 *.pyc
 *.pyo
-test_output.md
 .env
 *.env
 
 # Generated outputs (not source code)
 generated_output/
 training_data/
+batch_orders/drafts/
 
 # Sample HTML outputs (generated, not source)
 g*_official.html
@@ -15,6 +15,17 @@ g*_sample.html
 g*_sample.pdf
 g*_data_*.json
 
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
 # Keep docs/ (GitHub Pages source)
 # Keep gallery/ (portfolio samples)
 # Keep assets/ (print materials)
+# Keep brand/ (logos, exports)
+# Keep feasibility/ (research & templates)
+# Keep tests/ (test suite)
