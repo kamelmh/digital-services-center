@@ -80,14 +80,17 @@ Input (User) → Generator (Python) → HTML/PDF Output
 ```
 digital-services-center/
 ├── violit-app/main.py          # 30-page web interface
-├── docs/                        # GitHub Pages marketing site
-├── brand/                       # SVG logos, Canva exports
-├── gallery/                     # Portfolio samples
-├── assets/print/                # Flyers, pricing board
-├── batch_orders/                # Client tracking
-├── generated_output/            # Generated files (gitignored)
+├── docs/                        # GitHub Pages marketing site (5 pages)
+├── brand/                       # SVG logos, PNG exports, post graphics
+│   ├── assets/                  # Logo variants (flat, hexagon)
+│   ├── png-exports/             # All PNG exports (cover, profile, posts)
+│   └── *.svg                    # SVG logo files
+├── gallery/                     # Portfolio samples (3 HTML)
+├── assets/print/                # Flyers, pricing board, business cards
+├── feasibility/                 # Research & templates (12 files + 8 sectors)
+├── tests/                       # Test suite
 │
-├── # Tax Form Generators (no LLM)
+├── # Tax Form Generators (no LLM, template-based)
 ├── g12_official.py              # G12 IFU (Prévisionnelle + Définitive)
 ├── g50_generator.py             # G50 Monthly Multi-Tax
 ├── g4_ibs_generator.py          # G4 IBS Annual
@@ -101,20 +104,29 @@ digital-services-center/
 ├── feasibility_generator.py     # 9-part feasibility study
 ├── business_plan_generator.py   # Full business plan
 ├── nesda_dossier_generator.py   # NESDA financing dossier
-├── financial_calculators.py     # VAN/TRI calculators
-├── aapi_optimizer.py            # AAPI scoring optimizer
+├── financial_calculators.py     # VAN/TRI/Seuil (pure math, no LLM)
+├── projections_engine.py        # Financial projections (math-based)
+├── financial_projections_generator.py # Projections (LLM narrative)
+├── aapi_optimizer.py            # AAPI 1,500-point scoring
 ├── quality_scorer.py            # Output validation
 │
 ├── # Supporting Generators (no LLM)
-├── cv_generator.py              # CV generator
-├── cover_letter_generator.py    # Cover letter generator
-├── invoice_generator.py         # Invoice/quote generator
+├── cv_generator.py              # CV generator (PDF)
+├── cover_letter_generator.py    # Cover letter generator (PDF)
+├── invoice_generator.py         # Invoice/quote generator (PDF)
 ├── nesda_calculator.py          # NESDA financing calculator
 ├── nesda_eligibility.py         # NESDA eligibility checker
 ├── nesda_catalog.py             # 51 NESDA activities
 ├── business_defaults.py         # 13 business templates
 ├── pricing_calculator.py        # 30 services, 4 packages
 ├── government_paperwork_helper.py # CNAS/CASNOS/Carte Grise
+├── bmc_generator.py             # Business Model Canvas
+├── market_research_generator.py # Market research (LLM)
+├── marketing_plan_generator.py  # Marketing plan (LLM)
+├── social_media_generator.py    # Social media content
+├── linkedin_automation.py       # LinkedIn content automation
+├── linkedin_content.py          # LinkedIn content templates
+├── sample_gallery.py            # Gallery HTML generator
 │
 ├── # Infrastructure
 ├── service_orchestrator.py      # One-click dossier pipeline
@@ -122,10 +134,22 @@ digital-services-center/
 ├── unified_dossier_pdf.py       # All-in-one dossier PDF
 ├── training_data_collector.py   # I/O collection for improvement
 ├── training_hook.py             # Auto-save generator I/O
+├── batch_processor.py           # Batch processing for recurring clients
+├── _html_escape.py              # XSS prevention utility
+│
+├── # Data & Config
+├── generated_output/            # Generated files (gitignored)
+├── training_data/               # Training records (gitignored)
+├── batch_orders/                # Client tracking (gitignored)
+├── feasibility/                 # Research & templates
 │
 ├── requirements.txt             # Python dependencies
 ├── .env.example                 # API key template
-└── ALGERIAN_ADMIN_SERVICES.md   # Full form catalog research
+├── FACEBOOK_PAGE_SETUP.md       # Facebook page setup guide
+├── ALGERIAN_ADMIN_SERVICES.md   # Full form catalog research
+├── BUSINESS_PLAN.md             # Business plan
+├── STRATEGIC_ANALYSIS.md        # Competitive analysis & roadmap
+└── README.md                    # This file
 ```
 
 ## API Keys
