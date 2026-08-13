@@ -7,7 +7,7 @@
 2. Check sibling projects' `UPDATES.md` for changes that might affect this project:
    - `../kdp-publishing-copilot/UPDATES.md` — if working on PDF export
    - `../mahi-spiritual/UPDATES.md` — if working on astrology features
-   - `../taallim-pilot/UPDATES.md` — if working on education features
+   - `../lifeworkspace-teaching-platform/pilot/UPDATES.md` — if working on education features
    - `../../academix-dss/UPDATES.md` — if working on DSS features
 
 ### After Finishing Work
