@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — DSC Digital Services Center</title>
+  <meta name="description" content="Contactez DSC : téléphone, email, WhatsApp. Basé à El Bayadh, Algérie. Nous répondons en 24 heures.">
+  <meta name="keywords" content="contact, DSC, El Bayadh, Algérie, téléphone, email, WhatsApp">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:title" content="Contact — DSC Digital Services Center">
+  <meta property="og:description" content="Contactez-nous pour vos projets. Réponse sous 24 heures.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dsc-dz.com/contact.html">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230A1628'/><text x='50' y='68' text-anchor='middle' font-family='Arial,sans-serif' font-size='42' font-weight='bold' fill='%23D4AF37'>DSC</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar__logo"><span>D</span>SC</a>
+      <div class="navbar__links">
+        <a href="index.html">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="tax-forms.html">Formulaires Fiscaux</a>
+        <a href="contact.html" class="active">Contact</a>
+        <a href="order.html" class="navbar__cta">Commander</a>
+      </div>
+      <button class="navbar__toggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <div class="page-header__breadcrumb">
+        <a href="index.html">Accueil</a> <span>/</span> <span>Contact</span>
+      </div>
+      <h1>Contactez-nous</h1>
+      <p>Nous sommes à votre écoute pour toute question ou demande de devis</p>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+
+        <!-- Contact Form -->
+        <div>
+          <h3 style="margin-bottom: 0.5rem;">Envoyez-nous un message</h3>
+          <p style="color: var(--gray-500); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Remplissez le formulaire ci-dessous et nous vous répondrons sous 24 heures.
+          </p>
+
+          <form id="contactForm" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="contactName">Nom complet *</label>
+              <input type="text" id="contactName" class="form-input" placeholder="Ex: Ahmed Benali" required>
+              <div class="form-error">Veuillez entrer votre nom.</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="contactEmail">Email *</label>
+                <input type="email" id="contactEmail" class="form-input" placeholder="ahmed@example.com" required>
+                <div class="form-error">Veuillez entrer un email valide.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contactPhone">Téléphone</label>
+                <input type="tel" id="contactPhone" class="form-input" placeholder="0555 00 00 00">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="contactSubject">Sujet</label>
+              <select id="contactSubject" class="form-select">
+                <option value="">— Sélectionnez un sujet —</option>
+                <option value="devis">Demande de devis</option>
+                <option value="info">Demande d'information</option>
+                <option value="fiscal">Question fiscale</option>
+                <option value="etude">Étude de faisabilité</option>
+                <option value="reclamation">Réclamation</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="contactMessage">Message *</label>
+              <textarea id="contactMessage" class="form-textarea" rows="5" placeholder="Décrivez votre besoin ou votre question..." required></textarea>
+              <div class="form-error">Veuillez entrer un message.</div>
+            </div>
+
+            <button type="submit" class="btn btn--whatsapp btn--lg btn--full">
+              💬 Envoyer via WhatsApp
+            </button>
+          </form>
+
+          <div id="contactSuccess" class="success-message">
+            <div class="success-message__icon">✓</div>
+            <h3>Message envoyé !</h3>
+            <p style="color: var(--gray-500); margin-top: 0.5rem;">
+              Merci ! Vous allez recevoir une confirmation sur WhatsApp.
+            </p>
+          </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div>
+          <div style="background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 2rem;">
+            <h3 style="margin-bottom: 1.5rem;">📞 Nos coordonnées</h3>
+            <div class="contact-info">
+              <div class="contact-info__item">
+                <div class="contact-info__icon">📱</div>
+                <div>
+                  <div class="contact-info__label">Téléphone / WhatsApp</div>
+                  <div class="contact-info__value">
+                    <a href="tel:+213676773892" style="color: var(--ink);">+213 676 773 892</a>
+                  </div>
+                </div>
+              </div>
+              <div class="contact-info__item">
+                <div class="contact-info__icon">📧</div>
+                <div>
+                  <div class="contact-info__label">Email</div>
+                  <div class="contact-info__value">
+                    <a href="mailto:contact@dsc-dz.com" style="color: var(--ink);">contact@dsc-dz.com</a>
+                  </div>
+                </div>
+              </div>
+              <div class="contact-info__item">
+                <div class="contact-info__icon">📍</div>
+                <div>
+                  <div class="contact-info__label">Adresse</div>
+                  <div class="contact-info__value">El Bayadh, Algérie</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+              <h4 style="margin-bottom: 0.75rem;">🕐 Horaires d'ouverture</h4>
+              <table class="hours-table">
+                <tr>
+                  <td style="color: var(--gray-500);">Lundi – Vendredi</td>
+                  <td>08:00 – 17:00</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--gray-500);">Samedi</td>
+                  <td>09:00 – 13:00</td>
+                </tr>
+                <tr>
+                  <td style="color: var(--gray-500);">Dimanche</td>
+                  <td style="color: var(--gray-400);">Fermé</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem;">
+              <a href="https://wa.me/213676773892?text=Bonjour%20DSC%2C%20j%27ai%20une%20question." class="btn btn--whatsapp btn--full" target="_blank" rel="noopener">
+                💬 Discuter sur WhatsApp
+              </a>
+              <a href="mailto:contact@dsc-dz.com" class="btn btn--outline btn--full">
+                📧 Envoyer un email
+              </a>
+              <a href="tel:+213676773892" class="btn btn--outline btn--full">
+                📱 Appeler maintenant
+              </a>
+            </div>
+          </div>
+
+          <!-- Map placeholder -->
+          <div style="margin-top: 1.5rem; background: var(--gray-100); border-radius: var(--radius-lg); height: 220px; display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 0.9rem; border: 1px dashed var(--gray-300);">
+            📍 El Bayadh, Algérie
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" style="background: var(--white);">
+    <div class="container">
+      <div class="section-header">
+        <h2>Questions fréquentes</h2>
+      </div>
+      <div class="grid grid-2">
+        <div class="card animate-on-scroll">
+          <h4 class="card__title">Combien de temps prend une étude de faisabilité ?</h4>
+          <p class="card__text">Une étude de faisabilité complète est généralement livrée sous 5 à 7 jours ouvrables, selon la complexité du projet.</p>
+        </div>
+        <div class="card animate-on-scroll">
+          <h4 class="card__title">Comment puis-je payer ?</h4>
+          <p class="card__text">Le paiement s'effectue à la livraison, par CCP, BaridiMob, ou en espèces lors du retrait du dossier.</p>
+        </div>
+        <div class="card animate-on-scroll">
+          <h4 class="card__title">Livrez-vous dans toute l'Algérie ?</h4>
+          <p class="card__text">Oui ! Nous travaillons à distance dans toute l'Algérie via WhatsApp et email. Les documents sont envoyés en PDF.</p>
+        </div>
+        <div class="card animate-on-scroll">
+          <h4 class="card__title">Puis-je obtenir un devis gratuit ?</h4>
+          <p class="card__text">Bien sûr ! Contactez-nous via WhatsApp ou le formulaire de contact pour recevoir un devis personnalisé gratuit.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <div class="footer__brand"><span>D</span>SC</div>
+          <p class="footer__desc">Digital Services Center — Services professionnels pour entrepreneurs algériens.</p>
+        </div>
+        <div>
+          <div class="footer__heading">Navigation</div>
+          <div class="footer__links">
+            <a href="index.html">Accueil</a>
+            <a href="services.html">Services</a>
+            <a href="tax-forms.html">Formulaires fiscaux</a>
+            <a href="order.html">Commander</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Services</div>
+          <div class="footer__links">
+            <a href="services.html">Études de faisabilité</a>
+            <a href="tax-forms.html">Déclarations fiscales</a>
+            <a href="services.html">Documents d'entreprise</a>
+            <a href="services.html">Services graphiques</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Contact</div>
+          <div class="footer__contact-item">
+            <span class="icon">📱</span>
+            <span>+213 676 773 892</span>
+          </div>
+          <div class="footer__contact-item">
+            <span class="icon">📧</span>
+            <span>contact@dsc-dz.com</span>
+          </div>
+          <div class="footer__contact-item">
+            <span class="icon">📍</span>
+            <span>El Bayadh, Algérie</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>&copy; 2026 DSC — Digital Services Center. Tous droits réservés.</span>
+        <div class="footer__social">
+          <a href="https://wa.me/213676773892" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+          <a href="mailto:contact@dsc-dz.com" aria-label="Email">📧</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/213676773892?text=Bonjour%20DSC%2C%20j%27ai%20une%20question." class="whatsapp-float" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

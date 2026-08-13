@@ -1,0 +1,18 @@
+{
+  "id": "gen_2026-08-08_cb043facefca",
+  "timestamp": "2026-08-08T03:39:49.871371+00:00",
+  "generator": "cover_letter",
+  "input": {
+    "sender_name": "Kamel Mahi",
+    "lang": "fr"
+  },
+  "input_hash": "cb043facefca",
+  "output_len": 48,
+  "output_words": 4,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {
+    "filepath": "C:\\Users\\Admin\\Projects\\active\\digital-services-center\\generated_output\\lettre_fr_Kamel_Mahi.pdf"
+  }
+}

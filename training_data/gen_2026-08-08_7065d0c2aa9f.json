@@ -1,0 +1,19 @@
+{
+  "id": "gen_2026-08-08_7065d0c2aa9f",
+  "timestamp": "2026-08-08T03:39:37.852356+00:00",
+  "generator": "cv",
+  "input": {
+    "name": "Kamel Mahi",
+    "template": "",
+    "lang": "fr"
+  },
+  "input_hash": "7065d0c2aa9f",
+  "output_len": 34,
+  "output_words": 3,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {
+    "filepath": "C:\\Users\\Admin\\Projects\\active\\digital-services-center\\generated_output\\cv_fr_Kamel_Mahi.pdf"
+  }
+}

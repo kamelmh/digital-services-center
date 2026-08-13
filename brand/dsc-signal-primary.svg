@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#F5F5F0"/>
+  
+  <!-- Thin navy frame -->
+  <rect x="20" y="20" width="360" height="360" fill="none" stroke="#0A1628" stroke-width="4"/>
+  
+  <!-- DSC letters -->
+  <text x="200" y="230" text-anchor="middle" font-family="'Space Grotesk', 'Inter', sans-serif" font-weight="700" font-size="120" letter-spacing="8">
+    <tspan fill="#0A1628">D</tspan><tspan fill="#D4AF37">S</tspan><tspan fill="#0A1628">C</tspan>
+  </text>
+</svg>

@@ -1,0 +1,405 @@
+FEASIBILITY STUDY - FINANCIAL MODEL TEMPLATE
+Digital Services Center - El Bayadh, Algeria
+============================================
+
+SHEET 1: HYPOTHESES
+====================
+
+INPUT PARAMETERS
+----------------
+Project Name:,
+Client Name:,
+Start Date:,
+Currency: DZD,
+
+MARKET HYPOTHESES
+-----------------
+Market Size (Annual):,3000000,
+Market Growth Rate:,12%,
+Target Market Share Year 1:,5%,
+Target Market Share Year 3:,15%,
+Average Transaction Value:,5000,
+Monthly Transactions Year 1:,50,
+Monthly Transactions Year 3:,150,
+
+PRICING HYPOTHESES
+------------------
+Service 1 Name:,Service 1,
+Service 1 Price:,5000,
+Service 2 Name:,Service 2,
+Service 2 Price:,8000,
+Service 3 Name:,Service 3,
+Service 3 Price:,15000,
+
+COST HYPOTHESES
+---------------
+Rent (Monthly):,20000,
+Electricity (Monthly):,8000,
+Internet (Monthly):,5000,
+Insurance (Annual):,30000,
+Maintenance (Annual):,20000,
+
+STAFFING
+--------
+Position 1:,Owner/Manager,
+Position 1 Salary:,80000,
+Position 2:,Employee 1,
+Position 2 Salary:,40000,
+Position 3:,Employee 2,
+Position 3 Salary:,35000,
+Social Charges Rate:,(26% of gross),
+Total Monthly Payroll:,155000,
+
+INVESTMENT
+----------
+Equipment Total:,300000,
+Furniture Total:,50000,
+Renovation Total:,80000,
+Initial Stock:,30000,
+Working Capital:,100000,
+Pre-opening Expenses:,40000,
+TOTAL INVESTMENT:,600000,
+
+FINANCING
+---------
+Own Capital:,400000,
+Bank Loan:,200000,
+Loan Interest Rate:,9%,
+Loan Term (Years):,5,
+Monthly Loan Payment:,4153,
+
+ASSUMPTIONS REGISTER
+--------------------
+Assumption 1:,Market size based on INS data,
+Source 1:,INS Census 2020,
+Date 1:,2024-01-01,
+Confidence 1:,High,
+
+Assumption 2:,Prices based on competitor analysis,
+Source 2:,Field survey Jan 2024,
+Date 2:,2024-01-15,
+Confidence 2:,Medium,
+
+Assumption 3:,Salary levels from ANEM data,
+Source 3:,ANEM Statistics,
+Date 3:,2023-12-01,
+Confidence 3:,High,
+
+
+SHEET 2: INVESTMENT PLAN
+=========================
+
+INVESTMENT BREAKDOWN
+--------------------
+Category,Item,Amount (DZD),Source,Timing,Notes
+EQUIPMENT,Computer 1,40000,Own Capital,Month 1,
+EQUIPMENT,Computer 2,40000,Own Capital,Month 1,
+EQUIPMENT,Printer,45000,Bank Loan,Month 1,
+EQUIPMENT,Scanner,15000,Own Capital,Month 1,
+EQUIPMENT,Other Equipment,60000,Bank Loan,Month 2,
+SUBTOTAL EQUIPMENT,200000,,,,
+FURNITURE,Desks,30000,Own Capital,Month 1,
+FURNITURE,Chairs,15000,Own Capital,Month 1,
+FURNITURE,Storage,5000,Own Capital,Month 1,
+SUBTOTAL FURNITURE,50000,,,,
+RENOVATION,Works,50000,Own Capital,Month 1,
+RENOVATION,Signage,15000,Bank Loan,Month 1,
+RENOVATION,Electrical,15000,Own Capital,Month 1,
+SUBTOTAL RENOVATION,80000,,,,
+WORKING CAPITAL,Initial Stock,30000,Own Capital,Month 1,
+WORKING CAPITAL,Operating Cash,70000,Own Capital,Month 1,
+SUBTOTAL WORKING CAPITAL,100000,,,,
+PRE-OPENING,Registration,15000,Own Capital,Month 1,
+PRE-OPENING,Marketing Launch,15000,Own Capital,Month 1,
+PRE-OPENING,Training,10000,Own Capital,Month 1,
+SUBTOTAL PRE-OPENING,40000,,,,
+,,,
+TOTAL INVESTMENT,600000,,,,
+
+FINANCING SOURCES
+-----------------
+Source,Amount (DZD),Percentage,Conditions
+Own Capital,400000,67%,None
+Bank Loan,200000,33%,9% over 5 years
+TOTAL,600000,100%,
+
+
+SHEET 3: MONTHLY CASH FLOW - YEAR 1
+=====================================
+
+Month,1,2,3,4,5,6,7,8,9,10,11,12,YEAR 1
+REVENUES
+Service 1,15000,20000,25000,30000,35000,40000,40000,45000,45000,50000,50000,55000,450000
+Service 2,10000,12000,15000,18000,20000,22000,25000,28000,30000,32000,35000,38000,285000
+Service 3,5000,8000,10000,12000,15000,18000,20000,22000,25000,28000,30000,35000,228000
+Other,0,0,0,0,0,0,0,0,0,0,0,0,0
+TOTAL REVENUES,30000,40000,50000,60000,70000,80000,85000,95000,100000,110000,115000,128000,963000
+,,,
+COST OF SALES
+Supplies,9000,12000,15000,18000,21000,24000,25500,28500,30000,33000,34500,38400,288900
+Other Variable,3000,4000,5000,6000,7000,8000,8500,9500,10000,11000,11500,12800,96300
+TOTAL COST OF SALES,12000,16000,20000,24000,28000,32000,34000,38000,40000,44000,46000,51200,385200
+,,,
+GROSS PROFIT,18000,24000,30000,36000,42000,48000,51000,57000,60000,66000,69000,76800,577800
+Gross Margin,60%,60%,60%,60%,60%,60%,60%,60%,60%,60%,60%,60%,60%
+,,,
+OPERATING EXPENSES
+Rent,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,20000,240000
+Salaries Gross,125000,125000,125000,125000,125000,125000,125000,125000,125000,125000,125000,125000,1500000
+Social Charges (26%),32500,32500,32500,32500,32500,32500,32500,32500,32500,32500,32500,32500,390000
+Electricity,8000,8000,8000,8000,8000,8000,8000,8000,8000,8000,8000,8000,96000
+Internet,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,60000
+Marketing,10000,10000,8000,8000,6000,6000,5000,5000,5000,5000,5000,5000,78000
+Maintenance,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,24000
+Insurance,0,0,0,0,0,0,0,0,0,0,0,0,0
+Accounting,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,60000
+Phone,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,36000
+Miscellaneous,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,5000,60000
+TOTAL OPEX,195500,195500,193500,193500,191500,191500,190500,190500,190500,190500,190500,190500,2302500
+,,,
+EBITDA,-177500,-171500,-163500,-157500,-149500,-143500,-139500,-133500,-130500,-124500,-121500,-113700,-1725000
+Depreciation (20%),10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,120000
+EBIT,-187500,-181500,-173500,-167500,-159500,-153500,-149500,-143500,-140500,-134500,-131500,-123700,-1845000
+Interest Expense,1500,1375,1250,1125,1000,875,750,625,500,375,250,125,9750
+EBT,-189000,-182875,-174750,-168625,-160500,-154375,-150250,-144125,-141000,-134875,-131750,-123825,-1856875
+Tax (19%),0,0,0,0,0,0,0,0,0,0,0,0,0
+NET INCOME,-189000,-182875,-174750,-168625,-160500,-154375,-150250,-144125,-141000,-134875,-131750,-123825,-1856875
+,,,
+CASH FLOW
+Net Income,-189000,-182875,-174750,-168625,-160500,-154375,-150250,-144125,-141000,-134875,-131750,-123825,-1856875
+Depreciation,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,10000,120000
+Loan Principal,3453,3578,3703,3828,3953,4078,4203,4328,4453,4578,4703,4828,49682
+OPERATING CASH FLOW,-175545,-172347,-161447,-155647,-147547,-141297,-137247,-131047,-127547,-121297,-118247,-110647,-1639115
+Capex,0,0,0,0,0,0,0,0,0,0,0,0,0
+INVESTING CASH FLOW,0,0,0,0,0,0,0,0,0,0,0,0,0
+Loan Proceeds,200000,0,0,0,0,0,0,0,0,0,0,0,200000
+FINANCING CASH FLOW,200000,0,0,0,0,0,0,0,0,0,0,0,200000
+,,,
+NET CASH FLOW,24455,-172347,-161447,-155647,-147547,-141297,-137247,-131047,-127547,-121297,-118247,-110647,-1279115
+CUMULATIVE CASH FLOW,24455,-147892,-309339,-464986,-612533,-753830,-891077,-1022124,-1149671,-1270968,-1389215,-1499862,-1499862
+
+
+SHEET 4: PROJECTIONS YEARS 2-5
+================================
+
+Year,Year 1,Year 2,Year 3,Year 4,Year 5
+REVENUES
+Service 1,450000,540000,648000,777600,933120
+Service 2,285000,342000,410400,492480,590976
+Service 3,228000,273600,328320,393984,472781
+Other,0,0,0,0,0
+TOTAL REVENUES,963000,1155600,1386720,1664064,1996877
+,,,
+COST OF SALES
+Supplies (30%),288900,346680,416016,499219,599063
+Other Variable (10%),96300,115560,138672,166406,199688
+TOTAL COST OF SALES,385200,462240,554688,665626,798751
+,,,
+GROSS PROFIT,577800,693360,832032,998439,1198126
+Gross Margin,60%,60%,60%,60%,60%
+,,,
+OPERATING EXPENSES
+Rent,240000,252000,264600,277830,291722
+Salaries Gross,1500000,1575000,1653750,1736438,1823260
+Social Charges (26%),390000,409500,429975,451474,474048
+Electricity,96000,100800,105840,111132,116689
+Internet,60000,63000,66150,69458,72930
+Marketing,78000,81900,85995,90295,94810
+Maintenance,24000,25200,26460,27783,29172
+Insurance,30000,31500,33075,34729,36465
+Accounting,60000,63000,66150,69458,72930
+Phone,36000,37800,39690,41675,43758
+Miscellaneous,60000,63000,66150,69458,72930
+TOTAL OPEX,2302500,2413500,2534160,2660873,2793915
+,,,
+EBITDA,-1724700,-1720140,-1702128,-1662434,-1595789
+Depreciation (20%),120000,120000,120000,120000,120000
+EBIT,-1844700,-1840140,-1822128,-1782434,-1715789
+Interest Expense,9750,8025,6150,4125,1950
+EBT,-1854450,-1848165,-1828278,-1786559,-1717739
+Tax (19%),0,0,0,0,0
+NET INCOME,-1854450,-1848165,-1828278,-1786559,-1717739
+,,,
+CASH FLOW
+Net Income,-1854450,-1848165,-1828278,-1786559,-1717739
+Depreciation,120000,120000,120000,120000,120000
+Loan Principal,49682,52575,55675,58975,62475
+OPERATING CASH FLOW,-1684768,-1675590,-1652603,-1607584,-1535264
+Capex,0,0,0,0,0
+INVESTING CASH FLOW,0,0,0,0,0
+Loan Proceeds,0,0,0,0,0
+FINANCING CASH FLOW,0,0,0,0,0
+,,,
+NET CASH FLOW,-1684768,-1675590,-1652603,-1607584,-1535264
+CUMULATIVE CASH FLOW,-3184630,-4860220,-6512823,-8120407,-9655671
+
+
+SHEET 5: BREAK-EVEN ANALYSIS
+=============================
+
+BREAK-EVEN CALCULATION
+----------------------
+Fixed Costs (Monthly),190500,
+Variable Cost Ratio,40%,
+Contribution Margin,60%,
+BREAK-EVEN (Monthly Revenue),317500,
+BREAK-EVEN (Monthly Units),64,
+
+BREAK-EVEN BY SERVICE
+---------------------
+Service,Price,Variable Cost,Contribution,Units Needed,Revenue Needed
+Service 1,5000,2000,3000,32,160000
+Service 2,8000,3200,4800,20,160000
+Service 3,15000,6000,9000,12,180000
+TOTAL,,,,64,500000
+
+BREAK-EVEN TIMELINE
+-------------------
+Month,Cumulative Cash Flow,Break-Even Reached?
+1,-189000,No
+2,-371875,No
+3,-546625,No
+4,-715250,No
+5,-875750,No
+6,-1030125,No
+7,-1180375,No
+8,-1324500,No
+9,-1465500,No
+10,-1600375,No
+11,-1732125,No
+12,-1855950,No
+
+
+SHEET 6: SENSITIVITY ANALYSIS
+==============================
+
+SCENARIO ANALYSIS
+-----------------
+Scenario,Revenue Change,Cost Change,Net Income,Cash Flow,Risk Level
+Base Case,0%,0%,-1856875,-1499862,High
+Optimistic,+20%,-10%,-1125875,-769862,Medium
+Pessimistic,-20%,+10%,-2587875,-2229862,Very High
+Delayed Opening (3 months),-25%,0%,-2321875,-1964862,Very High
+Delayed Collections (60 days),0%,0%,-1856875,-1799862,High
+
+SENSITIVITY TABLE
+-----------------
+Variable,Low (-20%),Base,High (+20%),Impact
+Revenue,-770400,963000,1155600,High
+Supplies Cost,231120,288900,346680,Medium
+Rent,192000,240000,288000,Low
+Salaries,1200000,1500000,1800000,High
+
+TORNADO CHART DATA
+------------------
+Variable,Downside Impact,Upside Impact
+Revenue,-770400,770400
+Salaries,-300000,300000
+Supplies,-57780,57780
+Rent,-48000,48000
+Other Costs,-36000,36000
+
+
+SHEET 7: DEBT SERVICE COVERAGE RATIO (DSCR)
+=============================================
+
+DSCR CALCULATION
+----------------
+Year,Net Operating Income,Debt Service,DSCR,Status
+1,-1724700,49682,-34.72,Critical
+2,-1720140,52575,-32.72,Critical
+3,-1702128,55675,-30.57,Critical
+4,-1662434,58975,-28.19,Critical
+5,-1595789,62475,-25.56,Critical
+
+DSCR INTERPRETATION
+-------------------
+DSCR > 1.2: Healthy - Can service debt comfortably
+DSCR 1.0-1.2: Tight - Monitor closely
+DSCR < 1.0: Critical - Cannot service debt from operations
+
+RECOMMENDATION
+-------------
+Current DSCR indicates project cannot service debt from Year 1 operations.
+Options:
+1. Increase own capital contribution
+2. Reduce loan amount
+3. Extend loan term
+4. Increase revenue projections
+5. Reduce operating costs
+
+
+SHEET 8: DECISION PAGE
+=======================
+
+EXECUTIVE SUMMARY
+-----------------
+Project Name:,
+Total Investment: 600000 DZD,
+Own Capital Required: 400000 DZD,
+Bank Loan Required: 200000 DZD,
+Payback Period: N/A (Losses in Year 1),
+ROI (3 Years): Negative,
+Jobs Created: 3,
+
+RISK ASSESSMENT
+---------------
+Risk 1: Market demand lower than expected,Probability: Medium,Impact: High
+Risk 2: Competition intensifies,Probability: High,Impact: Medium
+Risk 3: Cost overruns,Probability: Low,Impact: Medium
+Risk 4: Regulatory changes,Probability: Low,Impact: Low
+
+CONDITIONS FOR SUCCESS
+----------------------
+Condition 1: Achieve 75% capacity by Month 6,Priority: High
+Condition 2: Control costs within 10% of budget,Priority: High
+Condition 3: Build client base of 50 regular customers,Priority: Medium
+
+FINAL RECOMMENDATION
+--------------------
+RECOMMENDATION: GO WITH CONDITIONS
+
+Conditions:
+1. Increase own capital to 500,000 DZD minimum
+2. Reduce loan to 100,000 DZD maximum
+3. Achieve break-even by Month 12
+4. Maintain cost discipline
+
+Next Steps:
+1. Secure additional 100,000 DZD own capital
+2. Negotiate smaller bank loan
+3. Implement aggressive marketing in first 6 months
+4. Monitor cash flow weekly
+5. Review progress at Month 3 and Month 6
+
+
+SHEET 9: IMPLEMENTATION PLAN
+=============================
+
+30-60-90 DAY PLAN
+-----------------
+Phase,Day,Action,Responsible,Status
+SETUP,1-10,Immatriculation CNRC,Owner,Pending
+SETUP,1-10,Find and secure location,Owner,Pending
+SETUP,1-10,Open bank account,Owner,Pending
+SETUP,11-20,Order equipment,Owner,Pending
+SETUP,11-20,Renovate premises,Contractor,Pending
+SETUP,21-30,Install equipment,Owner,Pending
+SETUP,21-30,Hire employees,Owner,Pending
+SETUP,21-30,Obtain permits,Owner,Pending
+LAUNCH,31-45,Soft launch (friends/family),Owner,Pending
+LAUNCH,31-45,Test all services,Team,Pending
+LAUNCH,46-60,Official opening,Team,Pending
+LAUNCH,46-60,Marketing campaign,Owner,Pending
+LAUNCH,46-60,First client acquisition,Team,Pending
+GROWTH,61-90,Client feedback collection,Team,Pending
+GROWTH,61-90,Process optimization,Owner,Pending
+GROWTH,61-90,Service expansion planning,Owner,Pending
+GROWTH,61-90,Financial review,Owner,Pending
+
+
+============================================
+END OF FINANCIAL MODEL TEMPLATE
+Digital Services Center - El Bayadh, Algeria
+MAHI Kamel Abdelghani - kamelmahi71@gmail.com
+============================================

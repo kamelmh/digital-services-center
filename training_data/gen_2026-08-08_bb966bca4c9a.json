@@ -1,0 +1,19 @@
+{
+  "id": "gen_2026-08-08_bb966bca4c9a",
+  "timestamp": "2026-08-08T04:02:21.678145+00:00",
+  "generator": "cv",
+  "input": {
+    "name": "Test User",
+    "template": "",
+    "lang": "fr"
+  },
+  "input_hash": "bb966bca4c9a",
+  "output_len": 33,
+  "output_words": 3,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {
+    "filepath": "C:\\Users\\Admin\\Projects\\active\\digital-services-center\\generated_output\\cv_fr_Test_User.pdf"
+  }
+}

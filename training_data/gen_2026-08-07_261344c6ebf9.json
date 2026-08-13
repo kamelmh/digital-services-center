@@ -1,0 +1,17 @@
+{
+  "id": "gen_2026-08-07_261344c6ebf9",
+  "timestamp": "2026-08-07T19:31:17.511455+00:00",
+  "generator": "g50",
+  "input": {
+    "month": 6,
+    "year": 2026,
+    "nif": "123"
+  },
+  "input_hash": "261344c6ebf9",
+  "output_len": 40541,
+  "output_words": 3400,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {}
+}

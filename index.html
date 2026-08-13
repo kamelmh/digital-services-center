@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Services Center — Direction de l'Éducation El Bayadh</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --accent: #d4a574;
+            --bg: #0a0a0f;
+            --card-bg: #12121a;
+            --text: #e0d5c1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        .container { max-width: 800px; width: 100%; }
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        h1 {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(212, 165, 116, 0.15);
+        }
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+        .card p {
+            font-size: 0.9rem;
+            color: #888;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 60px;
+        }
+        .link {
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 16px 24px;
+            text-decoration: none;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+        .link:hover {
+            border-color: var(--accent);
+            background: #1a1a25;
+        }
+        .link-icon { font-size: 1.5rem; }
+        .link-text h3 { font-size: 1rem; margin-bottom: 4px; }
+        .link-text p { font-size: 0.85rem; color: #888; }
+        footer {
+            text-align: center;
+            color: #555;
+            font-size: 0.85rem;
+            padding-top: 40px;
+            border-top: 1px solid #222;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🏛️</div>
+            <h1>Digital Services Center</h1>
+            <p class="subtitle">Direction de l'Éducation — El Bayadh, Algeria</p>
+        </header>
+
+        <div class="cards">
+            <a href="gallery/" class="card">
+                <div class="card-icon">📊</div>
+                <h2>Études de Faisabilité</h2>
+                <p>3 études anonymisées — données réelles du marché algérien</p>
+            </a>
+            <a href="order_form.html" class="card">
+                <div class="card-icon">🛒</div>
+                <h2>Commander une Étude</h2>
+                <p>Formulaire de commande — devis via WhatsApp</p>
+            </a>
+            <a href="FLYER_AR.html" class="card">
+                <div class="card-icon">📄</div>
+                <h2>النشرة بالعربية</h2>
+                <p>Feuillet de services numériques en arabe</p>
+            </a>
+            <a href="FLYER_FR.html" class="card">
+                <div class="card-icon">📄</div>
+                <h2>Flyer FR</h2>
+                <p>Feuillet de services numériques en français</p>
+            </a>
+            <a href="PRICING_BOARD.html" class="card">
+                <div class="card-icon">💰</div>
+                <h2>Grille Tarifaire</h2>
+                <p>Tableau des prix pour tous les services</p>
+            </a>
+        </div>
+
+        <h2 class="section-title">📧 Templates</h2>
+        <div class="links">
+            <a href="email_director_allal.html" class="link">
+                <span class="link-icon">✉️</span>
+                <div class="link-text">
+                    <h3>Email — Directeur Allal</h3>
+                    <p>Template email pour le directeur d'école</p>
+                </div>
+            </a>
+            <a href="email_teacher_allal.html" class="link">
+                <span class="link-icon">✉️</span>
+                <div class="link-text">
+                    <h3>Email — Enseignant Allal</h3>
+                    <p>Template email pour l'enseignant d'anglais</p>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            <p>© 2026 Mahi Kamel Abdelghani — Digital Services Center</p>
+        </footer>
+    </div>
+</body>
+</html>

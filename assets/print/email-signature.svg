@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="400" height="100">
+  <rect x="0" y="0" width="4" height="100" fill="#D4AF37"/>
+  <!-- MK icon -->
+  <g transform="translate(15, 10) scale(0.2)">
+    <path d="M 80 80 L 80 320 L 140 180 L 200 320 L 200 80"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 200 80 L 200 320"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 80"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round"/>
+    <path d="M 200 200 L 320 320"
+          fill="none" stroke="#0A1628" stroke-width="28" stroke-linecap="round"/>
+    <circle cx="200" cy="200" r="14" fill="#0A1628"/>
+  </g>
+  <!-- Text -->
+  <text x="65" y="40" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0A1628">Digital Services Center</text>
+  <text x="65" y="60" font-family="Inter, sans-serif" font-size="10" font-weight="400" fill="#666">MAHI Kamel Abdelghani</text>
+  <text x="65" y="78" font-family="Inter, sans-serif" font-size="9" font-weight="400" fill="#666">kamelmahi71@gmail.com | +213 676 77 38 92</text>
+</svg>

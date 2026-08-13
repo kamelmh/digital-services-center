@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commander — DSC Digital Services Center</title>
+  <meta name="description" content="Passez votre commande DSC : études de faisabilité, déclarations fiscales, documents d'entreprise, services graphiques.">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:title" content="Commander — DSC Digital Services Center">
+  <meta property="og:description" content="Passez votre commande en ligne. Service rapide et professionnel.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dsc-dz.com/order.html">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%230A1628'/><text x='50' y='68' text-anchor='middle' font-family='Arial,sans-serif' font-size='42' font-weight='bold' fill='%23D4AF37'>DSC</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar__logo"><span>D</span>SC</a>
+      <div class="navbar__links">
+        <a href="index.html">Accueil</a>
+        <a href="services.html">Services</a>
+        <a href="tax-forms.html">Formulaires Fiscaux</a>
+        <a href="contact.html">Contact</a>
+        <a href="order.html" class="navbar__cta">Commander</a>
+      </div>
+      <button class="navbar__toggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <div class="page-header__breadcrumb">
+        <a href="index.html">Accueil</a> <span>/</span> <span>Commander</span>
+      </div>
+      <h1>Passez votre commande</h1>
+      <p>Remplissez le formulaire ci-dessous et recevez un devis via WhatsApp</p>
+    </div>
+  </section>
+
+  <!-- Order Form -->
+  <section class="section">
+    <div class="container">
+      <div class="two-col">
+        <!-- Form -->
+        <div>
+          <form id="orderForm" novalidate>
+            <h3 style="margin-bottom: 1.5rem;">📋 Informations personnelles</h3>
+
+            <div class="form-group">
+              <label class="form-label" for="clientName">Nom complet *</label>
+              <input type="text" id="clientName" class="form-input" placeholder="Ex: Ahmed Benali" required>
+              <div class="form-error">Veuillez entrer votre nom.</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="clientEmail">Email *</label>
+                <input type="email" id="clientEmail" class="form-input" placeholder="ahmed@example.com" required>
+                <div class="form-error">Veuillez entrer un email valide.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="clientPhone">Téléphone *</label>
+                <input type="tel" id="clientPhone" class="form-input" placeholder="0555 00 00 00" required>
+                <div class="form-error">Veuillez entrer votre numéro.</div>
+              </div>
+            </div>
+
+            <h3 style="margin: 2rem 0 1.5rem;">📦 Détails de la commande</h3>
+
+            <div class="form-group">
+              <label class="form-label" for="serviceSelect">Service souhaité *</label>
+              <select id="serviceSelect" class="form-select" required>
+                <option value="">— Sélectionnez un service —</option>
+
+                <optgroup label="📊 Études">
+                  <option value="feasibility-study">Étude de faisabilité</option>
+                  <option value="business-plan">Business Plan</option>
+                  <option value="market-study">Étude de marché</option>
+                </optgroup>
+
+                <optgroup label="📋 Déclarations fiscales">
+                  <option value="g12">Déclaration G12 (Mensuelle TVA)</option>
+                  <option value="g50">Déclaration G50 (Annuelle revenus)</option>
+                  <option value="g4">Déclaration G4 (TVA collectée)</option>
+                  <option value="g11">Déclaration G11 (Trimestrielle)</option>
+                  <option value="g29">Déclaration G29 (Retenues source)</option>
+                  <option value="g1">Déclaration G1 (Résultat fiscal)</option>
+                  <option value="g8">Déclaration G8 (Opérations diverses)</option>
+                </optgroup>
+
+                <optgroup label="📄 Documents d'entreprise">
+                  <option value="rnc">Immatriculation RNC</option>
+                  <option value="nis">Numéro NIS</option>
+                  <option value="nif">Numéro NIF</option>
+                  <option value="rc">Registre de Commerce</option>
+                  <option value="attestation">Attestation fiscale</option>
+                </optgroup>
+
+                <optgroup label="🎨 Services graphiques">
+                  <option value="logo-design">Design de logo</option>
+                  <option value="business-card">Carte de visite</option>
+                  <option value="flyer">Flyer / Dépliant</option>
+                  <option value="letterhead">Papier en-tête</option>
+                </optgroup>
+
+                <optgroup label="Autre">
+                  <option value="other">Autre service (précisez ci-dessous)</option>
+                </optgroup>
+              </select>
+              <div class="form-error">Veuillez sélectionner un service.</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="quantity">Quantité / Nombre de formulaires</label>
+              <input type="number" id="quantity" class="form-input" value="1" min="1" max="100">
+              <div class="form-hint">Pour les déclarations fiscales : nombre de mois ou de formulaires.</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="clientDetails">Détails supplémentaires</label>
+              <textarea id="clientDetails" class="form-textarea" rows="4" placeholder="Décrivez vos besoins spécifiques, informations importantes, ou demandes particulières..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn--whatsapp btn--lg btn--full mt-2">
+              💬 Envoyer la commande via WhatsApp
+            </button>
+            <p style="text-align: center; font-size: 0.8rem; color: var(--gray-400); margin-top: 0.75rem;">
+              Vous serez redirigé vers WhatsApp avec votre commande pré-remplie.
+            </p>
+          </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+          <div class="order-summary">
+            <h4 class="order-summary__title">💰 Résumé de la commande</h4>
+            <div class="order-summary__row">
+              <span style="color: var(--gray-500);">Service</span>
+              <span id="summaryService" style="font-weight: 500;">—</span>
+            </div>
+            <div class="order-summary__row">
+              <span style="color: var(--gray-500);">Quantité</span>
+              <span id="summaryQty">1</span>
+            </div>
+            <div class="order-summary__total">
+              <span>Estimation</span>
+              <span id="summaryTotal" class="price price--lg">—</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; padding: 1.5rem; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg);">
+            <h4 style="margin-bottom: 1rem;">📞 Besoin d'aide ?</h4>
+            <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 1rem;">
+              Notre équipe est disponible pour répondre à vos questions et vous guider dans votre commande.
+            </p>
+            <a href="https://wa.me/213676773892?text=Bonjour%20DSC%2C%20j%27ai%20besoin%20d%27aide%20pour%20ma%20commande." class="btn btn--whatsapp btn--sm btn--full" target="_blank" rel="noopener">
+              💬 Contacter via WhatsApp
+            </a>
+            <a href="tel:+213676773892" class="btn btn--outline btn--sm btn--full mt-1">
+              📱 Appeler : 0676 773 892
+            </a>
+          </div>
+
+          <div style="margin-top: 1.5rem; padding: 1.5rem; background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.2); border-radius: var(--radius-lg);">
+            <h4 style="margin-bottom: 0.5rem;">⚡ Traitement rapide</h4>
+            <ul style="font-size: 0.85rem; color: var(--gray-600); list-style: none;">
+              <li style="padding: 0.25rem 0;">✓ Devis sous 2 heures</li>
+              <li style="padding: 0.25rem 0;">✓ Livraison en 24-72h</li>
+              <li style="padding: 0.25rem 0;">✓ Paiement à la livraison</li>
+              <li style="padding: 0.25rem 0;">✓ Support WhatsApp continu</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <div class="footer__brand"><span>D</span>SC</div>
+          <p class="footer__desc">Digital Services Center — Services professionnels pour entrepreneurs algériens.</p>
+        </div>
+        <div>
+          <div class="footer__heading">Navigation</div>
+          <div class="footer__links">
+            <a href="index.html">Accueil</a>
+            <a href="services.html">Services</a>
+            <a href="tax-forms.html">Formulaires fiscaux</a>
+            <a href="order.html">Commander</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Services</div>
+          <div class="footer__links">
+            <a href="services.html">Études de faisabilité</a>
+            <a href="tax-forms.html">Déclarations fiscales</a>
+            <a href="services.html">Documents d'entreprise</a>
+            <a href="services.html">Services graphiques</a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Contact</div>
+          <div class="footer__contact-item">
+            <span class="icon">📱</span>
+            <span>+213 676 773 892</span>
+          </div>
+          <div class="footer__contact-item">
+            <span class="icon">📧</span>
+            <span>contact@dsc-dz.com</span>
+          </div>
+          <div class="footer__contact-item">
+            <span class="icon">📍</span>
+            <span>El Bayadh, Algérie</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>&copy; 2026 DSC — Digital Services Center. Tous droits réservés.</span>
+        <div class="footer__social">
+          <a href="https://wa.me/213676773892" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+          <a href="mailto:contact@dsc-dz.com" aria-label="Email">📧</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/213676773892?text=Bonjour%20DSC%2C%20j%27ai%20une%20question." class="whatsapp-float" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
