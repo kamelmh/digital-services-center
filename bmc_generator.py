@@ -118,6 +118,17 @@ class BMCGenerator:
         except Exception:
             pass
 
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="bmc",
+                input_params={"business_type": business_type, "custom_params": bool(params)},
+                output_content=json.dumps({"meta": {"business_type": business_type}, "blocks": blocks}, ensure_ascii=False),
+                metadata={"custom_overrides": list(params.keys()) if params else []},
+            )
+        except Exception:
+            pass
+
         return {
             "meta": {
                 "generated_at": datetime.now().isoformat(),

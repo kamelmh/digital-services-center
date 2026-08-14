@@ -1,0 +1,17 @@
+{
+  "id": "gen_2026-08-14_a752690324ce",
+  "timestamp": "2026-08-14T21:53:57.938250+00:00",
+  "generator": "g50",
+  "input": {
+    "month": 6,
+    "year": 2026,
+    "nif": "1234567890"
+  },
+  "input_hash": "a752690324ce",
+  "output_len": 40747,
+  "output_words": 3413,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {}
+}

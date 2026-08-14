@@ -306,7 +306,7 @@ def generate_3_scenarios(
     params = {
         "prudent": {"rev_mult": 0.80, "cogs_mult": 1.05, "op_mult": 1.10, "label": "Hypothèse prudente"},
         "reference": {"rev_mult": 1.00, "cogs_mult": 1.00, "op_mult": 1.00, "label": "Hypothèse de référence"},
-        "defavorable": {"rev_mult": 1.15, "cogs_mult": 0.95, "op_mult": 0.95, "label": "Hypothèse favorable"},
+        "favorable": {"rev_mult": 1.15, "cogs_mult": 0.95, "op_mult": 0.95, "label": "Hypothèse favorable"},
     }
 
     for name, p in params.items():

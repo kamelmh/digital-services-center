@@ -1,0 +1,21 @@
+{
+  "id": "gen_2026-08-14_5455f563d0c1",
+  "timestamp": "2026-08-14T21:52:43.210013+00:00",
+  "generator": "nesda_dossier",
+  "input": {
+    "activity_key": "boulangerie",
+    "business_type": "boulangerie",
+    "wilaya": "El Bayadh",
+    "investment": 3000000,
+    "client_status": "unemployed"
+  },
+  "input_hash": "5455f563d0c1",
+  "output_len": 12501,
+  "output_words": 2059,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {
+    "decree": "26-154 (April 2026)"
+  }
+}

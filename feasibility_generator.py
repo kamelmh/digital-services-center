@@ -1002,8 +1002,8 @@ class FeasibilityGenerator:
 | التراكمي | | | | | |
 
 **ج) تحليل نقطة التعادل (محسوب بدقة):**
-- التكاليف الثابتة الشهرية: {format_dzd(real_financials['monthly_costs_est']) if real_financials else 'حسب الجدول أعلاه'}
-- عدد الوحدات لنقطة التعادل: {format_dzd(real_financials['reference_seuil']) if real_financials else 'حسب الجدول أعلاه'} وحدة
+- التكاليف الثابتة الشهرية: {format_dzd(real_financials['monthly_costs_est']) if real_financials else 'حسب الجدول أعلان'}
+- نقطة التعادل بالوحدات: {int(real_financials['reference_seuil']) if real_financials and real_financials['reference_seuil'] != float('inf') else 'حسب الجدول أعلان'} وحدة
 - المدة المتوقعة للوصول لنقطة التعادل: {real_financials['reference_delai']:.1f} سنة""" if real_financials else """
 **ج) تحليل نقطة التعادل:**
 - التكاليف الثابتة الشهرية
@@ -1039,7 +1039,7 @@ class FeasibilityGenerator:
 |-----------|-----------|-----|-----|--------------|--------------|
 | حذر (ال Worst Case) | {format_dzd(real_financials['scenarios']['prudent']['annual_revenue']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['prudent']['van']) if real_financials else '—'} | {format_pct(real_financials['scenarios']['prudent']['tri']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['prudent']['seuil_rentabilite']) if real_financials else '—'} | |
 | مرجح (Base Case) | {format_dzd(real_financials['scenarios']['reference']['annual_revenue']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['reference']['van']) if real_financials else '—'} | {format_pct(real_financials['scenarios']['reference']['tri']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['reference']['seuil_rentabilite']) if real_financials else '—'} | |
-| متفائل (Best Case) | {format_dzd(real_financials['scenarios']['defavorable']['annual_revenue']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['defavorable']['van']) if real_financials else '—'} | {format_pct(real_financials['scenarios']['defavorable']['tri']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['defavorable']['seuil_rentabilite']) if real_financials else '—'} | |
+| متفائل (Best Case) | {format_dzd(real_financials['scenarios']['favorable']['annual_revenue']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['favorable']['van']) if real_financials else '—'} | {format_pct(real_financials['scenarios']['favorable']['tri']) if real_financials else '—'} | {format_dzd(real_financials['scenarios']['favorable']['seuil_rentabilite']) if real_financials else '—'} | |
 
 **ج) التوصيات النهائية:**
 - توصيات لتحسين الربحية

@@ -21,8 +21,22 @@ When finishing work, append an entry below.
 - **Alerts for other projects:** None
 
 ## Pending Work
-- [ ] VAN/TRI calculation formulas
-- [ ] Break-even calculation templates
+- [x] VAN/TRI calculation formulas — verified in `financial_calculators.py:96-149`
+- [x] Break-even calculation templates — `seuil_rentabilite` (units) and `seuil_rentabilite_valeur` (DZD) in `financial_calculators.py:152-170`
+
+## Recent Changes
+
+### 2026-08-14 — VAN/TRI & Break-even Formulas Verified; Scenario Labeling Fixed; Training Hooks Added
+- **What:** 
+  - VAN (Net Present Value) and TRI (Internal Rate of Return) formulas confirmed correct in `financial_calculators.py`. Formula: VAN = Σ(CF_t / (1+r)^t), TRI via Newton-Raphson with bisection fallback.
+  - Break-even templates verified: `seuil_rentabilite()` (units) and `seuil_rentabilite_valeur()` (DZD) in `financial_calculators.py:152-170`.
+  - Fixed scenario labeling bug in `generate_3_scenarios()`: "defavorable" param (which had rev_mult=1.15, i.e. best case) was renamed to "favorable". Three scenarios now: prudent (pessimistic), reference (base), favorable (optimistic).
+  - Fixed Section 8 break-even display in `feasibility_generator.py`: changed from `format_dzd()` on unit count (incorrect) to displaying raw unit count.
+  - Added `training_hook` integration to `nesda_dossier_generator.py` and `bmc_generator.py` — all generators now capture I/O for training data.
+- **Files:** `financial_calculators.py`, `feasibility_generator.py`, `nesda_dossier_generator.py`, `bmc_generator.py`
+- **Impact:** Scenario labels now match their math. Training data capture expanded to all 12+ generators.
+- **Breaking changes:** Scenario key changed from `'defavorable'` to `'favorable'` — any code referencing `scenarios['defavorable']` will need updating. All references found and updated in `feasibility_generator.py`.
+- **Alerts for other projects:** Scenario key `'defavorable'` → `'favorable'` rename may affect any project consuming `generate_3_scenarios()` output.
 
 ---
 *Last updated: 2026-08-08*

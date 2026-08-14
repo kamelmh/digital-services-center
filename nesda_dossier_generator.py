@@ -166,6 +166,24 @@ class NESDADossierGenerator:
         # ── Part IX: Annexes ──────────────────────────────────────────────────
         results["sections"]["partie_9"] = self._generate_part9(params)
 
+        full_text = "\n\n".join(results["sections"].values())
+        try:
+            from training_hook import hook_generation
+            hook_generation(
+                generator="nesda_dossier",
+                input_params={
+                    "activity_key": params.get("activity_key", ""),
+                    "business_type": params.get("business_type", ""),
+                    "wilaya": params.get("wilaya", ""),
+                    "investment": investment,
+                    "client_status": client_status,
+                },
+                output_content=full_text,
+                metadata={"decree": results["meta"]["decree"]},
+            )
+        except Exception:
+            pass
+
         return results
 
     def _generate_part1(self, params: dict) -> str:
