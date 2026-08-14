@@ -24,7 +24,7 @@ class NESDAFinancingResult:
     # Loan terms
     interest_rate: float
     repayment_years: int
-    grace_years: int
+    grace_years: float
     annual_payment: float
     monthly_payment: float
     total_interest: float
@@ -79,9 +79,9 @@ def calculate_nesda_financing(
     monthly_revenue: int = 500_000,
     cogs_pct: float = 0.65,
     operating_pct: float = 0.15,
-    interest_rate: float = 0.03,
-    repayment_years: int = 10,
-    grace_years: int = 1,
+    interest_rate: float = 0.02,
+    repayment_years: int = 12,
+    grace_years: float = 1.5,
 ) -> NESDAFinancingResult:
     """Calculate NESDA financing breakdown."""
 
@@ -102,16 +102,22 @@ def calculate_nesda_financing(
     nesda_grant = int(total_cost * nesda_pct)
     bank_loan = int(total_cost * bank_pct)
 
-    # Loan repayment
-    total_interest = bank_loan * interest_rate * repayment_years
+    # Loan repayment — use annuity formula (same as FinancialCalculators.FinancingPlan)
+    r = interest_rate
+    n = repayment_years - grace_years
+    if r > 0 and n > 0 and bank_loan > 0:
+        annual_payment = bank_loan * (r * (1 + r) ** n) / ((1 + r) ** n - 1)
+    else:
+        annual_payment = bank_loan / max(1, repayment_years)
+
+    monthly_payment = annual_payment / 12
+    total_interest = annual_payment * n - bank_loan
     total_repayment = bank_loan + total_interest
-    annual_payment = total_repayment / repayment_years if repayment_years > 0 else 0
-    monthly_payment = annual_payment / 12 if annual_payment > 0 else 0
 
     # Schedule
     schedule = []
     balance = bank_loan
-    for year in range(1, repayment_years + 1):
+    for year in range(1, int(repayment_years) + 1):
         if year <= grace_years:
             interest = balance * interest_rate
             principal = 0

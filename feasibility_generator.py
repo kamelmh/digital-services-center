@@ -44,7 +44,7 @@ ALGERIA_DATA = {
     "smig_monthly": 20_000,
     "tva_rate": 0.19,
     "corporate_tax_rate": 0.19,
-    "cnas_employer_rate": 0.26,
+    "cnas_employer_rate": 0.255,
     "loan_interest_rate": 0.09,
     "discount_rate": 0.12,
     "inflation_rate": 0.03,
@@ -474,7 +474,7 @@ def calculate_real_financials(
     ref = scenarios["reference"]
     loan_payment = financing.annual_payment()
 
-    # NESDA financing details (if applicable)
+    # NESDA financing details (if applicable) — 2026 verified rates: 2% interest, 12 years, 1.5y grace
     nesda_result = None
     if total_investment <= 10_000_000:
         nesda_result = calculate_nesda_financing(
@@ -484,9 +484,9 @@ def calculate_real_financials(
             monthly_revenue=annual_revenue_est // 12,
             cogs_pct=1 - margin_mid,
             operating_pct=0.15,
-            interest_rate=0.0675,
-            repayment_years=8,
-            grace_years=1,
+            interest_rate=0.02,
+            repayment_years=12,
+            grace_years=1.5,
         )
 
     return {
@@ -841,16 +841,20 @@ class FeasibilityGenerator:
                 rf_block += f"| {label} | {rev} | {van_str} | {tri_str} | {seuil_str} | {delai_str} |\n"
 
         fin_assumptions = f"""
-**الافتراضات المالية الأساسية:**
-- معدل TVA: 19%
-- ضريبة الدخل (IR): 19% (لفاعلي التجارة والخدمات)
-- ضريبة القيمة المضافة: 19%
-- CNAS صاحب العمل: 26% من الأجر الصافي
-- فائدة القروض البنكية: 6.75% (LTA + 1.5%)
-- معدل الخصم: 12%
-- فترات السداد: حتى 8 سنوات ( déférence 3 سنوات للقروض)
+**الافتراضات المالية الأساسية (محدثة 2026):**
+- معدل TVA: 19% (تطبيق عادي)، 9% (تطبيق مخفض)
+- IBS (ضريبة الأرباح): 19% للصناعة، 23% للخدمات
+- IRG (ضريبة الدخل الشخصية): 0-35% (تكراري تقدمي)
+- IFU (نظام مبسط): 5% للبضاعة/الصناعة، 12% للخدمات (الحد الأقصى 8M دج)
+- CNAS صاحب العمل: 25% + 0.5% أعمال اجتماعية = 25.5% إجمالاً
+- CNAS الموظف: 9% (قابل للخصم قبل IRG)
+- فائدة القروض العامة: 6.75% (LTA + 1.5%)
+- فائدة قرض NESDA: 2% (معدل مخفض)
+- معدل الخصم (VAN): 12%
+- مدة سداد NESDA: 12 سنة (1.5 سنة حظر + 10.5 سنة سداد)
+- SNMG: 24,000 دج/شهر (حد أدنى للأجور)
 - الحد الأقصى للتمويل NESDA: 10,000,000 دج
-- NESDA: حصة البنك 70%، حصة NESDA 28%، حصة شخصية 2%
+- NESDA: حصة البنك 70%، حصة NESDA 15-25%، حصة شخصية 5-15%
 - CNAC: الحد الأقصى 10,000,000 دج، فئة العمر 30-50 سنة
 - إعفاء من الضريبة العقارية والـ IFU لمدة 3 سنوات (6 للهضاب العليا، 10 للجنوب)
 """
