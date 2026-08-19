@@ -34,9 +34,9 @@ def _esc(value: object, default: str = "") -> str:
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 IRG_BAREME = [
-    (180_000, 0.00),
+    (120_000, 0.00),
     (360_000, 0.20),
-    (720_000, 0.30),
+    (1_440_000, 0.30),
     (float("inf"), 0.35),
 ]
 
@@ -1001,10 +1001,10 @@ def _bareme_html() -> str:
       </tr>
     </thead>
     <tbody>
-      <tr><td>≤ 180 000 DA</td><td>0%</td></tr>
-      <tr><td>180 001 — 360 000 DA</td><td>20%</td></tr>
-      <tr><td>360 001 — 720 000 DA</td><td>30%</td></tr>
-      <tr><td>> 720 000 DA</td><td>35%</td></tr>
+      <tr><td>≤ 120 000 DA</td><td>0%</td></tr>
+      <tr><td>120 001 — 360 000 DA</td><td>20%</td></tr>
+      <tr><td>360 001 — 1 440 000 DA</td><td>30%</td></tr>
+      <tr><td>> 1 440 000 DA</td><td>35%</td></tr>
     </tbody>
   </table>
   <div class="note">Parts fiscales : Célibataire 1 part — Marié(e) 2 parts — +0,5 part/enfant (max 3) — +0,5 part/parent à charge (max 2)</div>

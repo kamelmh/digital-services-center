@@ -41,7 +41,7 @@ ALGERIA_DATA = {
     "currency": "دج",
     "currency_code": "DZD",
     "population_growth_rate": 0.018,
-    "smig_monthly": 20_000,
+    "snmg_monthly": 24_000,
     "tva_rate": 0.19,
     "corporate_tax_rate": 0.19,
     "cnas_employer_rate": 0.255,

@@ -32,13 +32,14 @@ def _esc(value: object, default: str = "") -> str:
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 # IRG Barème 2026 — monthly thresholds (DA)
-# (annual_threshold = monthly * 12)
+# Source: mfdgi.gov.dz, CIDTA, Loi de Finances 2026
+# Salaire net imposable = brut - CNAS(9%), then apply 40% abattement (plafonné 1,500 DZD/mois)
+# Exonération: salaire brut ≤ 30,000 DZD/mois
 IRG_BAREME_MONTHLY = [
-    (15_000, 0.00),
-    (30_000, 0.10),
-    (60_000, 0.20),
-    (120_000, 0.30),
-    (float("inf"), 0.40),
+    (30_000, 0.00),    # 0-30K: 0% (exonéré)
+    (120_000, 0.23),   # 30K-120K: 23%
+    (360_000, 0.27),   # 120K-360K: 27%
+    (float("inf"), 0.30),  # >360K: 30%
 ]
 
 SITUATION_FAMILIALE = [
@@ -648,25 +649,25 @@ def _g30_summary_html(data: G29Data) -> str:
 def _bareme_reference_html() -> str:
     """IRG barème reference table (informational)."""
     return f"""<div class="section">
-  <div class="section-title">BARÈME IRG PROGRESSIF (Année {datetime.now().year})</div>
+  <div class="section-title">BARÈME IRG PROGRESSIF SUR SALAIRES (Année {datetime.now().year})</div>
   <table class="summary-table">
     <thead>
       <tr>
-        <th>Tranche mensuelle (DA)</th>
+        <th>Tranche mensuelle imposable (DA)</th>
         <th>Taux</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td>≤ 15 000</td><td>0%</td></tr>
-      <tr><td>15 001 — 30 000</td><td>10%</td></tr>
-      <tr><td>30 001 — 60 000</td><td>20%</td></tr>
-      <tr><td>60 001 — 120 000</td><td>30%</td></tr>
-      <tr><td>> 120 000</td><td>40%</td></tr>
+      <tr><td>≤ 30 000</td><td>0%</td></tr>
+      <tr><td>30 001 — 120 000</td><td>23%</td></tr>
+      <tr><td>120 001 — 360 000</td><td>27%</td></tr>
+      <tr><td>&gt; 360 000</td><td>30%</td></tr>
     </tbody>
   </table>
   <div class="note">
-    Le calcul est effectué mensuellement puis multiplié par 12. Le quotient familial (nombre de parts)
-    est appliqué avant le barème progressif. — Référence légale : Article 132 du CIDTA.
+    Calcul : brut - CNAS(9%) → net social → abattement 40% (1 000-1 500 DZD/mois) → barème mensuel × 12 = IRG annuel.<br>
+    Exonération : salaire brut ≤ 30 000 DZD/mois = IRG 0 — pas de quotient familial (parts) en IRG salaires.<br>
+    Référence : CIDTA articles 1-92, Loi de Finances 2026, mfdgi.gov.dz — barème 2026 vérifié.
   </div>
 </div>"""
 

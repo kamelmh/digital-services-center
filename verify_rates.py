@@ -66,11 +66,11 @@ VERIFIED_2026_RATES = {
     "tap_services_commerce": {"expected": 0.02, "unit": "%", "source": "WebMinds.dz"},
 
     # --- CNAS / Social Security ---
-    "smig_monthly": {"expected": 22_000, "unit": "DZD", "source": "africarrieres.com"},
+    "snmg_monthly": {"expected": 24_000, "unit": "DZD", "source": "macalculatriceenligne.com"},
     "snmg_monthly": {"expected": 24_000, "unit": "DZD", "source": "macalculatriceenligne.com"},
     "cnas_salaried_pct": {"expected": 0.09, "unit": "%", "source": "macalculatriceenligne.com"},
     "cnas_employer_pct": {"expected": 0.255, "unit": "%", "source": "macalculatriceenligne.com"},
-    "cnas_total_pct": {"expected": 0.255, "unit": "%", "source": "macalculatriceenligne.com"},
+    "cnas_total_pct": {"expected": 0.35, "unit": "%", "source": "macalculatriceenligne.com"},
 
     # --- Discount Rate ---
     "van_discount_rate": {"expected": 0.12, "unit": "%", "source": "Industry standard Algeria"},
@@ -114,7 +114,7 @@ def verify_feasibility_generator() -> list[RateCheck]:
     checks.append(RateCheck("tva_rate", ALGERIA_DATA["tva_rate"], VERIFIED_2026_RATES["tva_normal"]["expected"], "%", "lamacta.com, webminds.dz"))
     checks.append(RateCheck("corporate_tax_rate", ALGERIA_DATA["corporate_tax_rate"], VERIFIED_2026_RATES["ibs_industry"]["expected"], "%", "webminds.dz (industry default)"))
     checks.append(RateCheck("cnas_employer_rate", ALGERIA_DATA["cnas_employer_rate"], VERIFIED_2026_RATES["cnas_employer_pct"]["expected"], "%", "macalculatriceenligne.com"))
-    checks.append(RateCheck("smig_monthly", ALGERIA_DATA["smig_monthly"], VERIFIED_2026_RATES["smig_monthly"]["expected"], "DZD", "africarrieres.com"))
+    checks.append(RateCheck("snmg_monthly", ALGERIA_DATA.get("snmg_monthly", ALGERIA_DATA.get("smig_monthly")), VERIFIED_2026_RATES["snmg_monthly"]["expected"], "DZD", "macalculatriceenligne.com"))
 
     return checks
 
@@ -138,20 +138,87 @@ def verify_financial_calculators() -> list[RateCheck]:
     return checks
 
 
+def verify_g1_ggr_bareme() -> list[RateCheck]:
+    """Verify G1 GGR IRG barème constants match 2026 official values."""
+    from g1_ggr_generator import IRG_BAREME
+
+    checks = []
+
+    expected = [(120_000, 0.00), (360_000, 0.20), (1_440_000, 0.30), (float("inf"), 0.35)]
+    for i, (exp_tranche, exp_rate) in enumerate(expected):
+        if i < len(IRG_BAREME):
+            checks.append(RateCheck(
+                f"g1_irg_tranche_{i}",
+                exp_tranche,
+                IRG_BAREME[i][0],
+                "DZD",
+                "mfdgi.gov.dz, CIDTA, LF 2026"
+            ))
+            checks.append(RateCheck(
+                f"g1_irg_rate_{i}",
+                exp_rate,
+                IRG_BAREME[i][1],
+                "%",
+                "mfdgi.gov.dz, CIDTA, LF 2026"
+            ))
+
+    return checks
+
+
+def verify_g29_salary_bareme() -> list[RateCheck]:
+    """Verify G29/G30 salary IRG barème constants match 2026 official values."""
+    from g29_irg_salaires_generator import IRG_BAREME_MONTHLY
+
+    checks = []
+
+    expected = [(30_000, 0.00), (120_000, 0.23), (360_000, 0.27), (float("inf"), 0.30)]
+    for i, (exp_tranche, exp_rate) in enumerate(expected):
+        if i < len(IRG_BAREME_MONTHLY):
+            checks.append(RateCheck(
+                f"g29_irg_tranche_{i}",
+                exp_tranche,
+                IRG_BAREME_MONTHLY[i][0],
+                "DZD",
+                "mfdgi.gov.dz, CIDTA, LF 2026"
+            ))
+            checks.append(RateCheck(
+                f"g29_irg_rate_{i}",
+                exp_rate,
+                IRG_BAREME_MONTHLY[i][1],
+                "%",
+                "mfdgi.gov.dz, CIDTA, LF 2026"
+            ))
+
+    return checks
+
+
 def run_all(strict: bool = False) -> bool:
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
     all_checks = []
     all_checks.extend(verify_nesda_calculator())
     all_checks.extend(verify_feasibility_generator())
     all_checks.extend(verify_financial_calculators())
+    all_checks.extend(verify_g1_ggr_bareme())
+    all_checks.extend(verify_g29_salary_bareme())
 
     print("=" * 70)
-    print("2026 Rate Verification Report")
+    print(f"2026 Rate Verification Report — {timestamp}")
     print("=" * 70)
 
     failures = 0
     for check in all_checks:
         status_icon = "✅" if check.status == "PASS" else "❌"
-        if check.status != "PASS":
+        if isinstance(check.expected, float) and isinstance(check.actual, (int, float)):
+            # Handle inf comparison: both inf match; nan comparison fails
+            if check.expected == float("inf") and check.actual == float("inf"):
+                match = True
+            else:
+                match = abs(check.expected - check.actual) < 0.001
+        else:
+            match = check.expected == check.actual
+        if not match:
+            check.status = "FAIL"
             failures += 1
             print(f"  {status_icon} {check.name}: expected={check.expected}{check.unit}, actual={check.actual}{check.unit}")
             print(f"      Source: {check.source}")

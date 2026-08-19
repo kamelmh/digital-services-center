@@ -165,10 +165,13 @@ All other generators work without any API keys.
 
 ## Legal
 
-- IBS rates: 19% (production), 23% (BTP), 26% (commerce/services)
-- IRG brackets: 0% ≤180K, 20% 180-360K, 30% 360-720K, 35% >720K
-- TVA: 19% standard, 9% reduced
-- CNAS: 26% employer contribution
+- IBS rates: 19% (industry/production), 23% (services) — verified 2026 per WebMinds.dz
+- IRG brackets: 0% ≤120K, 20% 120-360K, 30% 360K-1.44M, 35% >1.44M — verified 2026
+- TVA: 19% standard, 9% reduced (taux réduit) — verified 2026
+- CNAS: 25.5% employer contribution (25% + 0.5% œuvres sociales) — verified 2026
+- SMIG: 22,000 DZD/month | SNMG: 24,000 DZD/month (CNAS base) — verified 2026
+- NESDA financing: 5-15% personal, 15-25% PNR grant, up to 70% bank (1-3% rate) — verified 2026
+- IFU: 5% (biens), 12% (services), threshold 8M DZD — verified 2026 LF 2026
 - Decree 26-154 (April 2026): Official 9-part feasibility study plan-type
 - DGI forms: All sourced from mfdgi.gov.dz
 

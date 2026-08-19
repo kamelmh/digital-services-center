@@ -27,6 +27,8 @@ try:
 except ImportError:
     raise SystemExit("Missing: requests. Install: python -m pip install requests")
 
+from financial_calculators import FinancialCalculators
+
 # ── NESDA Constants ──────────────────────────────────────────────────────────
 
 # Pull from nesda_catalog as single source of truth
@@ -460,11 +462,9 @@ class NESDADossierGenerator:
                 "net_income": net, "cash_flow": cf,
             })
 
-        # VAN calculation
-        discount = 0.10
-        van = -investment
-        for yr in years:
-            van += yr["cash_flow"] / (1 + discount) ** yr["year"]
+        # VAN calculation (single source of truth — FinancialCalculators)
+        cash_flows = [-investment] + [yr["cash_flow"] for yr in years]
+        van = FinancialCalculators.van(cash_flows)  # 12% Algerian market rate
 
         # Break-even
         fixed_costs = annual_rev * operating_pct
