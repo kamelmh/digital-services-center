@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from app_instance import app, _sidebar, _provider_select, _wilaya_select, _save_output
 from feasibility_generator import BUSINESS_TEMPLATES
-from dossier_generator import DossierGenerator
+from nesda_dossier_generator import NESDADossierGenerator
 
 
 def dossier_page():
@@ -30,15 +30,22 @@ def dossier_page():
         if not business_name.value or not business_name_en.value:
             app.toast("Please fill all fields", variant="error")
             return
-        app.toast("Generating complete NESDA dossier (25 steps)... This may take a few minutes.", variant="info")
+        app.toast("Generating complete NESDA dossier... This may take a few minutes.", variant="info")
         try:
-            gen = DossierGenerator(provider=provider.value)
-            result = gen.generate_full_dossier(
-                business_type.value, business_name.value, business_name_en.value,
-                wilaya.value, investment.value, monthly_revenue.value, employees_count.value,
-            )
+            gen = NESDADossierGenerator()
+            params = {
+                'activity_key': business_type.value,
+                'business_type': business_type.value,
+                'wilaya': wilaya.value,
+                'investment': investment.value,
+                'monthly_revenue': monthly_revenue.value,
+                'employees_count': employees_count.value,
+                'client_name': business_name.value,
+            }
+            result = gen.generate(params)
+            full_content = '\n\n---\n\n'.join(result['sections'].values())
             app.markdown("### Complete NESDA Dossier")
-            app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{result['content']}</div>")
-            _save_output("dossier", business_name.value, result["content"])
+            app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{full_content}</div>")
+            _save_output("dossier", business_name.value, full_content)
         except Exception as e:
             app.toast(f"Error: {e}", variant="error")

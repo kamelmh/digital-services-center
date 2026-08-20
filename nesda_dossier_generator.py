@@ -410,7 +410,8 @@ class NESDADossierGenerator:
 | **المجموع** | **100%** | **{calc.total_cost:,}** |
 
 ## شروط القرض البنكي
-- **سعر الفائدة:** {calc.interest_rate*100:.1f}% (مدعوم من NESDA)
+- **سعر الفائدة:** {interest_rate*100:.1f}% (مدعوم من NESDA)
+- **مدة السداد:** {repayment_years} سنة ({grace_years} سنة سماح + {repayment_years - grace_years} سنوات سداد)
 - **مدة السداد:** {calc.repayment_years} سنة ({calc.grace_years} سنة سماح + {calc.repayment_years - calc.grace_years} سنوات سداد)
 - **القسط الشهري:** {calc.monthly_payment:,.0f} دج
 - **إجمالي الفائدة:** {calc.total_interest:,.0f} دج
@@ -436,16 +437,24 @@ class NESDADossierGenerator:
 
     def _generate_part6(self, params: dict, investment: int, defaults: dict, financing: dict) -> str:
         """Part VI: Prévisions économiques et financières."""
+        from nesda_calculator import calculate_nesda_financing
+        
         monthly_rev = defaults.get("monthly_revenue_estimate", 500_000)
         annual_rev = monthly_rev * 12
         cogs_pct = defaults.get("cogs_pct", 0.65)
         operating_pct = defaults.get("operating_pct", 0.15)
         net_margin = defaults.get("profit_margin_target", 0.10)
         bank_loan = investment * financing["bank_pct"]
-        interest_rate = 0.03
-        annual_payment = bank_loan / 10  # simplified annuity
+        
+        # Use correct NESDA terms (2% interest, 12y repayment, 1.5y grace)
+        nesda_result = calculate_nesda_financing(investment)
+        interest_rate = nesda_result.interest_rate
+        repayment_years = nesda_result.repayment_years
+        grace_years = nesda_result.grace_years
+        annual_payment = nesda_result.annual_payment
 
         years = []
+        balance = bank_loan
         for y in range(1, 6):
             growth = (1 + 0.10) ** (y - 1)
             rev = annual_rev * growth
@@ -453,7 +462,15 @@ class NESDADossierGenerator:
             gross = rev - cogs
             operating = rev * operating_pct
             ebit = gross - operating
-            interest = max(0, bank_loan * interest_rate * (1 - (y-1)/10))
+            
+            # NESDA amortization with grace period
+            interest = balance * interest_rate
+            if y <= grace_years:
+                principal = 0  # Grace period: interest only
+            else:
+                principal = annual_payment - interest
+            balance = max(0, balance - principal)
+            
             net = (ebit - interest) * (1 - 0.19)  # after tax
             cf = net + (investment * 0.08)  # add depreciation
             years.append({
@@ -511,8 +528,8 @@ class NESDADossierGenerator:
 ## جدول سداد القرض البنكي
 | السنة | رصيد البداية | القسط | الفائدة |Principal | الرصيد النهاية |
 |-------|-------------|-------|---------|----------|---------------|
-| 1 | {bank_loan:,.0f} | {annual_payment:,.0f} | {bank_loan*interest_rate:,.0f} | {annual_payment - bank_loan*interest_rate:,.0f} | {bank_loan - (annual_payment - bank_loan*interest_rate):,.0f} |
-| 2 | {bank_loan - (annual_payment - bank_loan*interest_rate):,.0f} | {annual_payment:,.0f} | {(bank_loan - (annual_payment - bank_loan*interest_rate))*interest_rate:,.0f} | {annual_payment - (bank_loan - (annual_payment - bank_loan*interest_rate))*interest_rate:,.0f} | [À calculer] |
+| 1 | {bank_loan:,.0f} | {annual_payment:,.0f} | {bank_loan*interest_rate:,.0f} | 0 | {bank_loan:,.0f} |
+| 2 | {bank_loan:,.0f} | {annual_payment:,.0f} | {bank_loan*interest_rate:,.0f} | {annual_payment - bank_loan*interest_rate:,.0f} | {bank_loan - (annual_payment - bank_loan*interest_rate):,.0f} |
 """
 
     def _generate_part7(self, params: dict, investment: int) -> str:

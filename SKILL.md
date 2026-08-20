@@ -31,7 +31,7 @@ All generators are in `C:\Users\Admin\projects\active\apps\digital-services-cent
 | **G4 IBS** | `g4_ibs_generator.py` | `G4Data` + `generate_g4()` | Corporate tax declaration |
 | **G8** | `g8_existence_generator.py` | `G8Data` + `generate_g8()` | Business existence declaration |
 | **G11 BIC** | `g11_bic_generator.py` | `G11Data` + `generate_g11()` | Industrial/commercial profits declaration |
-| **G12** | `g12_generator.py` | `G12Data` + `generate_g12()` | IFU forecast declaration |
+| **G12** | `g12_official.py` | `G12Data` + `generate_g12()` | IFU forecast declaration |
 | **G29 IRG** | `g29_irg_salaires_generator.py` | `G29Data` + `generate_g29()` | Salary IRG annual declaration |
 | **G50** | `g50_generator.py` | `G50Data` + `generate_g50()` | Monthly multi-tax declaration |
 
