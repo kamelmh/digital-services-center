@@ -62,13 +62,32 @@ SECTIONS = [
 class BusinessPlanGenerator:
     """Generate an Arabic business plan through a selected LLM provider."""
 
-    def __init__(self, provider: str | None = None, api_key: str | None = None, model: str | None = None) -> None:
-        self.provider = self._resolve_provider(provider, api_key)
+    def __init__(self, provider: str | None = None, api_key: str | None = None, model: str | None = None, allow_offline: bool = True) -> None:
+        self.offline = False
+        try:
+            self.provider = self._resolve_provider(provider, api_key)
+        except FeasibilityError:
+            if allow_offline:
+                self.offline = True
+                self.provider = "offline"
+                self.api_key = None
+                self.model = "offline-templates"
+                self.url = ""
+                self.session = __import__("requests").Session()
+                return
+            raise
         config = PROVIDERS[self.provider]
         self.api_key = api_key or next(
             (os.getenv(k) for k in config["key_env"] if os.getenv(k)), None
         )
         if not self.api_key:
+            if allow_offline:
+                self.offline = True
+                self.provider = "offline"
+                self.model = "offline-templates"
+                self.url = ""
+                self.session = __import__("requests").Session()
+                return
             variables = " or ".join(config["key_env"])
             raise FeasibilityError(f"No API key found for {self.provider}. Set {variables}.")
         self.model = model or config["model"]
@@ -131,6 +150,9 @@ class BusinessPlanGenerator:
         investment: int,
     ) -> dict[str, Any]:
         """Generate a full business plan and return dict with sections + markdown."""
+        if getattr(self, "offline", False) or not getattr(self, "api_key", None):
+            from offline_templates import business_plan_offline
+            return business_plan_offline(business_type, business_name, location, wilaya, investment)
         template = BUSINESS_TEMPLATES.get(business_type)
         if not template:
             raise FeasibilityError(f"Unknown business type: {business_type}")
