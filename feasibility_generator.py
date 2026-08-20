@@ -586,7 +586,7 @@ BANK_REGULATION_14_03 = """أثرت اللائحة رقم 14-03 الصادرة �
 
 
 class FeasibilityGenerator:
-    """Generate an Arabic feasibility study through a selected LLM provider."""
+    """Generate an Arabic feasibility study. Works offline (templates) or online (LLM)."""
 
     def __init__(
         self,
@@ -595,13 +595,38 @@ class FeasibilityGenerator:
         model: str | None = None,
         timeout: int = 90,
         retries: int = 3,
+        allow_offline: bool = True,
     ) -> None:
-        self.provider = self._resolve_provider(provider, api_key)
-        config = PROVIDERS[self.provider]
-        self.api_key = api_key or self._read_api_key(config["key_env"])
-        if not self.api_key:
-            variables = " or ".join(config["key_env"])
-            raise FeasibilityError(f"No API key found for {self.provider}. Set {variables} or use --api-key.")
+        self.offline = False
+        try:
+            self.provider = self._resolve_provider(provider, api_key)
+            config = PROVIDERS[self.provider]
+            self.api_key = api_key or self._read_api_key(config["key_env"])
+            if not self.api_key:
+                if allow_offline:
+                    self.offline = True
+                    self.provider = "offline"
+                    self.api_key = None
+                    self.model = "offline-templates"
+                    self.url = ""
+                    self.timeout = timeout
+                    self.retries = retries
+                    self.session = requests.Session()
+                    return
+                variables = " or ".join(config["key_env"])
+                raise FeasibilityError(f"No API key found for {self.provider}. Set {variables} or use --api-key.")
+        except FeasibilityError:
+            if allow_offline:
+                self.offline = True
+                self.provider = "offline"
+                self.api_key = None
+                self.model = "offline-templates"
+                self.url = ""
+                self.timeout = timeout
+                self.retries = retries
+                self.session = requests.Session()
+                return
+            raise
 
         self.model = model or os.getenv(f"FEASIBILITY_{self.provider.upper()}_MODEL") or config["model"]
         self.url = os.getenv(f"FEASIBILITY_{self.provider.upper()}_URL", config["url"])
@@ -722,6 +747,38 @@ class FeasibilityGenerator:
             investment = (minimum + maximum) // 2
         if investment <= 0:
             raise FeasibilityError("يجب أن يكون مبلغ الاستثمار رقمًا موجبًا.")
+
+        # Offline path — no API key, no LLM needed
+        if getattr(self, "offline", False) or not getattr(self, "api_key", None):
+            from offline_templates import feasibility_offline
+            business_name = location.strip()
+            result = feasibility_offline(business_type, business_name, location.strip(), wilaya.strip(), investment)
+            # Attach real financials for PDF export compatibility
+            try:
+                rf = calculate_real_financials(investment, business, wilaya.strip())
+                result["real_financials"] = {
+                    "investment_plan": rf["investment_plan"],
+                    "financing_plan": rf["financing_plan"],
+                    "annual_revenue_est": rf["annual_revenue_est"],
+                    "reference_van": rf["reference_van"],
+                    "reference_tri": rf["reference_tri"],
+                    "reference_seuil": rf["reference_seuil"],
+                    "reference_delai": rf["reference_delai"],
+                    "reference_taux_marge": rf["reference_taux_marge"],
+                    "reference_compte_resultat": rf["reference_compte_resultat"],
+                    "reference_tresorerie": rf["reference_tresorerie"],
+                    "scenarios": rf["scenarios"],
+                    "nesda_result": rf["nesda_result"],
+                    "loan_payment": rf["loan_payment"],
+                }
+            except Exception:
+                pass
+            try:
+                from training_hook import hook_generation
+                hook_generation(generator="feasibility", input_params={"business_type": business_type, "location": location, "wilaya": wilaya, "investment": investment, "mode": "offline"}, output_content=result["content"], metadata={"sections": list(result["sections"].keys()), "offline": True})
+            except Exception:
+                pass
+            return result
 
         # Compute real financial calculations (no LLM guessing)
         real_financials = calculate_real_financials(investment, business, wilaya.strip())
