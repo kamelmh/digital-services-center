@@ -26,3 +26,5 @@ from .social_scheduling import social_scheduling_page
 from .social_engagement import social_engagement_page
 from .complete_dossier import complete_dossier_page
 from .bmc import bmc_page
+from .orchestrated_dossier import orchestrated_dossier_page
+from .dossier import dossier_page

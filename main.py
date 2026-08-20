@@ -13,11 +13,14 @@ from pages import (
     aapi_page, batch_page, nesda_calc_page, nesda_catalog_page,
     eligibility_page, linkedin_page, social_content_page, social_analytics_page,
     social_scheduling_page, social_engagement_page, complete_dossier_page, bmc_page,
+    orchestrated_dossier_page, dossier_page,
 )
 
 app.navigation([
     vl.Page(home_page, title="Home", icon="house"),
     vl.Page(complete_dossier_page, title="Complete Dossier", icon="package"),
+    vl.Page(orchestrated_dossier_page, title="One-Click Dossier", icon="zap"),
+    vl.Page(dossier_page, title="NESDA 9-Part", icon="file-text"),
     vl.Page(feasibility_page, title="Feasibility", icon="file-text"),
     vl.Page(business_plan_page, title="Business Plan", icon="briefcase"),
     vl.Page(market_research_page, title="Market Research", icon="bar-chart"),
