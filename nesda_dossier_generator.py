@@ -410,8 +410,7 @@ class NESDADossierGenerator:
 | **المجموع** | **100%** | **{calc.total_cost:,}** |
 
 ## شروط القرض البنكي
-- **سعر الفائدة:** {interest_rate*100:.1f}% (مدعوم من NESDA)
-- **مدة السداد:** {repayment_years} سنة ({grace_years} سنة سماح + {repayment_years - grace_years} سنوات سداد)
+- **سعر الفائدة:** {calc.interest_rate*100:.1f}% (مدعوم من NESDA)
 - **مدة السداد:** {calc.repayment_years} سنة ({calc.grace_years} سنة سماح + {calc.repayment_years - calc.grace_years} سنوات سداد)
 - **القسط الشهري:** {calc.monthly_payment:,.0f} دج
 - **إجمالي الفائدة:** {calc.total_interest:,.0f} دج
