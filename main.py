@@ -15,6 +15,7 @@ from pages import (
     social_scheduling_page, social_engagement_page, complete_dossier_page, bmc_page,
     orchestrated_dossier_page, dossier_page,
 )
+from pages.superuser import superuser_page
 
 app.navigation([
     vl.Page(home_page, title="Home", icon="house"),
@@ -46,6 +47,7 @@ app.navigation([
     vl.Page(social_analytics_page, title="Social Analytics", icon="bar-chart"),
     vl.Page(social_scheduling_page, title="Social Scheduling", icon="calendar"),
     vl.Page(social_engagement_page, title="Social Engagement", icon="message-circle"),
+    vl.Page(superuser_page, title="Superuser — Kamel Sample", icon="shield"),
     vl.Page(batch_page, title="Batch Process", icon="layers"),
 ])
 
