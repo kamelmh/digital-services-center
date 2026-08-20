@@ -18,7 +18,7 @@ def nesda_catalog_page():
 
     col1, col2, col3 = app.columns([2,1,1])
     with col1:
-        q = app.text_input("🔍 Search", placeholder="Search activities...").lower()
+        q = str(app.text_input("🔍 Search", placeholder="Search activities...")).lower()
     with col2:
         sectors = list(set(a.sector for a in CATALOG.values())) if CATALOG else []
         cat_filter = app.selectbox("Category", ["All"] + sorted(sectors))
@@ -27,14 +27,14 @@ def nesda_catalog_page():
 
     activities = list(CATALOG.values()) if CATALOG else []
     if q:
-        activities = [a for a in activities if q in a.name.lower() or q in str(a.id)]
+        activities = [a for a in activities if q in a.name_fr.lower() or q in a.name_ar or q in str(a.key)]
     if cat_filter != "All":
         activities = [a for a in activities if a.sector == cat_filter]
 
     if sort_by == "id":
-        activities.sort(key=lambda x: x.id)
+        activities.sort(key=lambda x: x.key)
     elif sort_by == "name":
-        activities.sort(key=lambda x: x.name)
+        activities.sort(key=lambda x: x.name_fr)
     else:
         activities.sort(key=lambda x: x.sector)
 
@@ -43,16 +43,20 @@ def nesda_catalog_page():
     </div>""")
 
     for a in activities:
-        with app.expander(f"#{a.id} — {a.name} [{a.sector}]"):
+        with app.expander(f"#{a.key} — {a.name_fr} [{a.sector}]"):
             app.html(f"""<div style="background:#f8f9fa;padding:12px;border-radius:8px;">
-                <div><strong>ID:</strong> {a.id}</div>
-                <div><strong>Name:</strong> {a.name}</div>
+                <div><strong>Key:</strong> {a.key}</div>
+                <div><strong>Name (FR):</strong> {a.name_fr}</div>
+                <div><strong>Name (AR):</strong> {a.name_ar}</div>
                 <div><strong>Sector:</strong> {a.sector}</div>
-                <div><strong>Description:</strong> {a.description}</div>
+                <div><strong>Investment:</strong> {a.investment_min:,} — {a.investment_max:,} DZD</div>
+                <div><strong>Margin:</strong> {a.profit_margin_pct}%</div>
+                <div><strong>Difficulty:</strong> {a.difficulty}</div>
             </div>""")
 
     app.markdown("---")
     app.markdown("#### Sector Summary")
-    stats = get_sector_stats()
-    for sector, count in stats.items():
-        app.text(f"{sector}: {count} activities")
+    seen_sectors = list(set(a.sector for a in CATALOG.values()))
+    for sector in sorted(seen_sectors):
+        sector_activities = [a for a in CATALOG.values() if a.sector == sector]
+        app.text(f"{sector}: {len(sector_activities)} activities")
