@@ -1,8 +1,27 @@
-reportlab>=5.0.0
-requests>=2.28.0
-fastapi>=0.104.0
-uvicorn>=0.24.0
-pydantic>=2.0.0
+# DSC — Digital Services Center
+# Lock: 2026-08-20  (pip freeze from Python 3.14.6, Windows)
+# Install:  pip install -r requirements.txt
+# Offline:  all except --provider (groq/openrouter/aihubmix) need no API key
 
-# UI Framework (install separately)
-# violit  # Custom Streamlit-like framework — install from local source or pip
+# ── Core ──────────────────────────────────────────────────
+reportlab==4.5.1          # Arabic PDF (Tahoma + arabic_reshaper + bidi)
+arabic-reshaper==3.0.1
+python-bidi==0.6.11
+
+# ── Web (Violit + API) ──────────────────────────────────
+violit==0.8.29             # UI framework — pin 0.8.29 (alpha, do not auto-bump)
+fastapi==0.141.1
+uvicorn[standard]==0.52.1
+pydantic==2.13.4
+requests==2.34.2
+jinja2==3.1.6              # offline_templates + future prompts/*.j2
+
+# ── Data / Docs ─────────────────────────────────────────
+openpyxl==3.1.5            # Excel import/export (future)
+python-multipart==0.0.32   # FastAPI file uploads
+
+# ── Build ───────────────────────────────────────────────
+# pyinstaller==6.22.2     # only for building dist/*.exe (pip install pyinstaller)
+
+# ── Optional (local LLM lane, future) ───────────────────
+# llama-cpp-python        # uncomment when adding bundled GGUF model

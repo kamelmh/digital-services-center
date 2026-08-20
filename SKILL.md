@@ -23,7 +23,7 @@ All generators are in `C:\Users\Admin\projects\active\apps\digital-services-cent
 | **Social Media** | `social_media_generator.py` | `SocialMediaGenerator().generate()` | Social media content |
 | **Tax Declaration** | `tax_declaration_generator.py` | `TaxDeclarationGenerator().generate()` | Tax declaration forms |
 
-### Tax Form Generators (6 official DGI forms)
+### Tax Form Generators (7 official DGI forms)
 
 | Form | File | Class/Function | Purpose |
 |------|------|----------------|---------|
@@ -43,14 +43,16 @@ All generators are in `C:\Users\Admin\projects\active\apps\digital-services-cent
 | **TRI (IRR)** | `financial_calculators.py` | `FinancialCalculators.tri()` | Internal Rate of Return |
 | **Break-even (units)** | `financial_calculators.py` | `FinancialCalculators.seuil_rentabilite()` | Break-even in units |
 | **Break-even (DZD)** | `financial_calculators.py` | `FinancialCalculators.seuil_rentabilite_valeur()` | Break-even in DZD |
-| **NESDA Financing** | `nesda_calculator.py` | `calculate_nesda_financing()` | NESDA loan terms (2%/12y/1.5y) |
+| **NESDA Financing** | `nesda_calculator.py` | `calculate_nesda_financing()` | NESDA loan terms (0% bonified / 7y / 1.5y grace) |
+| **Offline Engine** | `offline_templates.py` | `*_offline()` | 7 deterministic fallbacks — 100% offline sellable |
 
 ### Verification
 
 | Tool | File | Purpose |
 |------|------|---------|
-| **Rate Checker** | `verify_rates.py` | 30 automated rate verification checks |
+| **Rate Checker** | `verify_rates.py` | 38 automated rate verification checks |
 | **Tests** | `tests/test_generators.py` | 47 generator tests |
+| **Fonts** | `assets/fonts/Tahoma*.ttf` | Bundled for exe portability (no system dependency) |
 
 ## Usage Patterns
 
@@ -93,45 +95,53 @@ data = G29Data(
 html = generate_g29(data)
 ```
 
-## Critical Rate Constants (2026 verified)
+## Critical Rate Constants (2026 verified — RESEARCH_2026.md, 11 sources)
 
 ```python
-# NESDA Financing
-NESDA_INTEREST_RATE = 0.02      # 2% (was 3%)
-NESDA_REPAYMENT_YEARS = 12      # (was 10)
-NESDA_GRACE_YEARS = 1.5         # (was 1)
+# NESDA Financing (bonified 100% — NESDA DG + CPA Bank, 2026-08-20)
+NESDA_INTEREST_RATE = 0.00      # 0% (bonified, was 2%)
+NESDA_REPAYMENT_YEARS = 7       # 7y (5y repayment + 1.5y grace via CPA)
+NESDA_GRACE_YEARS = 1.5
+NESDA_MAX = 10_000_000          # DZD max financing
+# Offline: offline_templates.py uses these same values (deterministic)
 
-# IRG G1 Revenue (annual, per part)
-IRG_BAREME = [
-    (120_000, 0.00),   # ≤120K: 0%
-    (360_000, 0.20),   # 120K-360K: 20%
-    (1_440_000, 0.30), # 360K-1.44M: 30%
-    (float("inf"), 0.35),  # >1.44M: 35%
+# IRG — 6-tranche progressive (LF 2026, Art. 104 CIDTA — 2026-08-20)
+IRG_BAREME = [  # annual, per part (G1 GGR)
+    (240_000, 0.00),     # ≤240K: 0%
+    (480_000, 0.23),     # 240K-480K: 23%
+    (960_000, 0.27),     # 480K-960K: 27%
+    (1_920_000, 0.30),   # 960K-1.92M: 30%
+    (3_840_000, 0.33),   # 1.92M-3.84M: 33%
+    (float("inf"), 0.35),# >3.84M: 35%
+]
+IRG_BAREME_MONTHLY = [  # monthly (G29/G30 IRG salaires)
+    (30_000, 0.00),      # ≤30K: 0% (exonéré)
+    (120_000, 0.23),     # 30K-120K: 23%
+    (360_000, 0.27),     # 120K-360K: 27%
+    (1_600_000, 0.30),   # 360K-1.6M: 30%  (annualised 1.92M/12)
+    (3_200_000, 0.33),   # 1.6M-3.2M: 33%
+    (float("inf"), 0.35),# >3.2M: 35%
 ]
 
-# IRG G29 Salary (monthly, per employee)
-IRG_BAREME_MONTHLY = [
-    (30_000, 0.00),    # ≤30K: 0% (exonéré)
-    (120_000, 0.23),   # 30K-120K: 23%
-    (360_000, 0.27),   # 120K-360K: 27%
-    (float("inf"), 0.30),  # >360K: 30%
-]
+# SNMG / Wages
+SNMG_MONTHLY = 24_000    # DZD/month (DP 26-01, Jan 2026)
+# CNAS: salarié 9%, employeur 25.5% (+0.5% œuvres = 26% total patronal)
 
-# SNMG (Salaire Minimum National Garanti)
-SNMG_MONTHLY = 24_000  # DZD/month
-
-# Tax Rates
-TVA_NORMAL = 0.19      # 19%
-TVA_REDUCED = 0.09     # 9%
-IBS_INDUSTRY = 0.19    # 19%
-IBS_SERVICES = 0.23    # 23%
-CNAS_EMPLOYER = 0.255  # 25.5%
+# Tax Rates (Art. 150 CIDTA, LF 2026)
+TVA_NORMAL = 0.19        # 19% (taux normal)
+TVA_REDUCED = 0.09       # 9%  (taux réduit)
+IBS_PRODUCTION = 0.19    # 19% production
+IBS_BTP_TOURISM = 0.23   # 23% BTP/tourisme
+IBS_SERVICES = 0.26      # 26% commerce/services (was 23% — corrected 2026-08-20)
+CNAS_EMPLOYER = 0.255    # 25.5% (26% with œuvres sociales)
+# Discount rate for VAN: 12% (single source: FinancialCalculators.van)
 ```
 
 ## Verification
 ```bash
-python verify_rates.py          # 30 rate checks
+python verify_rates.py          # 38 rate checks
 python -m pytest tests/ -v     # 47 generator tests
+# new: python -c "from offline_templates import feasibility_offline; ..."
 ```
 
 ## Compliance Notes

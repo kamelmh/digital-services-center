@@ -101,8 +101,6 @@ When finishing work, append an entry below.
 
 ---
 
-*Last updated: 2026-08-20*
-
 ### 2026-08-20 — Major Rate Corrections (NESDA, IBS, IRG)
 
 - **What:**
@@ -118,3 +116,20 @@ When finishing work, append an entry below.
 - **Impact:** All financial outputs now use correct 2026 rates. NESDA dossiers show 0% interest (was 2%). IBS correctly shows 26% for services (was 23%). IRG calculations use full 6-tranche progressive scale.
 - **Breaking changes:** NESDA financing figures will change significantly (0% interest = lower costs). IBS for services increases from 23% to 26%. IRG calculations more nuanced with 6 brackets.
 - **Verification:** 38/38 rate checks pass, 47/47 tests pass
+
+---
+
+### 2026-08-20 — Offline Templates + PDF/Git Hardening (P0.1–P0.3)
+
+- **What:**
+  - **Offline lane (P0.1):** New `offline_templates.py` (399 lines) — 7 deterministic fallbacks for feasibility, business plan, market research, marketing plan, financial projections, social media, tax declaration. All use only local data (BUSINESS_TEMPLATES, ALGERIA_DATA, financial_calculators 12%, NESDA 0%/7y/1.5y, CNAS 25.5%, SNMG 24k). Same dict shape as LLM path (`content`, `sections`, `offline=True`) — zero UI change needed. 7 generators patched (`allow_offline=True` default) to delegate when `offline` or no `api_key`. `allow_offline=False` preserves hard-fail. Result: store sells offline — no internet, no key, no error.
+  - **PDF fonts (P0.2):** `dsc_utils.generate_pdf()` now calls `_register_pdf_fonts()` — bundled `assets/fonts/Tahoma*.ttf` first, then `C:/Windows/Fonts` fallback, then Helvetica alias. Verified Arabic PDF 32K. Fonts tracked so exe works on any Windows. `dsc.spec` already bundles `assets/` recursively.
+  - **Git hygiene (P0.3):** `.gitignore` adds `dsc_data.db` (+wal/shm), `nul`, `training_data/gen_*.json`. Untracked 17 previously-committed `gen_*.json` (stay on disk, now ignored; `index.jsonl` stays tracked).
+  - **Docs lock (P0.4-0.5):** `SKILL.md` synced to 38 checks, 7 tax forms, 0%/7y/1.5y NESDA, 6-tranche IRG, 26% IBS. `requirements.txt` pinned from `pip freeze` (reportlab 4.5.1, violit 0.8.29 pinned alpha, arabic-reshaper 3.0.1, bidi 0.6.11, etc.).
+  - **Desktop:** `.exe` rebuilt — 178 MB (was 176) includes offline templates + Tahoma.
+- **Files:** `offline_templates.py` (new), `feasibility_generator.py`, `business_plan_generator.py`, `market_research_generator.py`, `marketing_plan_generator.py`, `financial_projections_generator.py`, `social_media_generator.py`, `tax_declaration_generator.py`, `dsc_utils.py`, `assets/fonts/Tahoma*.ttf`, `.gitignore`, `SKILL.md`, `requirements.txt`
+- **Impact:** Product is now 100% offline sellable. Premium AI path stays via GROQ_API_KEY etc. No breaking change for online users — same call, richer text when key present.
+- **Verification:** 47/47 pass, 7/7 offline generators >500 chars (VAN/TRI/DZD/NESDA present), PDF 32K, `allow_offline=False` raises correctly.
+- **Alerts:** None — `offline=True` flag in output tells caller which path was used.
+
+*Last updated: 2026-08-20*
