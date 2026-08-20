@@ -11,6 +11,12 @@ import sys
 import time
 from datetime import datetime
 from typing import Any
+try:
+    from prompts import PROMPT_VERSION
+    from prompts import PROMPT_VERSION as _PROMPT_VERSION
+    _PROMPT_VERSION = PROMPT_VERSION  # keep linter happy
+except ImportError:
+    PROMPT_VERSION = "unknown"
 
 try:
     import requests
@@ -132,6 +138,7 @@ class MarketingPlanGenerator:
 
     def __init__(self, provider: str | None = None, api_key: str | None = None, model: str | None = None, allow_offline: bool = True) -> None:
         self.offline = False
+        self.prompt_version = PROMPT_VERSION
         try:
             self.provider = self._resolve_provider(provider, api_key)
         except FeasibilityError:
@@ -161,6 +168,7 @@ class MarketingPlanGenerator:
         self.model = model or config["model"]
         self.url = config["url"]
         self.session = requests.Session()
+        self.prompt_version = PROMPT_VERSION
 
     def _resolve_provider(self, requested: str | None, api_key: str | None) -> str:
         if requested:
@@ -221,7 +229,19 @@ class MarketingPlanGenerator:
         """Generate a comprehensive marketing plan."""
         if getattr(self, "offline", False) or not getattr(self, "api_key", None):
             from offline_templates import marketing_plan_offline
-            return marketing_plan_offline(business_type, business_name, location, wilaya, investment, monthly_budget)
+            result = marketing_plan_offline(business_type, business_name, location, wilaya, investment, monthly_budget)
+            try:
+                from quality_scorer import QualityScorer as _QS0
+                _qr0 = _QS0().score("marketing_plan", result["content"])
+                _qm0 = {"quality_grade": _qr0.grade, "quality_score": round(_qr0.overall_score, 3), "quality_passed": _qr0.passed}
+            except Exception:
+                _qm0 = {}
+            try:
+                from training_hook import hook_generation
+                hook_generation(generator="marketing_plan", input_params={"business_type": business_type, "location": location, "wilaya": wilaya, "mode": "offline"}, output_content=result["content"], metadata={"sections": list(result["sections"].keys()), "offline": True, "prompt_version": getattr(self, "prompt_version", "unknown"), **_qm0})
+            except Exception:
+                pass
+            return result
         template = BUSINESS_TEMPLATES.get(business_type)
         if not template:
             raise FeasibilityError(f"Unknown business type: {business_type}")
@@ -286,13 +306,20 @@ currency: DZD
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** """ + now.strftime("%d/%m/%Y")
 
+        # Quality gate
+        try:
+            from quality_scorer import QualityScorer as _QS
+            _qr = _QS().score("marketing_plan", content)
+            _qmeta = {"quality_grade": _qr.grade, "quality_score": round(_qr.overall_score, 3), "quality_passed": _qr.passed}
+        except Exception:
+            _qmeta = {}
         try:
             from training_hook import hook_generation
             hook_generation(
                 generator="marketing_plan",
                 input_params={"business_type": business_type, "monthly_budget": monthly_budget},
                 output_content=content,
-                metadata={"sections": list(sections.keys())},
+                metadata={"sections": list(sections.keys()), "prompt_version": getattr(self, "prompt_version", "unknown"), **_qmeta},
             )
         except Exception:
             pass

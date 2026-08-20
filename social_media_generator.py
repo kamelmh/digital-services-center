@@ -11,6 +11,12 @@ import sys
 import time
 from datetime import datetime
 from typing import Any
+try:
+    from prompts import PROMPT_VERSION
+    from prompts import PROMPT_VERSION as _PROMPT_VERSION
+    _PROMPT_VERSION = PROMPT_VERSION  # keep linter happy
+except ImportError:
+    PROMPT_VERSION = "unknown"
 
 try:
     import requests
@@ -170,6 +176,7 @@ class SocialMediaGenerator:
 
     def __init__(self, provider: str | None = None, api_key: str | None = None, model: str | None = None, allow_offline: bool = True) -> None:
         self.offline = False
+        self.prompt_version = PROMPT_VERSION
         try:
             self.provider = self._resolve_provider(provider, api_key)
         except FeasibilityError:
@@ -199,6 +206,7 @@ class SocialMediaGenerator:
         self.model = model or config["model"]
         self.url = config["url"]
         self.session = requests.Session()
+        self.prompt_version = PROMPT_VERSION
 
     def _resolve_provider(self, requested: str | None, api_key: str | None) -> str:
         if requested:
@@ -265,7 +273,19 @@ class SocialMediaGenerator:
         """Generate social media content."""
         if getattr(self, "offline", False) or not getattr(self, "api_key", None):
             from offline_templates import social_media_offline
-            return social_media_offline(content_type, business_type, business_name, location, wilaya)
+            result = social_media_offline(content_type, business_type, business_name, location, wilaya)
+            try:
+                from quality_scorer import QualityScorer as _QS0
+                _qr0 = _QS0().score("social_media", result["content"])
+                _qm0 = {"quality_grade": _qr0.grade, "quality_score": round(_qr0.overall_score, 3), "quality_passed": _qr0.passed}
+            except Exception:
+                _qm0 = {}
+            try:
+                from training_hook import hook_generation
+                hook_generation(generator="social_media", input_params={"business_type": business_type, "content_type": content_type, "mode": "offline"}, output_content=result["content"], metadata={"offline": True, "prompt_version": getattr(self, "prompt_version", "unknown"), **_qm0})
+            except Exception:
+                pass
+            return result
         template = BUSINESS_TEMPLATES.get(business_type)
         if not template:
             raise FeasibilityError(f"Unknown business type: {business_type}")
@@ -316,12 +336,20 @@ language: ar
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** {now:%d/%m/%Y}"""
 
+        # Quality gate
+        try:
+            from quality_scorer import QualityScorer as _QS
+            _qr = _QS().score("social_media", full_content)
+            _qmeta = {"quality_grade": _qr.grade, "quality_score": round(_qr.overall_score, 3), "quality_passed": _qr.passed}
+        except Exception:
+            _qmeta = {}
         try:
             from training_hook import hook_generation
             hook_generation(
                 generator="social_media",
                 input_params={"business_type": business_type, "content_type": content_type},
                 output_content=full_content,
+                metadata={"prompt_version": getattr(self, "prompt_version", "unknown"), **_qmeta},
             )
         except Exception:
             pass

@@ -27,7 +27,7 @@ def tax_guides_page():
         if app.button("Generate G12", key="g12_btn"):
             try:
                 gen = TaxDeclarationGenerator()
-                result = gen.generate("g12", {"business_name":bname.value,"nif":nif.value,"wilaya":wilaya.value,"activity":activity.value,"investment":investment.value,"annual_revenue":revenue.value})
+                result = gen.generate("g12", bname.value or "غير محدد")
                 _save_output("g12", bname.value or "g12", result, "g12_declaration.pdf")
                 app.success("Generated G12!")
             except Exception as e:
@@ -45,7 +45,7 @@ def tax_guides_page():
         if app.button("Generate G50", key="g50_btn"):
             try:
                 gen = TaxDeclarationGenerator()
-                result = gen.generate("g50", {"business_name":bname.value,"nif":nif.value,"period":period.value,"taxable_turnover":taxable.value,"vat_collected":collected.value})
+                result = gen.generate("g50", bname.value or "غير محدد")
                 _save_output("g50", bname.value or "g50", result, "g50_declaration.pdf")
                 app.success("Generated G50!")
             except Exception as e:
@@ -69,7 +69,7 @@ def tax_guides_page():
         if app.button("Generate G4", key="g4_btn"):
             try:
                 gen = TaxDeclarationGenerator()
-                result = gen.generate("g4", {"business_name":bname.value,"nif":nif.value,"period":period.value,"employees":employees})
+                result = gen.generate("g4", bname.value or "غير محدد")
                 _save_output("g4", bname.value or "g4", result, "g4_declaration.pdf")
                 app.success("Generated G4!")
             except Exception as e:
@@ -88,7 +88,7 @@ def tax_guides_page():
         if app.button("Generate G1", key="g1_btn"):
             try:
                 gen = TaxDeclarationGenerator()
-                result = gen.generate("g1", {"business_name":bname.value,"nif":nif.value,"period":period.value,"revenue":revenue.value,"cogs":cogs.value,"operating_expenses":operating.value})
+                result = gen.generate("g1", bname.value or "غير محدد")
                 _save_output("g1", bname.value or "g1", result, "g1_declaration.pdf")
                 app.success("Generated G1!")
             except Exception as e:
@@ -107,7 +107,7 @@ def tax_guides_page():
         if app.button("Generate G29", key="g29_btn"):
             try:
                 gen = TaxDeclarationGenerator()
-                result = gen.generate("g29", {"business_name":bname.value,"nif":nif.value,"period":period.value,"revenue":revenue.value,"cogs":cogs.value,"operating_expenses":operating.value})
+                result = gen.generate("g29", bname.value or "غير محدد")
                 _save_output("g29", bname.value or "g29", result, "g29_declaration.pdf")
                 app.success("Generated G29!")
             except Exception as e:
@@ -126,7 +126,7 @@ def tax_guides_page():
         if app.button("Generate G8", key="g8_btn"):
             try:
                 gen = TaxDeclarationGenerator()
-                result = gen.generate("g8", {"business_name":bname.value,"nif":nif.value,"period":period.value,"revenue":revenue.value,"cogs":cogs.value,"operating_expenses":operating.value})
+                result = gen.generate("g8", bname.value or "غير محدد")
                 _save_output("g8", bname.value or "g8", result, "g8_declaration.pdf")
                 app.success("Generated G8!")
             except Exception as e:

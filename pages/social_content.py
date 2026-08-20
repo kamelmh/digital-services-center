@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app_instance import app, _sidebar, _save_output
+from app_instance import app, _sidebar, _save_output, _wilaya_select
 from social_media_generator import SocialMediaGenerator
 from feasibility_generator import BUSINESS_TEMPLATES
 
@@ -18,8 +18,9 @@ def social_content_page():
     app.html(f"<h3 style='margin-bottom:2px;'>{template['name_ar']}</h3><p style='margin-top:0;color:#666;'>{template['name_en']}</p>")
 
     location = app.text_input("City / Location")
+    wilaya = _wilaya_select()
     business_name = app.text_input("Business Name (Arabic)")
-    provider = app.selectbox("Provider", ["Gemini", "Groq"])
+    provider = app.selectbox("Provider", ["groq", "openrouter", "aihubmix"], index=0)
 
     if app.button("Generate Social Media Content"):
         if not business_name.value:
@@ -27,8 +28,8 @@ def social_content_page():
             return
         app.toast("Generating social media content...", variant="info")
         try:
-            gen = SocialMediaGenerator(provider=provider.value)
-            result = gen.generate(business_type.value, business_name.value, location.value, "")
+            gen = SocialMediaGenerator(provider=provider.value.lower())
+            result = gen.generate(business_type.value, business_name.value, location.value, wilaya.value)
             app.markdown("### Social Media Content")
             app.html(f"<div style='background:#f8f9fa;padding:15px;border-radius:8px;white-space:pre-wrap;font-family:serif;line-height:1.8;'>{result['content']}</div>")
             _save_output("social_media", business_name.value, result["content"])
