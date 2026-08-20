@@ -160,6 +160,9 @@ def generate_pdf(html_content: str, filename: str, output_dir: str = None) -> Pa
     from reportlab.lib.units import cm
     from reportlab.lib import colors
 
+    # Register Tahoma for Arabic — bundled in assets/fonts for .exe portability
+    _register_pdf_fonts()
+
     if output_dir is None:
         output_dir = Path(__file__).parent / "generated_output"
     else:
@@ -183,6 +186,7 @@ def generate_pdf(html_content: str, filename: str, output_dir: str = None) -> Pa
                                   fontName='Helvetica-Bold', fontSize=16,
                                   alignment=1, spaceAfter=20)
 
+
     story = []
     story.append(Paragraph("Digital Services Center", title_style))
     story.append(Spacer(1, 10))
@@ -203,6 +207,46 @@ def generate_pdf(html_content: str, filename: str, output_dir: str = None) -> Pa
     doc.build(story)
     return pdf_path
 
+
+def _register_pdf_fonts():
+    """Register Tahoma (Arabic) — bundled copy first, then system fallbacks."""
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    if 'Tahoma' in pdfmetrics.getRegisteredFontNames():
+        return
+    bundled = Path(__file__).parent / "assets" / "fonts" / "Tahoma.ttf"
+    bundled_b = Path(__file__).parent / "assets" / "fonts" / "Tahoma-Bold.ttf"
+    # Try bundled first (works inside PyInstaller exe via _MEIPASS)
+    try:
+        import sys as _sys
+        import pathlib as _pl
+        meipass = getattr(_sys, '_MEIPASS', None)
+        if meipass:
+            mpass_fonts = _pl.Path(meipass) / "assets" / "fonts"
+            if (mpass_fonts / "Tahoma.ttf").exists():
+                bundled = mpass_fonts / "Tahoma.ttf"
+                bundled_b = mpass_fonts / "Tahoma-Bold.ttf"
+    except Exception:
+        pass
+    for name, path, fallback in [
+        ('Tahoma', bundled, r'C:/Windows/Fonts/tahoma.ttf'),
+        ('Tahoma-Bold', bundled_b, r'C:/Windows/Fonts/tahomabd.ttf'),
+    ]:
+        try:
+            if Path(path).exists():
+                pdfmetrics.registerFont(TTFont(name, str(path)))
+            elif Path(fallback).exists():
+                pdfmetrics.registerFont(TTFont(name, fallback))
+        except Exception:
+            pass
+    # Fallback aliases so Helvetica requests don't crash if Tahoma missing
+    try:
+        if 'Tahoma' not in pdfmetrics.getRegisteredFontNames():
+            pdfmetrics.registerFont(TTFont('Tahoma', 'Helvetica'))
+        if 'Tahoma-Bold' not in pdfmetrics.getRegisteredFontNames():
+            pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'Helvetica-Bold'))
+    except Exception:
+        pass
 
 def export_page_to_pdf(content: str, page_name: str, app_instance=None):
     """Export current page content to PDF with download button."""

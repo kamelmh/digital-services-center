@@ -36,3 +36,14 @@ screenshots/
 
 # Claude Desktop
 CLAUDE_DESKTOP_SUMMARY.md
+
+# DSC runtime
+dsc_data.db
+dsc_data.db-wal
+dsc_data.db-shm
+nul
+
+# Training data (per-generation JSONs — keep index.jsonl intent, ignore bulk)
+training_data/gen_*.json
+
+# Fonts are tracked (assets/fonts/*.ttf bundled for exe portability)
