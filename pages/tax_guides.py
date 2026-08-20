@@ -16,6 +16,9 @@ def tax_guides_page():
 
     with tab1:
         app.markdown("### G12 — Impot Forfait Unique")
+        app.html("""<div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:10px;font-size:0.9em;">
+            <strong>Real form:</strong> <a href="?page=g12" style="color:#1565c0;">G12 page →</a> &nbsp;|&nbsp; <strong>API:</strong> <code>POST /tax/g12</code> &nbsp;|&nbsp; <a href="https://www.mfdgi.gov.dz/files/516/-/13/GN12--12.pdf" target="_blank" style="color:#1565c0;">Official PDF (mfdgi)</a>
+        </div>""")
         cols = app.columns(2)
         bname = cols[0].text_input("Business Name", key="g12_n")
         nif = cols[1].text_input("NIF", key="g12_nif")
@@ -35,6 +38,9 @@ def tax_guides_page():
 
     with tab2:
         app.markdown("### G50 — TVA Mensuelle")
+        app.html("""<div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:10px;font-size:0.9em;">
+            <strong>Real form:</strong> <a href="?page=g50" style="color:#1565c0;">G50 page →</a> &nbsp;|&nbsp; <strong>API:</strong> <code>POST /tax/g50</code> &nbsp;|&nbsp; <a href="?page=g50" style="color:#1565c0;">Preview: /tax/g50/preview</a>
+        </div>""")
         cols = app.columns(2)
         bname = cols[0].text_input("Business Name", key="g50_n")
         nif = cols[1].text_input("NIF", key="g50_nif")
@@ -52,7 +58,10 @@ def tax_guides_page():
                 app.error(str(e))
 
     with tab3:
-        app.markdown("### G4 — IR (Salaries)")
+        app.markdown("### G4 — IBS (Impôt sur le Bénéfice)")
+        app.html("""<div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:10px;font-size:0.9em;">
+            <strong>Real form:</strong> <a href="?page=g4" style="color:#1565c0;">G4 page →</a> &nbsp;|&nbsp; <strong>API:</strong> <code>POST /tax/g4</code>
+        </div>""")
         cols = app.columns(2)
         bname = cols[0].text_input("Business Name", key="g4_n")
         nif = cols[1].text_input("NIF", key="g4_nif")
@@ -76,7 +85,10 @@ def tax_guides_page():
                 app.error(str(e))
 
     with tab4:
-        app.markdown("### G1 — IR BIC (Entreprise)")
+        app.markdown("### G1 — IRG / GGR (Revenu Global)")
+        app.html("""<div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:10px;font-size:0.9em;">
+            <strong>Real form:</strong> <a href="?page=g1" style="color:#1565c0;">G1 page →</a> &nbsp;|&nbsp; <strong>API:</strong> <code>POST /tax/g1</code>
+        </div>""")
         cols = app.columns(2)
         bname = cols[0].text_input("Business Name", key="g1_n")
         nif = cols[1].text_input("NIF", key="g1_nif")
@@ -95,7 +107,10 @@ def tax_guides_page():
                 app.error(str(e))
 
     with tab5:
-        app.markdown("### G29 — IS Trimestriel")
+        app.markdown("### G29 — IRG Salaires (G29/G30)")
+        app.html("""<div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:10px;font-size:0.9em;">
+            <strong>Real form:</strong> <a href="?page=g29" style="color:#1565c0;">G29 page →</a> &nbsp;|&nbsp; <strong>API:</strong> <code>POST /tax/g29</code>
+        </div>""")
         cols = app.columns(2)
         bname = cols[0].text_input("Business Name", key="g29_n")
         nif = cols[1].text_input("NIF", key="g29_nif")
@@ -114,7 +129,10 @@ def tax_guides_page():
                 app.error(str(e))
 
     with tab6:
-        app.markdown("### G8 — IS (Annual)")
+        app.markdown("### G8 — Déclaration d'Existence")
+        app.html("""<div style="background:#e3f2fd;padding:10px;border-radius:8px;margin-bottom:10px;font-size:0.9em;">
+            <strong>Real form:</strong> <a href="?page=g8" style="color:#1565c0;">G8 page →</a> &nbsp;|&nbsp; <strong>API:</strong> <code>POST /tax/g8</code> &nbsp;|&nbsp; <a href="?page=g8" style="color:#1565c0;">Preview: /tax/g8/preview</a>
+        </div>""")
         cols = app.columns(2)
         bname = cols[0].text_input("Business Name", key="g8_n")
         nif = cols[1].text_input("NIF", key="g8_nif")
