@@ -1,4 +1,4 @@
-"""DSC REST API — FastAPI layer for all generators and calculators.
+"""DSC REST API — FastAPI layer for all generators, calculators, auth, and billing.
 
 Endpoints:
   /health              — Health check
@@ -17,6 +17,13 @@ Endpoints:
   /tax/g1              — G1 general income declaration
   /tax/g8              — G8 existence declaration
   /quality/score       — Quality scoring for generated content
+  /auth/register       — Create account (email + password)
+  /auth/login          — Login, returns JWT
+  /auth/me             — Current user (requires Bearer token)
+  /billing/plans       — List plans (public)
+  /billing/checkout    — Create checkout (requires auth)
+  /billing/webhook     — Gateway webhook (mock or Chargily/Stripe)
+  /billing/me          — My subscription (requires auth)
 """
 
 from __future__ import annotations
@@ -25,7 +32,7 @@ import importlib
 import os
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
@@ -55,6 +62,11 @@ from financial_calculators import (
     generate_3_scenarios,
 )
 from quality_scorer import QualityScorer, score_all, format_report
+from auth import (
+    LoginRequest, RegisterRequest, TokenResponse, UserOut,
+    authenticate, create_token, create_user, get_current_user,
+    get_current_user_optional, get_user_by_id,
+)
 
 # ── App ───────────────────────────────────────────────────────────────────────
 
@@ -71,6 +83,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Billing router (auth tables are created on auth import)
+try:
+    from billing import router as billing_router
+    app.include_router(billing_router)
+except Exception as _e:
+    # Billing is optional for offline .exe
+    pass
 
 
 # ── Pydantic Schemas (request / response) ────────────────────────────────────
@@ -549,6 +569,30 @@ def quality_score(req: QualityRequest):
             for c in report.checks
         ],
     )
+
+
+# ── Auth ─────────────────────────────────────────────────────────────────────
+
+@app.post("/auth/register", response_model=TokenResponse)
+def auth_register(req: RegisterRequest):
+    """Create account and return JWT."""
+    user = create_user(req.email, req.password, req.name)
+    token = create_token(user.id, user.email)
+    return TokenResponse(access_token=token, user=user)
+
+
+@app.post("/auth/login", response_model=TokenResponse)
+def auth_login(req: LoginRequest):
+    """Login and return JWT."""
+    user = authenticate(req.email, req.password)
+    token = create_token(user.id, user.email)
+    return TokenResponse(access_token=token, user=user)
+
+
+@app.get("/auth/me", response_model=UserOut)
+def auth_me(user: UserOut = Depends(get_current_user)):
+    """Current user (requires Authorization: Bearer <token>)."""
+    return user
 
 
 # ── HTML Preview ──────────────────────────────────────────────────────────────
