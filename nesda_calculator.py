@@ -79,8 +79,8 @@ def calculate_nesda_financing(
     monthly_revenue: int = 500_000,
     cogs_pct: float = 0.65,
     operating_pct: float = 0.15,
-    interest_rate: float = 0.02,
-    repayment_years: int = 12,
+    interest_rate: float = 0.0,
+    repayment_years: int = 7,
     grace_years: float = 1.5,
 ) -> NESDAFinancingResult:
     """Calculate NESDA financing breakdown."""
@@ -104,9 +104,11 @@ def calculate_nesda_financing(
 
     # Loan repayment — use annuity formula (same as FinancialCalculators.FinancingPlan)
     r = interest_rate
-    n = repayment_years - grace_years
+    n = repayment_years - grace_years  # actual repayment years (after grace)
     if r > 0 and n > 0 and bank_loan > 0:
         annual_payment = bank_loan * (r * (1 + r) ** n) / ((1 + r) ** n - 1)
+    elif n > 0 and bank_loan > 0:
+        annual_payment = bank_loan / n  # 0% interest: divide evenly over repayment period
     else:
         annual_payment = bank_loan / max(1, repayment_years)
 

@@ -138,9 +138,9 @@ class NESDARequest(BaseModel):
     monthly_revenue: int = Field(500_000, gt=0)
     cogs_pct: float = Field(0.65, ge=0, le=1)
     operating_pct: float = Field(0.15, ge=0, le=1)
-    interest_rate: float = Field(0.03, ge=0, le=1)
-    repayment_years: int = Field(10, ge=1, le=30)
-    grace_years: int = Field(1, ge=0, le=10)
+    interest_rate: float = Field(0.0, ge=0, le=1)
+    repayment_years: int = Field(7, ge=1, le=30)
+    grace_years: int = Field(2, ge=0, le=10)
 
 
 class NESDAResponse(BaseModel):

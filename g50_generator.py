@@ -56,11 +56,13 @@ TVA_RATE_STANDARD = 0.19
 TVA_RATE_REDUIT = 0.09
 TVA_RATE_ZERO = 0.00
 
-# IRG Brackets 2025 (annual)
+# IRG Brackets 2026 (annual)
 IRG_BRACKETS = [
-    (180_000, 0.00),
-    (360_000, 0.20),
-    (720_000, 0.30),
+    (240_000, 0.00),
+    (480_000, 0.23),
+    (960_000, 0.27),
+    (1_920_000, 0.30),
+    (3_840_000, 0.33),
     (float("inf"), 0.35),
 ]
 

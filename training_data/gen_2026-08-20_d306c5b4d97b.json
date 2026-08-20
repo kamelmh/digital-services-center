@@ -1,0 +1,21 @@
+{
+  "id": "gen_2026-08-20_d306c5b4d97b",
+  "timestamp": "2026-08-20T09:43:03.179301+00:00",
+  "generator": "nesda_dossier",
+  "input": {
+    "activity_key": "centre_services_num",
+    "business_type": "centre_services_num",
+    "wilaya": "Alger",
+    "investment": 2500000,
+    "client_status": "unemployed"
+  },
+  "input_hash": "d306c5b4d97b",
+  "output_len": 12569,
+  "output_words": 2077,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {
+    "decree": "26-154 (April 2026)"
+  }
+}

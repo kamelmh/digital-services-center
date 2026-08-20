@@ -1,7 +1,7 @@
 # Algerian Business Regulations 2026 — Research-Backed Reference
 
-> Last verified: 2026-08-14  
-> Sources: UpGrowth.dz, WebMinds.dz, ComptaLegal.dz, AfroTools.dz  
+> Last verified: 2026-08-20  
+> Sources: NESDA DG interview (lesenjeuxeco.dz), CPA Bank (cpa-bank.dz), UpGrowth.dz, WebMinds.dz, ComptaLegal.dz, AfroTools.dz, lamacta.com, macalculatriceenligne.com, Art. 150 CIDTA  
 > Purpose: Ground all DSC outputs in verified 2026 Algerian legal/economic data
 
 ---
@@ -49,9 +49,9 @@
 | Activity Type | 2026 Rate |
 |--------------|----------|
 | Production de biens | 19% |
-| Bâtiment, TP, hydraulique | 19% |
-| Tourisme, thermale | 19% |
-| Services et autres | 23% |
+| Bâtiment, TP, hydraulique, tourisme | 19% |
+| BTP et tourisme (sauf agences de voyage) | 23% |
+| **Commerce, Services et autres activités** | **26%** |
 
 - Déclaration annuelle, échéance: 30 avril
 - Paiement fractionné en versements anticipés
@@ -59,12 +59,14 @@
 
 ### IRG (Impôt sur le Revenu Global — Personal Income Tax)
 
-| Tranche revenement annuel (DZD) | Taux |
+| Tranche revenu annuel (DZD) | Taux |
 |---|---|
-| Jusqu'à 120,000 | 0% |
-| 120,001 — 360,000 | 20% |
-| 360,001 — 1,440,000 | 30% |
-| Au-delà de 1,440,000 | 35% |
+| Jusqu'à 240,000 | 0% |
+| 240,001 — 480,000 | 23% |
+| 480,001 — 960,000 | 27% |
+| 960,001 — 1,920,000 | 30% |
+| 1,920,001 — 3,840,000 | 33% |
+| Au-delà de 3,840,000 | 35% |
 
 - Abattement forfaitaire de 40% sur le revenu imposable, borné 1,000-1,500 DZD/mois
 - Exonération si salaire brut ≤ 30,000 DZD/mois
@@ -111,8 +113,8 @@
 | **Apport personnel** | 5% (chômeurs/étudiants) / 15% (salariés) | upgrowth.dz |
 | **Subvention NESDA (PNR)** | 15-25% selon profil/secteur | upgrowth.dz |
 | **Crédit bancaire** | Jusqu'à 70% du coût | upgrowth.dz |
-| **Taux intérêt crédit** | 1-3% (taux bonifié) | upgrowth.dz |
-| **Durée remboursement** | 11.5 ans (1.5 an différé + 2×5 ans) | upgrowth.dz |
+| **Taux intérêt crédit** | **0% (bonifié à 100%)** | **NESDA DG interview (lesenjeuxeco.dz Feb 2026), CPA Bank** |
+| **Durée remboursement** | **6.5 ans (5 ans remboursement + 18 mois différé)** | **CPA Bank official page** |
 | **Formation CDE** | Obligatoire pour création | upgrowth.dz |
 | **Attestation CDE valabilité** | 2 ans | upgrowth.dz |
 
@@ -248,17 +250,18 @@
 - [ ] TRI computed via Newton-Raphson with bisection fallback
 - [ ] Break-even: unit-based + value-based (DZD)
 - [ ] 3 scenarios: prudent (80% rev), reference (100%), favorable (115% rev)
-- [ ] Loan rate: 6.75% (LTA + 1.5%)
-- [ ] Repayment: 7-8 years standard
-- [ ] SMIG/SNMG: 24,000 DZD/month (CNAS base)
+- [ ] Loan rate: 0% (NESDA bonifié 100%)
+- [ ] Repayment: 6.5 years (5y + 1.5y grace)
+- [ ] SNMG: 24,000 DZD/month (CNAS base)
 
 ### Regulatory Compliance:
 - [ ] 9-part dossier structure (NESDA Annexe V)
 - [ ] All wilayas included with market_index weighting
 - [ ] Tax rates verified against LF 2026
 - [ ] NESDA financing model: 5/15% personal, 15-25% PNR, up to 70% bank
-- [ ] Regulatory checklist per business type
-- [ ] Tax incentives properly described (3/6/10 years)
+- [ ] IBS: 19% (production), 23% (BTP/tourisme), 26% (commerce/services)
+- [ ] IRG G1: 6 tranches (0%/23%/27%/30%/33%/35%)
+- [ ] IRG G29: 6 tranches (0%/23%/27%/30%/33%/35%)
 
 ### Output Standards:
 - [ ] Arabic only (foss ha) in all Arabic outputs
@@ -270,12 +273,14 @@
 ---
 
 ## Sources:
-1. UpGrowth.dz — "NESDA Algérie 2026" (Aug 11, 2026)
-2. WebMinds.dz — "Fiscalité Algérie 2026" (May 7, 2026)
-3. UpGrowth.dz — "IFU ou régime réel" (Jul 11, 2026)
-4. UpGrowth.dz — "TVA Entreprise Algérie 2026" (Jul 31, 2026)
-5. ComptaLegal.dz — "CNAS vs CASNOS 2026" (May 21, 2026)
-6. AfroTools.dz — "Calculateur salaire net" (Apr 20, 2026)
-7. UpGrowth.dz — "Guide Recrutement Algérie 2026" (Apr 23, 2026)
-8. JoliBoaz.fr — "Smic Algérie 2026" (Mar 3, 2026)
-9. UpGrowth.dz — "Auto-Entrepreneur Impôts 2026" (Jul 31, 2026)
+1. NESDA DG interview — "Taux d'intérêt 0%" (lesenjeuxeco.dz, Feb 2026)
+2. CPA Bank — NESDA product page: "Durée 6 ans et 6 mois, taux bonifié 100%" (cpa-bank.dz)
+3. UpGrowth.dz — "NESDA Algérie 2026" (Aug 11, 2026)
+4. WebMinds.dz — "Fiscalité Algérie 2026" (May 7, 2026)
+5. UpGrowth.dz — "IFU ou régime réel" (Jul 11, 2026)
+6. UpGrowth.dz — "TVA Entreprise Algérie 2026" (Jul 31, 2026)
+7. ComptaLegal.dz — "CNAS vs CASNOS 2026" (May 21, 2026)
+8. AfroTools.dz — "Calculateur salaire net" (Apr 20, 2026)
+9. lamacta.com — IRG barème 2026
+10. macalculatriceenligne.com — "Calculateur IRG 2026" (Circulaire 08/MF/DGI)
+11. Art. 150 CIDTA — IBS rates (gbsdz.com, sakinadz.com)

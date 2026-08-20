@@ -17,11 +17,11 @@ class TestG50Generator:
         # 180,000 DA annual = 15,000/month → 0% bracket
         assert calculate_irg_mensuel(180_000) == 0
 
-    def test_irg_mensuel_in_20pct_bracket(self):
+    def test_irg_mensuel_in_23pct_bracket(self):
         from g50_generator import calculate_irg_mensuel
-        # 360,000 DA annual = 30,000/month → first 15k at 0%, next 15k at 20%
+        # 360,000 DA annual = 30,000/month → first 20k at 0%, next 10k at 23%
         result = calculate_irg_mensuel(360_000)
-        assert result == 3_000  # 15_000 * 0.20
+        assert result == 2_300  # 10_000 * 0.23
 
     def test_irg_mensuel_high_salary(self):
         from g50_generator import calculate_irg_mensuel
@@ -135,7 +135,7 @@ class TestG1GGRGenerator:
 
     def test_irg_bareme_structure(self):
         from g1_ggr_generator import IRG_BAREME
-        assert len(IRG_BAREME) == 4
+        assert len(IRG_BAREME) == 6
         # First bracket: 0%
         assert IRG_BAREME[0][1] == 0.0
         # Last bracket: 35%

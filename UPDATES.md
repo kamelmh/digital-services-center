@@ -101,4 +101,20 @@ When finishing work, append an entry below.
 
 ---
 
-*Last updated: 2026-08-19*
+*Last updated: 2026-08-20*
+
+### 2026-08-20 — Major Rate Corrections (NESDA, IBS, IRG)
+
+- **What:**
+  - **NESDA rates corrected:** Interest rate 2%→0% (100% bonified by state, per NESDA DG interview & CPA Bank). Repayment period 12y→7y (5y repayment + 1.5y grace, per CPA Bank). Grace period 1.5y unchanged.
+  - **IBS services rate corrected:** 23%→26% (Art. 150 CIDTA, 3-tier structure: 19% production, 23% BTP/tourism, 26% commerce/services)
+  - **IRG G1 barème expanded:** 4 tranches→6 tranches (new 33% bracket at 1.92M-3.84M). Updated thresholds: 240K/480K/960K/1.92M/3.84M with rates 0%/23%/27%/30%/33%/35%
+  - **IRG G29 barème expanded:** Added 33% bracket (1.6M-3.2M) and 35% bracket (>3.2M). 6 tranches total.
+  - **SMIG→SNMG in dossier:** Fixed hardcoded 20,000→24,000 in salary tables and Part 7
+  - **G50 IRG brackets updated:** Old 4-tranche scale replaced with correct 2026 6-tranche scale
+  - **Tests updated:** 2 tests fixed for new barème structure (45→47 pass)
+  - **RESEARCH_2026.md updated:** All rates corrected, sources expanded to 11
+- **Files:** `nesda_calculator.py`, `nesda_dossier_generator.py`, `g1_ggr_generator.py`, `g29_irg_salaires_generator.py`, `g50_generator.py`, `verify_rates.py`, `api.py`, `feasibility_generator.py`, `RESEARCH_2026.md`, `tests/test_generators.py`
+- **Impact:** All financial outputs now use correct 2026 rates. NESDA dossiers show 0% interest (was 2%). IBS correctly shows 26% for services (was 23%). IRG calculations use full 6-tranche progressive scale.
+- **Breaking changes:** NESDA financing figures will change significantly (0% interest = lower costs). IBS for services increases from 23% to 26%. IRG calculations more nuanced with 6 brackets.
+- **Verification:** 38/38 rate checks pass, 47/47 tests pass

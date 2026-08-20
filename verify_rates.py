@@ -37,9 +37,9 @@ VERIFIED_2026_RATES = {
     "nesda_grant_pct_min": {"expected": 0.15, "unit": "%", "source": "UpGrowth.dz"},
     "nesda_grant_pct_max": {"expected": 0.25, "unit": "%", "source": "UpGrowth.dz"},
     "nesda_bank_pct": {"expected": 0.70, "unit": "%", "source": "UpGrowth.dz"},
-    "nesda_interest_rate_min": {"expected": 0.01, "unit": "%", "source": "UpGrowth.dz"},
-    "nesda_interest_rate_max": {"expected": 0.03, "unit": "%", "source": "UpGrowth.dz"},
-    "nesda_repayment_years": {"expected": 12, "unit": "years", "source": "UpGrowth.dz"},
+    "nesda_interest_rate_min": {"expected": 0.0, "unit": "%", "source": "NESDA DG interview (lesenjeuxeco.dz Feb 2026), CPA Bank (100% bonified)"},
+    "nesda_interest_rate_max": {"expected": 0.0, "unit": "%", "source": "NESDA DG interview (lesenjeuxeco.dz Feb 2026), CPA Bank (100% bonified)"},
+    "nesda_repayment_years": {"expected": 7, "unit": "years", "source": "CPA Bank: 6 ans et 6 mois (5y repayment + 1.5y grace)"},
     "nesda_grace_years": {"expected": 1.5, "unit": "years", "source": "UpGrowth.dz"},
 
     # --- Tax Rates ---
@@ -49,7 +49,7 @@ VERIFIED_2026_RATES = {
     "tva_threshold_commerce": {"expected": 500_000_000, "unit": "DZD", "source": "upgrowth.dz"},
 
     "ibs_industry": {"expected": 0.19, "unit": "%", "source": "WebMinds.dz"},
-    "ibs_services": {"expected": 0.23, "unit": "%", "source": "WebMinds.dz"},
+    "ibs_services": {"expected": 0.26, "unit": "%", "source": "Art. 150 CIDTA, webminds.dz, gbsdz.com"},
 
     "irg_rate_max": {"expected": 0.35, "unit": "%", "source": "WebMinds.dz"},
     "irg_threshold_0": {"expected": 120_000, "unit": "DZD", "source": "WebMinds.dz"},
@@ -91,15 +91,15 @@ def verify_nesda_calculator() -> list[RateCheck]:
         total_cost=5_000_000,
         model="triangular",
         profile="unemployed",
-        interest_rate=0.02,
-        repayment_years=12,
+        interest_rate=0.0,
+        repayment_years=7,
         grace_years=1.5,
     )
 
     checks.append(RateCheck("nesda_personal_pct", MODELS["triangular"]["personal_range"][0], VERIFIED_2026_RATES["nesda_personal_pct_unemployed"]["expected"], "%", "UpGrowth.dz"))
     checks.append(RateCheck("nesda_grant_pct", MODELS["triangular"]["nesda_range"][1], VERIFIED_2026_RATES["nesda_grant_pct_max"]["expected"], "%", "UpGrowth.dz"))
     checks.append(RateCheck("nesda_bank_pct", MODELS["triangular"]["bank_pct"], VERIFIED_2026_RATES["nesda_bank_pct"]["expected"], "%", "UpGrowth.dz"))
-    checks.append(RateCheck("nesda_interest_rate", result.interest_rate, 0.02, "%", "UpGrowth.dz (verified 1-3%)"))
+    checks.append(RateCheck("nesda_interest_rate", result.interest_rate, 0.0, "%", "NESDA DG, CPA Bank (100% bonified)"))
     checks.append(RateCheck("nesda_repayment_years", result.repayment_years, VERIFIED_2026_RATES["nesda_repayment_years"]["expected"], "years", "UpGrowth.dz"))
     checks.append(RateCheck("nesda_grace_years", result.grace_years, VERIFIED_2026_RATES["nesda_grace_years"]["expected"], "years", "UpGrowth.dz"))
 
@@ -144,7 +144,7 @@ def verify_g1_ggr_bareme() -> list[RateCheck]:
 
     checks = []
 
-    expected = [(120_000, 0.00), (360_000, 0.20), (1_440_000, 0.30), (float("inf"), 0.35)]
+    expected = [(240_000, 0.00), (480_000, 0.23), (960_000, 0.27), (1_920_000, 0.30), (3_840_000, 0.33), (float("inf"), 0.35)]
     for i, (exp_tranche, exp_rate) in enumerate(expected):
         if i < len(IRG_BAREME):
             checks.append(RateCheck(
@@ -171,7 +171,7 @@ def verify_g29_salary_bareme() -> list[RateCheck]:
 
     checks = []
 
-    expected = [(30_000, 0.00), (120_000, 0.23), (360_000, 0.27), (float("inf"), 0.30)]
+    expected = [(30_000, 0.00), (120_000, 0.23), (360_000, 0.27), (1_600_000, 0.30), (3_200_000, 0.33), (float("inf"), 0.35)]
     for i, (exp_tranche, exp_rate) in enumerate(expected):
         if i < len(IRG_BAREME_MONTHLY):
             checks.append(RateCheck(

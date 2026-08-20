@@ -1,0 +1,21 @@
+{
+  "id": "gen_2026-08-20_87612532b641",
+  "timestamp": "2026-08-20T11:06:05.829491+00:00",
+  "generator": "nesda_dossier",
+  "input": {
+    "activity_key": "quincaillerie",
+    "business_type": "quincaillerie",
+    "wilaya": "El Bayadh",
+    "investment": 5000000,
+    "client_status": "unemployed"
+  },
+  "input_hash": "87612532b641",
+  "output_len": 12578,
+  "output_words": 2080,
+  "provider": null,
+  "model": null,
+  "quality_score": null,
+  "metadata": {
+    "decree": "26-154 (April 2026)"
+  }
+}

@@ -484,8 +484,8 @@ def calculate_real_financials(
             monthly_revenue=annual_revenue_est // 12,
             cogs_pct=1 - margin_mid,
             operating_pct=0.15,
-            interest_rate=0.02,
-            repayment_years=12,
+            interest_rate=0.0,
+            repayment_years=7,
             grace_years=1.5,
         )
 
