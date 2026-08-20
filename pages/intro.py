@@ -4,15 +4,27 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app_instance import app, _sidebar
+from dsc_utils import get_stats, stat_card
 
 
 def home_page():
     _sidebar()
     app.html("""
-    <div style="text-align:center;padding:25px 0;">
-        <h1 style="color:#0A1628;margin-bottom:5px;">Digital Services Center</h1>
-        <p style="color:#D4AF37;font-size:1.1em;margin-top:0;">مركز الخدمات الرقمية — الجزائر</p>
-        <p style="color:#888;font-size:0.9em;margin-top:5px;">28 Tools • 28 Pages • One-Click Dossier Pipeline</p>
+    <div style="text-align:center;padding:30px 0;background:linear-gradient(135deg,#0A1628 0%,#1a237e 50%,#0A1628 100%);color:white;border-radius:15px;margin-bottom:20px;">
+        <h1 style="color:white;margin-bottom:5px;">Digital Services Center</h1>
+        <p style="color:#D4AF37;font-size:1.2em;margin-top:0;">مركز الخدمات الرقمية — الجزائر</p>
+        <p style="color:rgba(255,255,255,0.7);font-size:0.9em;margin-top:5px;">28 Tools • 28 Pages • One-Click Dossier Pipeline</p>
+    </div>
+    """)
+
+    # Dashboard stats from database
+    stats = get_stats()
+    app.html(f"""
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:20px;">
+        {stat_card("Total Dossiers", str(stats['total_dossiers']), "📊", "#0A1628")}
+        {stat_card("Final Dossiers", str(stats['final_dossiers']), "✅", "#4CAF50")}
+        {stat_card("Total Revenue", f"{stats['total_revenue']//1000000}M", "💰", "#D4AF37")}
+        {stat_card("Total Profit", f"{stats['total_profit']//1000}K", "📈", "#28a745")}
     </div>
     """)
 

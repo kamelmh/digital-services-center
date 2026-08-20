@@ -10,8 +10,16 @@ import violit as vl
 sys.path.insert(0, str(Path(__file__).parent))
 
 from feasibility_generator import BUSINESS_TEMPLATES, ALGERIA_DATA
+from dsc_utils import (
+    ARABIC_FONT_CSS, loading_spinner, progress_bar, success_box, error_box,
+    warning_box, info_box, stat_card, export_page_to_pdf,
+    save_dossier, get_dossiers, get_dossier, get_stats,
+)
 
 app = vl.App(title="Digital Services Center", theme="ocean")
+
+# Inject Arabic font CSS on every page
+app.html(ARABIC_FONT_CSS)
 
 
 def _fmt(n):
