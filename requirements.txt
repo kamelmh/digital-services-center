@@ -16,9 +16,14 @@ pydantic==2.13.4
 requests==2.34.2
 jinja2==3.1.6              # offline_templates + future prompts/*.j2
 
+# ── Auth (P2 — SQLite + JWT, no extra infra) ────────────
+PyJWT==2.13.0          # JWT (HS256)
+# passlib/bcrypt kept as optional legacy (auth now uses hashlib pbkdf2)
+
 # ── Data / Docs ─────────────────────────────────────────
 openpyxl==3.1.5            # Excel import/export (future)
 python-multipart==0.0.32   # FastAPI file uploads
+email-validator==2.3.0     # Pydantic EmailStr
 
 # ── Build ───────────────────────────────────────────────
 # pyinstaller==6.22.2     # only for building dist/*.exe (pip install pyinstaller)
