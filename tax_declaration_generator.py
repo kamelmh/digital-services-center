@@ -11,6 +11,12 @@ import sys
 import time
 from datetime import datetime
 from typing import Any
+try:
+    from prompts import PROMPT_VERSION
+    from prompts import PROMPT_VERSION as _PROMPT_VERSION
+    _PROMPT_VERSION = PROMPT_VERSION  # keep linter happy
+except ImportError:
+    PROMPT_VERSION = "unknown"
 
 try:
     import requests
@@ -150,6 +156,7 @@ class TaxDeclarationGenerator:
 
     def __init__(self, provider: str | None = None, api_key: str | None = None, model: str | None = None, allow_offline: bool = True) -> None:
         self.offline = False
+        self.prompt_version = PROMPT_VERSION
         try:
             self.provider = self._resolve_provider(provider, api_key)
         except FeasibilityError:
@@ -179,6 +186,7 @@ class TaxDeclarationGenerator:
         self.model = model or config["model"]
         self.url = config["url"]
         self.session = requests.Session()
+        self.prompt_version = PROMPT_VERSION
 
     def _resolve_provider(self, requested: str | None, api_key: str | None) -> str:
         if requested:
@@ -237,7 +245,19 @@ class TaxDeclarationGenerator:
         """Generate a tax declaration guide."""
         if getattr(self, "offline", False) or not getattr(self, "api_key", None):
             from offline_templates import tax_declaration_offline
-            return tax_declaration_offline(declaration_type, business_name)
+            result = tax_declaration_offline(declaration_type, business_name)
+            try:
+                from quality_scorer import QualityScorer as _QS0
+                _qr0 = _QS0().score("tax_declaration", result["content"])
+                _qm0 = {"quality_grade": _qr0.grade, "quality_score": round(_qr0.overall_score, 3), "quality_passed": _qr0.passed}
+            except Exception:
+                _qm0 = {}
+            try:
+                from training_hook import hook_generation
+                hook_generation(generator="tax_declaration", input_params={"declaration_type": declaration_type, "mode": "offline"}, output_content=result["content"], metadata={"offline": True, "prompt_version": getattr(self, "prompt_version", "unknown"), **_qm0})
+            except Exception:
+                pass
+            return result
         config = DECLARATION_TYPES.get(declaration_type)
         if not config:
             raise FeasibilityError(f"Unknown declaration type: {declaration_type}")
@@ -275,12 +295,20 @@ language: ar
 **إعداد:** Digital Services Center — مركز الخدمات الرقمية<br>
 **تاريخ الإعداد:** {now:%d/%m/%Y}"""
 
+        # Quality gate
+        try:
+            from quality_scorer import QualityScorer as _QS
+            _qr = _QS().score("tax_declaration", full_content)
+            _qmeta = {"quality_grade": _qr.grade, "quality_score": round(_qr.overall_score, 3), "quality_passed": _qr.passed}
+        except Exception:
+            _qmeta = {}
         try:
             from training_hook import hook_generation
             hook_generation(
                 generator="tax_declaration",
                 input_params={"declaration_type": declaration_type, "business_name": business_name},
                 output_content=full_content,
+                metadata={"prompt_version": getattr(self, "prompt_version", "unknown"), **_qmeta},
             )
         except Exception:
             pass

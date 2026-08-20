@@ -13,6 +13,12 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+try:
+    from prompts import PROMPT_VERSION
+    from prompts import PROMPT_VERSION as _PROMPT_VERSION
+    _PROMPT_VERSION = PROMPT_VERSION  # keep linter happy
+except ImportError:
+    PROMPT_VERSION = "unknown"
 
 try:
     import requests
@@ -598,6 +604,7 @@ class FeasibilityGenerator:
         allow_offline: bool = True,
     ) -> None:
         self.offline = False
+        self.prompt_version = PROMPT_VERSION
         try:
             self.provider = self._resolve_provider(provider, api_key)
             config = PROVIDERS[self.provider]
@@ -633,6 +640,7 @@ class FeasibilityGenerator:
         self.timeout = timeout
         self.retries = retries
         self.session = requests.Session()
+        self.prompt_version = PROMPT_VERSION
 
     @staticmethod
     def _read_api_key(names: tuple[str, ...]) -> str | None:
@@ -773,9 +781,16 @@ class FeasibilityGenerator:
                 }
             except Exception:
                 pass
+            # Quality gate (offline)
+            try:
+                from quality_scorer import QualityScorer as _QS
+                _qro = _QS().score("feasibility", result["content"])
+                _qmo = {"quality_grade": _qro.grade, "quality_score": round(_qro.overall_score, 3), "quality_passed": _qro.passed}
+            except Exception:
+                _qmo = {}
             try:
                 from training_hook import hook_generation
-                hook_generation(generator="feasibility", input_params={"business_type": business_type, "location": location, "wilaya": wilaya, "investment": investment, "mode": "offline"}, output_content=result["content"], metadata={"sections": list(result["sections"].keys()), "offline": True})
+                hook_generation(generator="feasibility", input_params={"business_type": business_type, "location": location, "wilaya": wilaya, "investment": investment, "mode": "offline"}, output_content=result["content"], metadata={"sections": list(result["sections"].keys()), "offline": True, "prompt_version": getattr(self, "prompt_version", "unknown"), **_qmo})
             except Exception:
                 pass
             return result
@@ -807,14 +822,23 @@ class FeasibilityGenerator:
             "loan_payment": real_financials["loan_payment"],
         }
 
+        # Quality gate (online)
+        try:
+            from quality_scorer import QualityScorer as _QS2
+            _full = "\n\n".join(str(v) for v in result.values() if isinstance(v, str))
+            _qr2 = _QS2().score("feasibility", _full)
+            _qm2 = {"quality_grade": _qr2.grade, "quality_score": round(_qr2.overall_score, 3), "quality_passed": _qr2.passed}
+        except Exception:
+            _qm2 = {}
+            _full = ""
         try:
             from training_hook import hook_generation
-            full_text = "\n\n".join(str(v) for v in result.values() if isinstance(v, str))
+            full_text = _full if '_full' in locals() and _full else "\n\n".join(str(v) for v in result.values() if isinstance(v, str))
             hook_generation(
                 generator="feasibility",
                 input_params={"business_type": business_type, "location": location, "wilaya": wilaya, "investment": investment},
                 output_content=full_text,
-                metadata={"sections": list(sections.keys())},
+                metadata={"sections": list(sections.keys()), "prompt_version": getattr(self, "prompt_version", "unknown"), **_qm2},
             )
         except Exception:
             pass
