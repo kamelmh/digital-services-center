@@ -433,3 +433,21 @@ def tax_declaration_offline(declaration_type: str, business_name: str = "") -> d
     full = header + body + f"\n\n**إعداد:** DSC — {_today()}"
     return {"title": f"دليل {name_ar}", "declaration_type": name_ar,
             "date": now.isoformat(timespec="seconds"), "content": full, "offline": True}
+
+
+# ── Invoice / Quote offline (deterministic, no LLM) ─────────────────────────
+
+def invoice_offline(business_name: str, client_name: str, items: list[dict], discount_percent: float = 0, notes: str = "", payment_terms: str = "30 jours") -> dict:
+    """Deterministic invoice without LLM — wraps InvoiceGenerator offline."""
+    from invoice_generator import InvoiceGenerator
+
+    gen = InvoiceGenerator(allow_offline=True)
+    return gen.generate_invoice(business_name, client_name, items, discount_percent, notes, payment_terms)
+
+
+def quote_offline(business_name: str, client_name: str, items: list[dict], validity_days: int = 30, notes: str = "") -> dict:
+    """Deterministic quote without LLM."""
+    from invoice_generator import InvoiceGenerator
+
+    gen = InvoiceGenerator(allow_offline=True)
+    return gen.generate_quote(business_name, client_name, items, validity_days, notes)

@@ -192,3 +192,18 @@ When finishing work, append an entry below.
 
 ### Alerts for other projects
 - No cross-project impact — tax prompts and preview routes are isolated to DSC API.
+
+## 2026-08-21 - Offline 9-part + Invoice deterministic
+
+### What changed
+- `InvoiceGenerator` now supports `allow_offline=True` (default) — deterministic fallback without LLM. `generate_invoice`/`generate_quote` compute TVA 19% locally and return markdown table with offline note. Previously required API key and raised FeasibilityError.
+- Added `invoice_offline`/`quote_offline` wrappers in `offline_templates.py` for consistency with other 7 offline generators.
+- Verified `NESDADossierGenerator` 9-part (I-IX) already deterministic via `_generate_part1..9` — no LLM needed. `_generate_offline` placeholder retained for `_chat` path only. Tested with `boulangerie/Oran/3M` — 9 parts generated offline.
+
+### Files affected
+- `invoice_generator.py`: offline flag + deterministic rendering
+- `offline_templates.py`: added invoice_offline/quote_offline
+- `nesda_dossier_generator.py`: verified offline (no change, already 9-part deterministic)
+
+### Breaking changes / alerts
+- None — offline path is additive. Existing LLM path unchanged when API key present.

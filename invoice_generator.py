@@ -42,18 +42,38 @@ INVOICE_SYSTEM_PROMPT = """أنت محاسب جزائري متخصص في إعد
 class InvoiceGenerator:
     """Generate Arabic invoices and quotes through a selected LLM provider."""
 
-    def __init__(self, provider: str | None = None, api_key: str | None = None, model: str | None = None) -> None:
-        self.provider = self._resolve_provider(provider, api_key)
-        config = PROVIDERS[self.provider]
-        self.api_key = api_key or next(
-            (os.getenv(k) for k in config["key_env"] if os.getenv(k)), None
-        )
-        if not self.api_key:
-            variables = " or ".join(config["key_env"])
-            raise FeasibilityError(f"No API key found for {self.provider}. Set {variables}.")
-        self.model = model or config["model"]
-        self.url = config["url"]
-        self.session = requests.Session()
+    def __init__(self, provider: str | None = None, api_key: str | None = None, model: str | None = None, allow_offline: bool = True) -> None:
+        self.offline = False
+        try:
+            self.provider = self._resolve_provider(provider, api_key)
+            config = PROVIDERS[self.provider]
+            self.api_key = api_key or next(
+                (os.getenv(k) for k in config["key_env"] if os.getenv(k)), None
+            )
+            if not self.api_key:
+                if allow_offline:
+                    self.offline = True
+                    self.provider = "offline"
+                    self.api_key = None
+                    self.model = "offline-templates"
+                    self.url = ""
+                    self.session = requests.Session()
+                    return
+                variables = " or ".join(config["key_env"])
+                raise FeasibilityError(f"No API key found for {self.provider}. Set {variables}.")
+            self.model = model or config["model"]
+            self.url = config["url"]
+            self.session = requests.Session()
+        except FeasibilityError:
+            if allow_offline:
+                self.offline = True
+                self.provider = "offline"
+                self.api_key = None
+                self.model = "offline-templates"
+                self.url = ""
+                self.session = requests.Session()
+                return
+            raise
 
     def _resolve_provider(self, requested: str | None, api_key: str | None) -> str:
         if requested:
@@ -161,8 +181,30 @@ class InvoiceGenerator:
 اكتب الفاتورة بتنسيق احترافي جاهز للطباعة، مع شعار واسم المشروع في الأعلى.
 أضف خانة التوقيع في الأسفل."""
 
-        print("  Generating invoice...", file=sys.stderr)
-        content = self._call_llm(prompt, 0.2)
+        if getattr(self, "offline", False):
+            # Offline deterministic rendering — same numbers, no LLM
+            content = f"""# فاتورة — {invoice_number}
+
+**المورد:** {business_name}
+**العميل:** {client_name}
+**التاريخ:** {now:%d/%m/%Y} — **الاستحقاق:** {due_date:%d/%m/%Y}
+**شروط الدفع:** {payment_terms}
+
+| # | الوصف | الكمية | السعر | المجموع قبل TVA | TVA (19%) | المجموع شامل |
+|---|-------|--------|-------|-----------------|-----------|--------------|
+{items_text}
+|   | **المجموع** |  |  | **{subtotal:,}** | **{tva_amount:,.0f}** | **{total:,.0f}** |
+
+- المجموع قبل TVA: {subtotal:,} دج
+- الخصم ({discount_percent}%): {discount_amount:,.0f} دج
+- TVA (19%): {tva_amount:,.0f} دج
+- **الإجمالي: {total:,.0f} دج**
+
+> **وضع عدم الاتصال:** فاتورة مولّدة محليًا بدون LLM — صالحة للطباعة بعد المراجعة.
+"""
+        else:
+            print("  Generating invoice...", file=sys.stderr)
+            content = self._call_llm(prompt, 0.2)
 
         full_content = f"""---
 title: "فاتورة — {invoice_number}"
@@ -255,8 +297,23 @@ currency: DZD
 
 اكتب العرض بتنسيق احترافي جاهز للطباعة. أضف شروط عامة في الأسفل."""
 
-        print("  Generating quote...", file=sys.stderr)
-        content = self._call_llm(prompt, 0.2)
+        if getattr(self, "offline", False):
+            content = f"""# عرض سعر — {quote_number}
+
+**المورد:** {business_name}
+**العميل:** {client_name}
+**التاريخ:** {now:%d/%m/%Y} — **الصلاحية:** {valid_until:%d/%m/%Y} ({validity_days} يوم)
+
+| # | الوصف | الكمية | السعر | المجموع قبل TVA | TVA (19%) | المجموع شامل |
+|---|-------|--------|-------|-----------------|-----------|--------------|
+{items_text}
+|   | **المجموع** |  |  | **{subtotal:,}** | **{tva_amount:,.0f}** | **{total:,.0f}** |
+
+> **وضع عدم الاتصال:** عرض سعر مولّد محليًا بدون LLM — صالحة للطباعة بعد المراجعة.
+"""
+        else:
+            print("  Generating quote...", file=sys.stderr)
+            content = self._call_llm(prompt, 0.2)
 
         full_content = f"""---
 title: "عرض سعر — {quote_number}"
