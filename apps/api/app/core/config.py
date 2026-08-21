@@ -50,3 +50,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Hardened check: fail fast if default JWT secret is used in production
+if settings.app_env == "production" and settings.jwt_secret == "change-me-in-prod-32-bytes-min":
+    raise ValueError("DSC_JWT_SECRET must be set to a strong random value in production (APP_ENV=production). Generate with: python -c \"import secrets; print(secrets.token_hex(32))\"")
+if settings.app_env == "production" and settings.auth_required is False:
+    import warnings
+
+    warnings.warn("APP_ENV=production but DSC_AUTH_REQUIRED is not set — enabling auth is recommended for SaaS")

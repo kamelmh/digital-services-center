@@ -32,10 +32,14 @@ import importlib
 import os
 from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 # ── Imports from existing modules ─────────────────────────────────────────────
 
@@ -75,6 +79,12 @@ app = FastAPI(
     description="REST API for Algerian tax forms, feasibility studies, pricing, and financial calculators.",
     version="1.0.0",
 )
+
+# Rate limiting — 60/min for expensive endpoints (quality, finance, pricing)
+limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(status_code=429, content={"detail": f"Rate limit exceeded: {exc.detail}"}))
+app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -306,7 +316,8 @@ def list_packages():
 # ── Pricing ───────────────────────────────────────────────────────────────────
 
 @app.post("/pricing/quote", response_model=PricingResponse)
-def pricing_quote(req: PricingRequest):
+@limiter.limit("60/minute")
+def pricing_quote(request: Request, req: PricingRequest):
     """Generate an instant pricing quote with WhatsApp message."""
     try:
         result = calculate_quote(
@@ -385,21 +396,24 @@ def nesda_calculate(req: NESDARequest):
 # ── Financial Calculators ─────────────────────────────────────────────────────
 
 @app.post("/finance/van")
-def finance_van(req: VANRequest):
+@limiter.limit("60/minute")
+def finance_van(request: Request, req: VANRequest):
     """Calculate VAN (Net Present Value)."""
     result = FinancialCalculators.van(req.cash_flows, req.discount_rate)
     return {"van": round(result, 2), "discount_rate": req.discount_rate}
 
 
 @app.post("/finance/tri")
-def finance_tri(req: TRIRequest):
+@limiter.limit("60/minute")
+def finance_tri(request: Request, req: TRIRequest):
     """Calculate TRI (Internal Rate of Return)."""
     result = FinancialCalculators.tri(req.cash_flows)
     return {"tri_pct": round(result, 2)}
 
 
 @app.post("/finance/seuil")
-def finance_seuil(req: SeuilRequest):
+@limiter.limit("60/minute")
+def finance_seuil(request: Request, req: SeuilRequest):
     """Calculate break-even point (units and DZD)."""
     units = FinancialCalculators.seuil_rentabilite(
         req.fixed_costs, req.price_per_unit, req.variable_cost_per_unit
@@ -417,7 +431,8 @@ def finance_seuil(req: SeuilRequest):
 
 
 @app.post("/finance/scenarios")
-def finance_scenarios(req: ScenarioRequest):
+@limiter.limit("60/minute")
+def finance_scenarios(request: Request, req: ScenarioRequest):
     """Generate prudent / reference / favorable scenario projections."""
     try:
         investment = InvestmentPlan(
@@ -553,7 +568,8 @@ def tax_g8(req: TaxFormRequest):
 # ── Quality Scoring ───────────────────────────────────────────────────────────
 
 @app.post("/quality/score", response_model=QualityResponse)
-def quality_score(req: QualityRequest):
+@limiter.limit("60/minute")
+def quality_score(request: Request, req: QualityRequest):
     """Score generated content for quality (word count, sections, specificity, language, structure)."""
     scorer = QualityScorer()
     report = scorer.score(req.generator, req.content, req.metadata)

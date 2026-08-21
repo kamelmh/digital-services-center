@@ -30,3 +30,4 @@ email-validator==2.3.0     # Pydantic EmailStr
 
 # ── Optional (local LLM lane, future) ───────────────────
 # llama-cpp-python        # uncomment when adding bundled GGUF model
+slowapi==0.1.9
