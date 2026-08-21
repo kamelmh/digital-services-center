@@ -117,6 +117,74 @@ def create_feasibility(req: FeasibilityRequest, db: Session = Depends(_get_db)):
     return {"job_id": job.id, "status": job.status, "message": "Queued — poll GET /v1/jobs/{job_id}"}
 
 
+@router.get("")
+def list_dossiers(
+    q: str | None = None,
+    wilaya: str | None = None,
+    status: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+    db: Session = Depends(_get_db),
+):
+    """List dossiers for current tenant (RLS) with search/filter/pagination."""
+    from ..models.dossier import Dossier
+
+    tenant_id = "00000000-0000-0000-0000-000000000000"
+    query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id)
+    if q:
+        like = f"%{q}%"
+        query = query.filter((Dossier.project_name.ilike(like)) | (Dossier.beneficiary_name.ilike(like)) | (Dossier.activity_type.ilike(like)))
+    if wilaya:
+        query = query.filter(Dossier.wilaya == wilaya)
+    if status:
+        query = query.filter(Dossier.status == status)
+    total = query.count()
+    rows = query.order_by(Dossier.created_at.desc()).offset(offset).limit(limit).all()
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "dossiers": [
+            {
+                "id": r.id,
+                "project_name": r.project_name,
+                "beneficiary_name": r.beneficiary_name,
+                "wilaya": r.wilaya,
+                "activity_type": r.activity_type,
+                "total_cost": r.total_cost,
+                "status": r.status,
+                "pdf_r2_key": r.pdf_r2_key,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+                "tenant_id": r.tenant_id,  # exposed for RLS verification in admin
+            }
+            for r in rows
+        ],
+    }
+
+
+@router.get("/{dossier_id}")
+def get_dossier(dossier_id: str, db: Session = Depends(_get_db)):
+    from ..models.dossier import Dossier
+
+    tenant_id = "00000000-0000-0000-0000-000000000000"
+    row = db.get(Dossier, dossier_id)
+    if not row or row.tenant_id != tenant_id:
+        raise HTTPException(status_code=404, detail="Dossier not found")
+    return {
+        "id": row.id,
+        "project_name": row.project_name,
+        "beneficiary_name": row.beneficiary_name,
+        "wilaya": row.wilaya,
+        "activity_type": row.activity_type,
+        "total_cost": row.total_cost,
+        "status": row.status,
+        "content": row.content,
+        "pdf_r2_key": row.pdf_r2_key,
+        "data_json": row.data_json,
+        "created_at": row.created_at.isoformat() if row.created_at else None,
+    }
+
+
 @router.get("/jobs/{job_id}")
 def get_job(job_id: str, db: Session = Depends(_get_db)):
     from ..models.job import Job
