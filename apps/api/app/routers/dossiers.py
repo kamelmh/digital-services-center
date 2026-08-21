@@ -1,5 +1,6 @@
 """Dossiers router — POST /v1/dossiers/feasibility (queued) + GET /jobs/{id}."""
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -202,3 +203,24 @@ def get_job(job_id: str, db: Session = Depends(_get_db)):
         "error": job.error,
         "dossier_id": job.dossier_id,
     }
+
+
+@router.get("/export-csv", response_class=Response)
+def export_csv(ids: str = "", db: Session = Depends(_get_db)):
+    """Export selected dossiers as CSV. Use ?ids=id1,id2,…"""
+    from ..models.dossier import Dossier
+    from fastapi.responses import Response
+
+    id_list = [i.strip() for i in ids.split(",") if i.strip()]
+    if not id_list:
+        raise HTTPException(status_code=400, detail="Parameter ?ids=id1,id2 required")
+    tenant_id = "00000000-0000-0000-0000-000000000000"
+    query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id).filter(Dossier.id.in_(id_list))
+    rows = query.all()
+    lines = ["id,project_name,beneficiary_name,total_cost,status,created_at"]
+    for r in rows:
+        lines.append(
+            f"{r.id},{r.project_name or ''},{r.beneficiary_name or ''},{r.total_cost or 0},{r.status or ''},{r.created_at.isoformat() if r.created_at else ''}"
+        )
+    csv_content = "\n".join(lines)
+    return Response(content=csv_content, media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="dossiers-{Date.now()}.csv"'})
