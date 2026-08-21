@@ -51,10 +51,18 @@ def _wilaya_note(wilaya: str) -> str:
 
 
 def _real_financials_block(investment: int, template: dict, wilaya: str) -> str:
-    """Deterministic VAN/TRI/seuil block via financial_calculators (no LLM)."""
+    """Deterministic VAN/TRI/seuil block via financial_calculators (no LLM).
+
+    Uses canonical margin assumptions [0.2, 0.3] matching FinancialCalculators defaults
+    to ensure markdown/PDF financial agreement (VAN/TRI/payback/revenue consistency).
+    """
     try:
         from feasibility_generator import calculate_real_financials
-        rf = calculate_real_financials(investment, template, wilaya)
+        # Use fixed margin [0.2, 0.3] consistent with FinancialCalculators class
+        # so markdown and PDF financial figures agree (avoid template-specific margins)
+        business = dict(template)
+        business["margin"] = [0.2, 0.3]
+        rf = calculate_real_financials(investment, business, wilaya)
         van = rf["reference_van"]
         tri = rf["reference_tri"]
         seuil = rf["reference_seuil"]
@@ -220,7 +228,8 @@ def _polish_sections(sections: dict, business_type: str) -> dict:
 
 
 def _real_fin_marge_line(template: dict) -> str:
-    m = template.get("margin", (0.15, 0.30))
+    # Canonical margin line matching financial viability check
+    m = [0.2, 0.3]
     return f"هامش ربح متوقع {m[0]*100:.0f}–{m[1]*100:.0f}%"
 
 

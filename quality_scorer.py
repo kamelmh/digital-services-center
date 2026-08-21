@@ -1,11 +1,12 @@
 """Quality Scorer — Validate generator outputs before packaging into dossier.
 
-Runs 5 checks on each generated section:
+Runs 6 checks on each generated section:
 1. Word count (minimum threshold)
 2. Section coverage (required sections present)
 3. Number specificity (contains actual figures, not placeholders)
 4. Language consistency (correct language for section type)
 5. Structure (has headings, not just a wall of text)
+6. Financial viability (VAN/TRI sign — flags negative VAN/TRI as requiring review)
 
 Returns a QualityReport with per-check scores and overall grade.
 """
@@ -159,6 +160,61 @@ class QualityScorer:
             passed=headings >= 3,
             score=structure_score,
             detail=f"{headings} headings/bold markers found",
+        ))
+
+        # 6. Financial viability (negative VAN/TRI requires review)
+        # Robust parsing: optional whitespace, both ASCII hyphen '-' (U+002D) and
+        # Unicode minus '−' (U+2212). Tests: VAN: -3, VAN: −3, TRI: -44.39%, TRI: −44.39%
+        van_negative = False
+        tri_negative = False
+        van_match = None
+        tri_match = None
+        # VAN pattern: handles "VAN: -3", "VAN : −3", "VAN-3", and "VAN (…): **-3 700 943 دج**"
+        # Primary: requires "**" (markdown bold) to avoid matching methodology polish text
+        van_m = re.search(r"VAN[^:\n]*:\s*\*\*\s*([\u2212\-]?\s*[\d][\d\s,\.]*)", content, re.IGNORECASE)
+        if not van_m:
+            van_m = re.search(r"VAN\s*:?\s*([\u2212\-]?\s*[\d][\d\s,\.]*)", content, re.IGNORECASE)
+        if van_m:
+            raw_van = van_m.group(1).replace("\u2212", "-").replace(" ", "").replace(",", "")
+            try:
+                van_val = float(raw_van)
+                van_negative = van_val < 0
+                van_match = van_m
+            except ValueError:
+                van_negative = False
+        tri_m = re.search(r"TRI[^:\n]*:\s*\*\*\s*([\u2212\-]?\s*[\d][\d\s,\.]*)\s*%?", content, re.IGNORECASE)
+        if not tri_m:
+            tri_m = re.search(r"TRI\s*:?\s*([\u2212\-]?\s*[\d][\d\s,\.]*)\s*%?", content, re.IGNORECASE)
+        if tri_m:
+            raw_tri = tri_m.group(1).replace("\u2212", "-").replace(" ", "").replace(",", "")
+            try:
+                tri_val = float(raw_tri)
+                tri_negative = tri_val < 0
+                tri_match = tri_m
+            except ValueError:
+                tri_negative = False
+
+        if van_negative or tri_negative:
+            fin_score = 0.3
+            parts = []
+            if van_negative:
+                parts.append(f"VAN {van_match.group(1).strip()} < 0")
+            if tri_negative:
+                parts.append(f"TRI {tri_match.group(1).strip()} < 0%")
+            detail = "; ".join(parts) + " — requires revised assumptions"
+        else:
+            fin_score = 1.0
+            # Distinguish "no data" from "viable" — but treat missing as viable for non-financial docs
+            if van_match or tri_match:
+                detail = "Project financially viable (VAN/TRI >= 0)"
+            else:
+                detail = "No VAN/TRI found — financial viability not applicable"
+
+        report.add(CheckResult(
+            name="financial_viability",
+            passed=not (van_negative or tri_negative),
+            score=fin_score,
+            detail=detail,
         ))
 
         return report

@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: dsc-api
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt && pip install sqlalchemy alembic redis rq boto3 gunicorn
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT apps.api.app.main:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dsc-neon
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: dsc-redis
+          type: redis
+          property: connectionString
+      - key: DSC_JWT_SECRET
+        generateValue: true
+      - key: STORAGE_BACKEND
+        value: r2
+      - key: R2_BUCKET
+        sync: false
+      - key: APP_ENV
+        value: production
+    healthCheckPath: /health
+
+  - type: worker
+    name: dsc-worker
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt && pip install sqlalchemy alembic redis rq boto3
+    startCommand: python -m rq worker --url $REDIS_URL dsc-queue
+
+  - type: redis
+    name: dsc-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+
+databases:
+  - name: dsc-neon
+    plan: free
+    databaseName: dsc
+    user: dsc

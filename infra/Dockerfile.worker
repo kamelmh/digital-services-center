@@ -1,0 +1,17 @@
+FROM python:3.14-slim
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpango-1.0-0 libharfbuzz0b fonts-noto-core \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir sqlalchemy alembic redis rq boto3
+
+COPY assets/fonts /app/assets/fonts
+COPY . .
+
+RUN python -m compileall -q .
+
+CMD ["python","-m","rq","worker","--url","redis://redis:6379/0","dsc-queue"]

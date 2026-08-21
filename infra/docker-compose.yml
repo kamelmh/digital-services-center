@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://dsc:dsc@db:5432/dsc
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_BACKEND: local
+    depends_on:
+      - db
+      - redis
+    command: gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:8000 apps.api.app.main:app
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.worker
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://dsc:dsc@db:5432/dsc
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_BACKEND: local
+    depends_on:
+      - db
+      - redis
+    command: python -m rq worker --url redis://redis:6379/0 dsc-queue
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dsc
+      POSTGRES_PASSWORD: dsc
+      POSTGRES_DB: dsc
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

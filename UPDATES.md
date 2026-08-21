@@ -133,3 +133,43 @@ When finishing work, append an entry below.
 - **Alerts:** None — `offline=True` flag in output tells caller which path was used.
 
 *Last updated: 2026-08-20*
+
+## 2026-08-20 - Final evidence-based validation
+
+### What changed
+- Reconciled financial calculation pipeline: offline markdown now consumes  with canonical margin [0.2, 0.3] matching FinancialCalculators defaults
+- Added Check #6 "financial_viability" to : detects negative VAN/TRI, assigns score=0.3 with detail "requires revised assumptions"; positive VAN/TRI gets score=1.0 with detail "Project financially viable"
+- Margin override confirmed safe:  does not mutate original 
+- All 47 tests pass, all 38 rate checks pass
+- 9/9 financial figures agree between Markdown and PDF (revenue, VAN, TRI, payback, margin, NESDA terms)
+
+### Files affected
+- : margin override in  and 
+- : added financial_viability check #6
+
+### Breaking changes / alerts
+- None — original artifacts untouched; new canonical markdown saved to new path; quality scorer improvement only
+
+### Alerts for other projects
+- No API changes, data format changes, or breaking changes that affect sibling projects
+- Quality scoring now correctly flags financially unviable projects (negative VAN/TRI) instead of assigning A-grade
+
+## 2026-08-20 - Final evidence-based validation
+
+### What changed
+- Reconciled financial calculation pipeline: offline markdown now consumes `calculate_real_financials()` with canonical margin [0.2, 0.3] matching FinancialCalculators defaults
+- Added Check #6 "financial_viability" to `quality_scorer.py`: detects negative VAN/TRI, assigns score=0.3 with detail "requires revised assumptions"; positive VAN/TRI gets score=1.0 with detail "Project financially viable"
+- Margin override confirmed safe: `business = dict(template); business['margin'] = [0.2, 0.3]` does not mutate original `BUSINESS_TEMPLATES`
+- All 47 tests pass, all 38 rate checks pass
+- 9/9 financial figures agree between Markdown and PDF (revenue, VAN, TRI, payback, margin, NESDA terms)
+
+### Files affected
+- `offline_templates.py`: margin override in `_real_financials_block` and `_real_fin_marge_line`
+- `quality_scorer.py`: added financial_viability check #6
+
+### Breaking changes / alerts
+- None — original artifacts untouched; new canonical markdown saved to new path; quality scorer improvement only
+
+### Alerts for other projects
+- No API changes, data format changes, or breaking changes that affect sibling projects
+- Quality scoring now correctly flags financially unviable projects (negative VAN/TRI) instead of assigning A-grade

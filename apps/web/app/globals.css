@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0A1628;
+  --gold: #D4AF37;
+}
+body {
+  @apply bg-white text-ink antialiased;
+}
