@@ -384,3 +384,33 @@ class TestRobustVanTriParsing:
         src = inspect.getsource(QualityScorer.score)
         assert "TTT" not in src, "TTT typo must not appear (should be TRI)"
         assert "TRI" in src
+
+
+# ── 4) Tax prompt 2026 regression ───────────────────────────────────────────
+
+class TestTaxPrompt2026:
+    """Tax prompts must use 2026 verified rates (prevent 2025 drift)."""
+
+    def test_irg_6_tranche_2026(self):
+        text = open("tax_declaration_generator.py", encoding="utf-8").read()
+        # 6-tranche 2026 must be present
+        assert "240,000" in text
+        assert "480,000" in text
+        assert "960,000" in text
+        assert "1,920,000" in text
+        assert "3,840,000" in text
+        # Old 2025 3-tranche must not be in the two updated prompts
+        # TAX_SYSTEM_PROMPT and irg_salaire should not contain the old pattern
+        assert text.count("180,000") == 0, "Old 2025 180,000 threshold still present — should be 240,000"
+        assert "20% 180" not in text and "20% من 180" not in text
+
+    def test_tva_ibs_2026(self):
+        text = open("tax_declaration_generator.py", encoding="utf-8").read()
+        assert "19%" in text and "9%" in text  # TVA 19%/9%
+        assert "19% إنتاج" in text or "19% " in text
+        assert "23%" in text and "26%" in text  # IBS 19/23/26
+
+    def test_preview_parity_7(self):
+        text = open("api.py", encoding="utf-8").read()
+        for route in ["/tax/g12/preview", "/tax/g50/preview", "/tax/g4/preview", "/tax/g11/preview", "/tax/g29/preview", "/tax/g1/preview", "/tax/g8/preview"]:
+            assert route in text, f"Missing preview route {route}"

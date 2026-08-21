@@ -173,3 +173,22 @@ When finishing work, append an entry below.
 ### Alerts for other projects
 - No API changes, data format changes, or breaking changes that affect sibling projects
 - Quality scoring now correctly flags financially unviable projects (negative VAN/TRI) instead of assigning A-grade
+
+## 2026-08-21 - Tax polish 2026 + preview parity
+
+### What changed
+- Updated `TAX_SYSTEM_PROMPT` in `tax_declaration_generator.py` from 2025 IRG 180k/360k/720k (20/30/35%) to 2026 6-tranche IRG 240k 0% / 480k 23% / 960k 27% / 1.92M 30% / 3.84M 33% / inf 35% (matches `g1_ggr_generator.py:36` IRG_BAREME and `verify_rates.py:38`). Also corrected TVA 19%/9%, IBS 19/23/26% (Art 150 CIDTA), IFU 5%/12% <8M, CNAS 25.5%+9% SNMG 24k, CASNOS 43.2k, NESDA 0%/7y/1.5y — now matches `ALGERIA_DATA` and `financial_calculators` single source.
+- Fixed `DECLARATION_TYPES['irg_salaire']` prompt 2025 → 2026 6-tranche.
+- Added 4 missing preview endpoints in `api.py` to achieve 7/7 parity: `GET /tax/g12/preview` (G12FormData activite_exercee), `GET /tax/g4/preview`, `GET /tax/g29/preview` (annee_imposition), `GET /tax/g1/preview` — now `g12/g50/g4/g11/g29/g1/g8` all return 200 HTML. Previously only g50/g11/g8 had preview.
+- Fixed `g8_existence_generator.py:130` `html` → `_html_mod` (NameError) and `api.py:603` G12 field `activite` → `activite_exercee`.
+
+### Files affected
+- `tax_declaration_generator.py`: TAX_SYSTEM_PROMPT and DECLARATION_TYPES irg_salaire
+- `api.py`: preview routes parity 3/7 → 7/7
+- `g8_existence_generator.py`: _field html escape fix
+
+### Breaking changes / alerts
+- None — prompt only, no data format change. Tax guides now consistent with DGI 2026 barèmes and other generators.
+
+### Alerts for other projects
+- No cross-project impact — tax prompts and preview routes are isolated to DSC API.

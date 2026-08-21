@@ -597,6 +597,13 @@ def auth_me(user: UserOut = Depends(get_current_user)):
 
 # ── HTML Preview ──────────────────────────────────────────────────────────────
 
+@app.get("/tax/g12/preview", response_class=HTMLResponse)
+def tax_g12_preview():
+    """Preview G12 form with sample data — now parity with G50/G11/G8."""
+    data = G12FormData(nif="1234567890", nom_prenoms="Ahmed Test", activite_exercee="Commerce de détail", adresse_activite="Oran")
+    return generate_g12_previsionnelle(data)
+
+
 @app.get("/tax/g50/preview", response_class=HTMLResponse)
 def tax_g50_preview():
     """Preview G50 form with sample data."""
@@ -604,11 +611,32 @@ def tax_g50_preview():
     return generate_g50_html(data)
 
 
+@app.get("/tax/g4/preview", response_class=HTMLResponse)
+def tax_g4_preview():
+    """Preview G4 form with sample data."""
+    data = G4Data(nif="1234567890", raison_sociale="SARL Test", forme_juridique="SARL", resultat_comptable=500000)
+    return generate_g4(data)
+
+
 @app.get("/tax/g11/preview", response_class=HTMLResponse)
 def tax_g11_preview():
     """Preview G11 form with sample data."""
     data = G11Data(nif="1234567890", nom_prenoms="Ahmed Test", code_activite="4711")
     return generate_g11_html(data)
+
+
+@app.get("/tax/g29/preview", response_class=HTMLResponse)
+def tax_g29_preview():
+    """Preview G29 form with sample data."""
+    data = G29Data(nif="1234567890", raison_sociale="SARL Test", annee_imposition=2026)
+    return generate_g29(data)
+
+
+@app.get("/tax/g1/preview", response_class=HTMLResponse)
+def tax_g1_preview():
+    """Preview G1 form with sample data."""
+    data = G1Data(nif="1234567890", nom_prenoms="Karim Test", situation_familiale="celibataire")
+    return generate_g1(data)
 
 
 @app.get("/tax/g8/preview", response_class=HTMLResponse)

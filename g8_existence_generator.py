@@ -127,7 +127,7 @@ def _checkbox(condition: bool) -> str:
 def _field(value: str, width: int = 40) -> str:
     """Return filled value or dotted line placeholder (HTML-escaped)."""
     if value:
-        return html.escape(str(value))
+        return _html_mod.escape(str(value))
     return "." * width
 
 
