@@ -207,3 +207,30 @@ When finishing work, append an entry below.
 
 ### Breaking changes / alerts
 - None — offline path is additive. Existing LLM path unchanged when API key present.
+
+## 2026-08-22 — Batch 2 generators (CNRC F1, DAS CNAS, SECU 01, ANAE) + API integration + rate limiting
+
+### What changed
+- **4 new form generators** (Batch 2 of KB gaps plan), all following the G13 pattern (dataclass + calculate + DGI/CNAS-styled HTML + training_hook):
+  - `cnrc_f1_generator.py` — Registre du Commerce personne morale: partners table with share/percentage validation, capital-per-share calc, apports-vs-capital check, 4000 DA timbre, required-docs checklist
+  - `das_cnas_generator.py` — CNAS annual salary declaration: per-employee NSS/salary rows, employer 25.5% / employee 9% contributions, masse salariale recap, rate reference table
+  - `secu01_generator.py` — CNAS employer affiliation: monthly contribution estimator (9%/25.5%), first-hire details, docs checklist
+  - `anae_generator.py` — Auto-entrepreneur activity declaration: IFU 5% (services) / 12% (production), plafond checks (5M/8M), CASNOS 43.2k flat, effective-load calc
+- **API integration** (`api.py`): POST /tax/g13, /tax/cnrc_f1, /tax/das_cnas, /tax/secu01, /tax/anae + GET preview for each (12/12 tax endpoints now have previews). Nested lists (associes, salaries) built from dicts via _build_dataclass.
+- **G13 bug fixes**: `cascnos_contribution=None` crashed HTML generation (`None > 0`); missing paren in acomptes label.
+- **Rate limiting for SaaS v1 routers**: new `apps/api/app/middleware/rate_limiter.py` with dependency-based sliding-window limiter (`make_rate_limit("60/minute")`) — slowapi decorators silently break FastAPI >=0.141 `include_router` (routes vanish; `_IncludedRouter` wrapper). Applied: feasibility 30/min, reads 60/min, job-poll 120/min, export-csv 10/min, checkout 10/min, webhook+me 60/min. Returns 429 + Retry-After.
+- **Route-order bug fixed** (`dossiers.py`): GET /{dossier_id} was defined before /export-csv and /jobs/{job_id}, shadowing them (export-csv always 404'd). Dynamic route moved last.
+- **CSV export fix**: JS-ism `Date.now()` → Python datetime stamp; commas stripped from CSV fields.
+- **Tests**: +23 new generator tests (IRG tranche boundaries, CASNOS auto vs explicit, CNRC shares/apports/timbre, DAS rates/totals, SECU estimator, ANAE plafonds/load). 81/81 pass.
+
+### Files affected
+- New: `cnrc_f1_generator.py`, `das_cnas_generator.py`, `secu01_generator.py`, `anae_generator.py`, `apps/api/app/middleware/rate_limiter.py`
+- Modified: `api.py`, `g13_bnc_generator.py`, `apps/api/app/main.py`, `apps/api/app/routers/dossiers.py`, `apps/api/app/routers/billing.py`, `tests/test_generators.py`
+
+### Breaking changes / alerts
+- **slowapi decorators must NOT be used inside APIRouters** on FastAPI >= 0.141 — use `make_rate_limit()` dependencies instead. Direct-on-app slowapi usage (legacy api.py) still works.
+- `/v1/dossiers/export-csv` and `/v1/dossiers/jobs/{id}` now actually reachable (were shadowed).
+- In-memory rate limiter is per-worker (Render 2 workers → effective limit x2).
+
+### Alerts for other projects
+- If academix-dss or other FastAPI projects use slowapi inside include_router-mounted routers on FastAPI >= 0.141, their routes are silently dropped — same fix applies (dependency-based limiting).

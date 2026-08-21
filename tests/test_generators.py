@@ -378,3 +378,205 @@ class TestInvoiceGenerator:
     def test_import(self):
         from invoice_generator import InvoiceGenerator
         assert InvoiceGenerator is not None
+
+
+# ── G13 BNC Generator ─────────────────────────────────────────────────────────
+
+class TestG13BNCGenerator:
+    """G13 — IRG for liberal professions (BNC). 6-tranche annual barème."""
+
+    def test_import(self):
+        from g13_bnc_generator import G13Input, calculate_g13, generate_g13_html
+        assert callable(calculate_g13)
+        assert callable(generate_g13_html)
+
+    def test_net_result_cascnos_auto(self):
+        from g13_bnc_generator import calculate_g13
+        # 2M revenue, 240k rent, no explicit CASNOS → auto 15% = 300k
+        r = calculate_g13(
+            annual_revenue=2_000_000, rent_expenses=240_000,
+            equipment_expenses=0, insurance_expenses=0,
+            other_expenses=0, depreciation=0,
+        )
+        assert r["net_result"] == 2_000_000 - 240_000 - 300_000
+
+    def test_net_result_cascnos_explicit(self):
+        from g13_bnc_generator import calculate_g13
+        r = calculate_g13(
+            annual_revenue=2_000_000, rent_expenses=0,
+            equipment_expenses=0, insurance_expenses=0,
+            other_expenses=0, depreciation=0,
+            cascnos_contribution=300_000,
+        )
+        assert r["net_result"] == 1_700_000
+
+    def test_irg_bareme_first_tranche(self):
+        from g13_bnc_generator import calculate_g13
+        # 400k revenue - 100k rent - 60k CASNOS(auto 15%) = net 240k → 0% tax
+        r = calculate_g13(
+            annual_revenue=400_000, rent_expenses=100_000,
+            equipment_expenses=0, insurance_expenses=0,
+            other_expenses=0, depreciation=0,
+        )
+        assert r["net_result"] == 240_000
+        assert r["tax_annual"] == 0
+
+    def test_tax_due_subtracts_advances(self):
+        from g13_bnc_generator import calculate_g13
+        r = calculate_g13(
+            annual_revenue=2_000_000, rent_expenses=240_000,
+            equipment_expenses=50_000, insurance_expenses=30_000,
+            other_expenses=20_000, depreciation=15_000,
+            cascnos_contribution=300_000, advance_payments=100_000,
+        )
+        assert r["net_result"] == 1_345_000
+        assert abs(r["tax_due"] - (r["tax_annual"] - 100_000)) < 0.01
+
+    def test_html_sections(self):
+        from g13_bnc_generator import G13Input, calculate_g13, generate_g13_html
+        data = G13Input(nif="123", name="T", profession="Consultant", annual_revenue=1_000_000)
+        calc = calculate_g13(1_000_000, 0, 0, 0, 0, 0)
+        calc = {**calc, "total_deductible_expenses": 150_000}
+        html = generate_g13_html(data, calc)
+        assert "IDENTIFICATION DU DÉCLARANT" in html
+        assert "CALCUL DE L'IRG" in html
+        assert "Signature du déclarant" in html
+
+
+# ── CNRC F1 Generator ─────────────────────────────────────────────────────────
+
+class TestCnrcF1Generator:
+    """CNRC F1 — commercial registration (personne morale)."""
+
+    def test_import(self):
+        from cnrc_f1_generator import F1Data, AssocieData, calculate_f1, generate_f1
+        assert callable(calculate_f1)
+        assert callable(generate_f1)
+
+    def test_parts_and_percentages(self):
+        from cnrc_f1_generator import F1Data, AssocieData, calculate_f1
+        d = F1Data(
+            capital_social=1_000_000,
+            associes=[
+                AssocieData(parts_sociales=600, pourcentage=60.0),
+                AssocieData(parts_sociales=400, pourcentage=40.0),
+            ],
+        )
+        c = calculate_f1(d)
+        assert c["total_parts"] == 1_000
+        assert c["pct_sum"] == 100.0
+        assert c["parts_valid"] is True
+        assert c["capital_per_part"] == 1_000.0
+
+    def test_apports_mismatch_flagged(self):
+        from cnrc_f1_generator import F1Data, calculate_f1
+        d = F1Data(capital_social=1_000_000, apports_numeraire=500_000, apports_nature=0)
+        c = calculate_f1(d)
+        assert c["apports_match"] is False
+
+    def test_timbre_fiscal(self):
+        from cnrc_f1_generator import F1Data, calculate_f1
+        assert calculate_f1(F1Data())["timbre_cost"] == 4_000
+
+    def test_html_sections(self):
+        from cnrc_f1_generator import F1Data, AssocieData, generate_f1
+        html = generate_f1(F1Data(
+            denomination="SARL TEST",
+            associes=[AssocieData(nom_prenom="A", parts_sociales=100, pourcentage=100)],
+        ))
+        assert "IDENTIFICATION DE LA SOCIÉTÉ" in html
+        assert "ASSOCIÉS" in html
+        assert "TIMBRE" in html.upper()
+
+
+# ── DAS CNAS Generator ────────────────────────────────────────────────────────
+
+class TestDasCnasGenerator:
+    """DAS — CNAS annual salary declaration. Employer 25.5%, employee 9%."""
+
+    def test_import(self):
+        from das_cnas_generator import DASData, DASEmployee, calculate_das, generate_das
+        assert callable(calculate_das)
+
+    def test_contribution_rates(self):
+        from das_cnas_generator import DASEmployee
+        e = DASEmployee(salaire_brut_annuel=720_000)
+        assert abs(e.cotisation_employeur - 720_000 * 0.255) < 0.01
+        assert abs(e.cotisation_salariale - 720_000 * 0.09) < 0.01
+
+    def test_totals(self):
+        from das_cnas_generator import DASData, DASEmployee, calculate_das
+        d = DASData(salaries=[
+            DASEmployee(salaire_brut_annuel=720_000),
+            DASEmployee(salaire_brut_annuel=420_000),
+        ])
+        c = calculate_das(d)
+        assert c["n_salaries"] == 2
+        assert c["masse_salariale_brute"] == 1_140_000
+        assert abs(c["total_cotisations"] - 1_140_000 * 0.345) < 0.01
+
+    def test_html_sections(self):
+        from das_cnas_generator import DASData, generate_das
+        html = generate_das(DASData(annee=2026, raison_sociale="T"))
+        assert "DÉCLARATION ANNUELLE DES SALAIRES" in html
+        assert "RÉCAPITULATIF DES COTISATIONS" in html
+
+
+# ── SECU 01 Generator ─────────────────────────────────────────────────────────
+
+class TestSecu01Generator:
+    """SECU 01 — CNAS employer affiliation."""
+
+    def test_import(self):
+        from secu01_generator import Secu01Data, calculate_secu01, generate_secu01
+        assert callable(calculate_secu01)
+
+    def test_contribution_estimate(self):
+        from secu01_generator import Secu01Data, calculate_secu01
+        c = calculate_secu01(Secu01Data(salaire_mensuel_estime=60_000))
+        assert c["cotisation_mensuelle_salariale"] == 5_400.0    # 9%
+        assert c["cotisation_mensuelle_employeur"] == 15_300.0   # 25.5%
+        assert c["cout_total_employeur_mensuel"] == 75_300.0
+
+    def test_html_sections(self):
+        from secu01_generator import Secu01Data, generate_secu01
+        html = generate_secu01(Secu01Data(raison_sociale="T"))
+        assert "DEMANDE D'AFFILIATION" in html
+        assert "ESTIMATION DES COTISATIONS" in html
+
+
+# ── ANAE Generator ────────────────────────────────────────────────────────────
+
+class TestAnaeGenerator:
+    """ANAE — auto-entrepreneur declaration. IFU 5% services / 12% production."""
+
+    def test_import(self):
+        from anae_generator import AnaeData, calculate_anae, generate_anae
+        assert callable(calculate_anae)
+
+    def test_ifu_rates(self):
+        from anae_generator import AnaeData, calculate_anae
+        assert calculate_anae(AnaeData(type_activite="Services", ca_annuel_prevu=1_000_000))["ifu_rate"] == 0.05
+        assert calculate_anae(AnaeData(type_activite="Production / Vente", ca_annuel_prevu=1_000_000))["ifu_rate"] == 0.12
+
+    def test_plafonds(self):
+        from anae_generator import AnaeData, calculate_anae
+        ok = calculate_anae(AnaeData(type_activite="Services", ca_annuel_prevu=5_000_000))
+        over = calculate_anae(AnaeData(type_activite="Services", ca_annuel_prevu=5_000_001))
+        prod = calculate_anae(AnaeData(type_activite="Production / Vente", ca_annuel_prevu=8_000_000))
+        assert ok["plafond_ok"] and not over["plafond_ok"] and prod["plafond_ok"]
+
+    def test_casnos_flat_and_load(self):
+        from anae_generator import AnaeData, calculate_anae
+        c = calculate_anae(AnaeData(type_activite="Services", ca_annuel_prevu=1_800_000))
+        assert c["casnos_annual"] == 43_200
+        assert c["ifu_annual"] == 90_000
+        assert abs(c["total_charges"] - 133_200) < 0.01
+        assert abs(c["effective_load"] - 7.4) < 0.01
+
+    def test_html_sections(self):
+        from anae_generator import AnaeData, generate_anae
+        html = generate_anae(AnaeData(type_activite="Services"))
+        assert "AUTO-ENTREPRENEUR" in html
+        assert "ESTIMATION FINANCIÈRE" in html
+  

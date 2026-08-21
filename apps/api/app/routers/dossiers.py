@@ -1,11 +1,20 @@
 """Dossiers router — POST /v1/dossiers/feasibility (queued) + GET /jobs/{id}."""
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..core.config import settings
+from ..middleware.rate_limiter import make_rate_limit
 from .entitlements import require_entitlement
+
+# Rate limits (dependency-based; slowapi decorators break include_router on FastAPI >= 0.141)
+_rl_generate = make_rate_limit("30/minute")   # generation is expensive (LLM + queue)
+_rl_read = make_rate_limit("60/minute")
+_rl_poll = make_rate_limit("120/minute")      # job polling is cheap
+_rl_export = make_rate_limit("10/minute")
 
 router = APIRouter(prefix="/v1/dossiers", tags=["dossiers"])
 
@@ -46,10 +55,15 @@ def _get_current_user_optional():
         return lambda: None
 
 
-@router.post("/feasibility", status_code=202, dependencies=[Depends(require_entitlement("free"))])
+@router.post(
+    "/feasibility",
+    status_code=202,
+    dependencies=[Depends(require_entitlement("free")), Depends(_rl_generate)],
+)
 def create_feasibility(req: FeasibilityRequest, db: Session = Depends(_get_db)):
     """Enqueue feasibility generation. Returns job_id for polling."""
     # Entitlement enforced via dependencies — free 1/mo, starter 10, pro/business fair-use
+    # Rate limit: 30/min per IP (generation is expensive)
 
     from ..models.job import Job
     from ..models.user import User
@@ -118,7 +132,7 @@ def create_feasibility(req: FeasibilityRequest, db: Session = Depends(_get_db)):
     return {"job_id": job.id, "status": job.status, "message": "Queued — poll GET /v1/jobs/{job_id}"}
 
 
-@router.get("")
+@router.get("", dependencies=[Depends(_rl_read)])
 def list_dossiers(
     q: str | None = None,
     wilaya: str | None = None,
@@ -163,7 +177,51 @@ def list_dossiers(
     }
 
 
-@router.get("/{dossier_id}")
+@router.get("/jobs/{job_id}", dependencies=[Depends(_rl_poll)])
+def get_job(job_id: str, db: Session = Depends(_get_db)):
+    from ..models.job import Job
+
+    job = db.get(Job, job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return {
+        "job_id": job.id,
+        "type": job.type,
+        "status": job.status,
+        "progress": job.progress,
+        "provider": job.provider,
+        "result": job.result,
+        "error": job.error,
+        "dossier_id": job.dossier_id,
+    }
+
+
+@router.get("/export-csv", response_class=Response, dependencies=[Depends(_rl_export)])
+def export_csv(ids: str = "", db: Session = Depends(_get_db)):
+    """Export selected dossiers as CSV. Use ?ids=id1,id2…"""
+    from ..models.dossier import Dossier
+    from fastapi.responses import Response
+
+    id_list = [i.strip() for i in ids.split(",") if i.strip()]
+    if not id_list:
+        raise HTTPException(status_code=400, detail="Parameter ?ids=id1,id2 required")
+    tenant_id = "00000000-0000-0000-0000-000000000000"
+    query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id).filter(Dossier.id.in_(id_list))
+    rows = query.all()
+    lines = ["id,project_name,beneficiary_name,total_cost,status,created_at"]
+    for r in rows:
+        created = r.created_at.isoformat() if r.created_at else ""
+        name = (r.project_name or "").replace(",", " ")
+        beneficiary = (r.beneficiary_name or "").replace(",", " ")
+        lines.append(f"{r.id},{name},{beneficiary},{r.total_cost or 0},{r.status or ''},{created}")
+    csv_content = "\n".join(lines)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d")
+    return Response(content=csv_content, media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="dossiers-{stamp}.csv"'})
+
+
+# NOTE: keep /{dossier_id} LAST — a dynamic single-segment route defined earlier
+# would shadow the static routes above (e.g. /export-csv would match as dossier_id).
+@router.get("/{dossier_id}", dependencies=[Depends(_rl_read)])
 def get_dossier(dossier_id: str, db: Session = Depends(_get_db)):
     from ..models.dossier import Dossier
 
@@ -184,43 +242,3 @@ def get_dossier(dossier_id: str, db: Session = Depends(_get_db)):
         "data_json": row.data_json,
         "created_at": row.created_at.isoformat() if row.created_at else None,
     }
-
-
-@router.get("/jobs/{job_id}")
-def get_job(job_id: str, db: Session = Depends(_get_db)):
-    from ..models.job import Job
-
-    job = db.get(Job, job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    return {
-        "job_id": job.id,
-        "type": job.type,
-        "status": job.status,
-        "progress": job.progress,
-        "provider": job.provider,
-        "result": job.result,
-        "error": job.error,
-        "dossier_id": job.dossier_id,
-    }
-
-
-@router.get("/export-csv", response_class=Response)
-def export_csv(ids: str = "", db: Session = Depends(_get_db)):
-    """Export selected dossiers as CSV. Use ?ids=id1,id2,…"""
-    from ..models.dossier import Dossier
-    from fastapi.responses import Response
-
-    id_list = [i.strip() for i in ids.split(",") if i.strip()]
-    if not id_list:
-        raise HTTPException(status_code=400, detail="Parameter ?ids=id1,id2 required")
-    tenant_id = "00000000-0000-0000-0000-000000000000"
-    query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id).filter(Dossier.id.in_(id_list))
-    rows = query.all()
-    lines = ["id,project_name,beneficiary_name,total_cost,status,created_at"]
-    for r in rows:
-        lines.append(
-            f"{r.id},{r.project_name or ''},{r.beneficiary_name or ''},{r.total_cost or 0},{r.status or ''},{r.created_at.isoformat() if r.created_at else ''}"
-        )
-    csv_content = "\n".join(lines)
-    return Response(content=csv_content, media_type="text/csv", headers={"Content-Disposition": f'attachment; filename="dossiers-{Date.now()}.csv"'})

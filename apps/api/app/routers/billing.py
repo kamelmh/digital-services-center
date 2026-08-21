@@ -8,6 +8,12 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..core.config import settings
+from ..middleware.rate_limiter import make_rate_limit
+
+# Rate limits (dependency-based; slowapi decorators break include_router on FastAPI >= 0.141)
+_rl_checkout = make_rate_limit("10/minute")   # checkout creation is expensive + abuse-prone
+_rl_webhook = make_rate_limit("60/minute")
+_rl_me = make_rate_limit("60/minute")
 
 router = APIRouter(prefix="/billing", tags=["billing"])
 
@@ -119,7 +125,7 @@ def list_plans():
     return {k: {"price": v["price"], "quota": v["quota"], "label": v["label"]} for k, v in PLANS.items()}
 
 
-@router.post("/checkout", response_model=CheckoutResponse)
+@router.post("/checkout", response_model=CheckoutResponse, dependencies=[Depends(_rl_checkout)])
 def create_checkout(req: CheckoutRequest, db: Session = Depends(_get_db)):
     if req.plan not in PLANS or req.plan == "free":
         raise HTTPException(status_code=400, detail="Invalid plan — choose starter|pro|business")
@@ -183,7 +189,7 @@ def _activate_subscription(db: Session, tenant_id: str, plan: str, months: int =
     db.commit()
 
 
-@router.post("/webhook")
+@router.post("/webhook", dependencies=[Depends(_rl_webhook)])
 async def webhook(
     request: Request,
     x_chargily_signature: str | None = Header(default=None),
@@ -247,7 +253,7 @@ async def webhook(
     return {"status": "ok", "checkout_id": row.id, "plan": row.plan}
 
 
-@router.get("/me")
+@router.get("/me", dependencies=[Depends(_rl_me)])
 def billing_me(db: Session = Depends(_get_db)):
     user = _get_or_create_anon_user(db)
     return {"tenant_id": user.id, "subscription": user.subscription, "until": user.subscription_until, "quota": PLANS.get(user.subscription, PLANS["free"])["quota"]}

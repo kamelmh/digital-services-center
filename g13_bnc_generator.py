@@ -329,7 +329,7 @@ def generate_g13_html(input_: G13Input, calc: dict) -> str:
     <thead><tr><th>Description</th><th>Montant DA</th></thead>
     <tbody>
       <tr><td>Chiffre d'affaires / recettes annuelles</td><td class="num">{_fmt_dzd(input_.annual_revenue)}</td></tr>
-      <tr><td>Cotisation CASNOS (15%)</td><td class="num">{_fmt_dzd(input_.cascnos_contribution if input_.cascnos_contribution > 0 else input_.annual_revenue * 0.15)}</td></tr>
+      <tr><td>Cotisation CASNOS (15%)</td><td class="num">{_fmt_dzd(input_.cascnos_contribution if (input_.cascnos_contribution or 0) > 0 else input_.annual_revenue * 0.15)}</td></tr>
       <tr class="total-row"><td><strong>Total charges déductibles</strong></td><td class="num"><strong>{_fmt_dzd(calc.get('total_deductible_expenses', 0))}</strong></td></tr>
     </tbody>
   </table>
@@ -375,7 +375,7 @@ def generate_g13_html(input_: G13Input, calc: dict) -> str:
     html += f"""<div class="section">
   <div class="section-title">SECTION 5 — ACOMPTES VERSÉS</div>
   <table class="fields-table">
-    <tr><td class="field-label">Acomptes déjà payés (20{input_.year-1}</td><td class="field-value">{_fmt_dzd(input_.advance_payments)}</td></tr>
+    <tr><td class="field-label">Acomptes déjà payés (année {input_.year - 1})</td><td class="field-value">{_fmt_dzd(input_.advance_payments)}</td></tr>
   </table>
 </div>"""
 

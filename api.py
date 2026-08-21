@@ -49,6 +49,11 @@ from g8_existence_generator import G8Data, generate_g8, generate_g8_html
 from g1_ggr_generator import G1Data, generate_g1
 from g11_bic_generator import G11Data, generate_g11, generate_g11_html
 from g29_irg_salaires_generator import G29Data, generate_g29
+from g13_bnc_generator import G13Input, calculate_g13, generate_g13_html
+from cnrc_f1_generator import F1Data, AssocieData, calculate_f1, generate_f1
+from das_cnas_generator import DASData, DASEmployee, calculate_das, generate_das
+from secu01_generator import Secu01Data, calculate_secu01, generate_secu01
+from anae_generator import AnaeData, calculate_anae, generate_anae
 
 # g12 functions have Unicode names — import via getattr
 _g12 = importlib.import_module("g12_official")
@@ -565,6 +570,94 @@ def tax_g8(req: TaxFormRequest):
     return TaxFormResponse(form_type="G8", html=html)
 
 
+# ── Tax Forms: New Generators (G13 BNC, CNRC F1, DAS CNAS, SECU 01, ANAE) ────
+
+@app.post("/tax/g13")
+def tax_g13(req: TaxFormRequest):
+    """Generate G13 BNC declaration — IRG for liberal professions."""
+    try:
+        form_data = _build_dataclass(G13Input, req.data)
+        calc = calculate_g13(
+            annual_revenue=form_data.annual_revenue,
+            rent_expenses=form_data.rent_expenses,
+            equipment_expenses=form_data.equipment_expenses,
+            insurance_expenses=form_data.insurance_expenses,
+            other_expenses=form_data.other_expenses,
+            depreciation=form_data.depreciation,
+            cascnos_contribution=form_data.cascnos_contribution,
+            advance_payments=form_data.advance_payments,
+        )
+        calc = {**calc, "total_deductible_expenses": (
+            form_data.rent_expenses + form_data.equipment_expenses
+            + form_data.insurance_expenses + form_data.other_expenses
+            + form_data.depreciation
+            + (form_data.cascnos_contribution or form_data.annual_revenue * 0.15)
+        )}
+        html = generate_g13_html(form_data, calc)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="G13", html=html, calculations=calc)
+
+
+@app.post("/tax/cnrc_f1")
+def tax_cnrc_f1(req: TaxFormRequest):
+    """Generate CNRC F1 — commercial registration (personne morale)."""
+    try:
+        form_data = _build_dataclass(F1Data, req.data)
+        # associes arrive as list of dicts — build AssocieData objects
+        if isinstance(req.data.get("associes"), list) and req.data["associes"] and all(isinstance(a, dict) for a in form_data.associes):
+            form_data.associes = [_build_dataclass(AssocieData, a) for a in form_data.associes]
+        html = generate_f1(form_data)
+        calc = calculate_f1(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="CNRC_F1", html=html, calculations=calc)
+
+
+@app.post("/tax/das_cnas")
+def tax_das_cnas(req: TaxFormRequest):
+    """Generate CNAS DAS — annual salary declaration."""
+    try:
+        form_data = _build_dataclass(DASData, req.data)
+        if isinstance(form_data.salaries, list) and form_data.salaries and all(isinstance(s, dict) for s in form_data.salaries):
+            form_data.salaries = [_build_dataclass(DASEmployee, s) for s in form_data.salaries]
+        html = generate_das(form_data)
+        calc = calculate_das(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="DAS_CNAS", html=html, calculations=calc)
+
+
+@app.post("/tax/secu01")
+@limiter.limit("60/minute")
+def tax_secu01(request: Request, req: TaxFormRequest):
+    """Generate CNAS SECU 01 — employer affiliation request."""
+    try:
+        form_data = _build_dataclass(Secu01Data, req.data)
+        html = generate_secu01(form_data)
+        calc = calculate_secu01(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="SECU01", html=html, calculations=calc)
+
+
+@app.post("/tax/anae")
+def tax_anae(req: TaxFormRequest):
+    """Generate ANAE auto-entrepreneur activity declaration."""
+    try:
+        form_data = _build_dataclass(AnaeData, req.data)
+        html = generate_anae(form_data)
+        calc = calculate_anae(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="ANAE", html=html, calculations=calc)
+
+
 # ── Quality Scoring ───────────────────────────────────────────────────────────
 
 @app.post("/quality/score", response_model=QualityResponse)
@@ -660,6 +753,137 @@ def tax_g8_preview():
     """Preview G8 form with sample data."""
     data = G8Data(nif="1234567890", nom="Benali", prenom="Karim")
     return generate_g8_html(data)
+
+
+# ── Previews: New Generators ─────────────────────────────────────────────────
+
+@app.get("/tax/g13/preview", response_class=HTMLResponse)
+def tax_g13_preview():
+    """Preview G13 BNC form with sample data — consultant with 2M DA revenue."""
+    data = G13Input(
+        nif="123456789012345",
+        nin="199603061234567890",
+        name="Benali Ahmed",
+        profession="Consultant",
+        address="El Bayadh Centre, Wilaya d'El Bayadh",
+        wilaya="32",
+        year=2026,
+        annual_revenue=2_000_000,
+        cascnos_contribution=300_000,
+        rent_expenses=240_000,
+        equipment_expenses=50_000,
+        insurance_expenses=30_000,
+        other_expenses=20_000,
+        depreciation=15_000,
+        advance_payments=100_000,
+        fait_a="El Bayadh",
+        date_declaration="30/04/2026",
+    )
+    calc = calculate_g13(
+        annual_revenue=data.annual_revenue,
+        rent_expenses=data.rent_expenses,
+        equipment_expenses=data.equipment_expenses,
+        insurance_expenses=data.insurance_expenses,
+        other_expenses=data.other_expenses,
+        depreciation=data.depreciation,
+        cascnos_contribution=data.cascnos_contribution,
+        advance_payments=data.advance_payments,
+    )
+    calc = {**calc, "total_deductible_expenses": (
+        data.rent_expenses + data.equipment_expenses
+        + data.insurance_expenses + data.other_expenses + data.depreciation
+        + (data.cascnos_contribution or data.annual_revenue * 0.15)
+    )}
+    return generate_g13_html(data, calc)
+
+
+@app.get("/tax/cnrc_f1/preview", response_class=HTMLResponse)
+def tax_cnrc_f1_preview():
+    """Preview CNRC F1 form with sample data — SARL with two partners."""
+    data = F1Data(
+        wilaya="16-Alger",
+        denomination="SARL TECH SOLUTIONS",
+        forme_juridique="SARL",
+        sigle="TS",
+        objet_social="Développement logiciel et services informatiques",
+        capital_social=1_000_000,
+        apports_numeraire=800_000,
+        apports_nature=200_000,
+        adresse_siege="123 Rue Didouche Mourad",
+        commune="Alger Centre",
+        wilaya_siege="16-Alger",
+        associes=[
+            AssocieData(nom_prenom="Benali Ahmed", nin="196030612345678901", parts_sociales=600, pourcentage=60.0, fonction="Gérant"),
+            AssocieData(nom_prenom="Mebarki Fatima", nin="198507212345678902", parts_sociales=400, pourcentage=40.0, fonction="Associée"),
+        ],
+        gerant_nom="Benali Ahmed",
+        fait_a="Alger",
+        date_declaration="15/01/2026",
+    )
+    return generate_f1(data)
+
+
+@app.get("/tax/das_cnas/preview", response_class=HTMLResponse)
+def tax_das_cnas_preview():
+    """Preview CNAS DAS with sample data — employer with 3 employees."""
+    data = DASData(
+        agence_cnas="Agence CNAS El Bayadh",
+        wilaya="32-El Bayadh",
+        annee=2026,
+        nif="1234567890A",
+        raison_sociale="SARL TECH SOLUTIONS",
+        activite="Prestation de services informatiques",
+        salaries=[
+            DASEmployee(nom_prenom="Benali Ahmed", nss="9603061234", categorie="Cadre", salaire_brut_annuel=720_000),
+            DASEmployee(nom_prenom="Mebarki Fatima", nss="8507212345", categorie="Non-cadre", salaire_brut_annuel=420_000),
+            DASEmployee(nom_prenom="Khelifi Youcef", nss="9205153456", categorie="Non-cadre", salaire_brut_annuel=300_000),
+        ],
+    )
+    return generate_das(data)
+
+
+@app.get("/tax/secu01/preview", response_class=HTMLResponse)
+def tax_secu01_preview():
+    """Preview SECU 01 affiliation form with sample data."""
+    data = Secu01Data(
+        agence_cnas="Agence CNAS El Bayadh",
+        wilaya="32-El Bayadh",
+        nif="1234567890A",
+        rc="16/00-1234567B21",
+        raison_sociale="SARL TECH SOLUTIONS",
+        forme_juridique="SARL",
+        activite="Prestation de services informatiques",
+        adresse="123 Rue Didouche Mourad",
+        commune="El Bayadh",
+        date_debut_activite="01/01/2026",
+        date_premier_emploi="01/03/2026",
+        effectif_prevu=3,
+        salaire_mensuel_estime=60_000,
+        representant_nom="Benali Ahmed",
+        representant_qualite="Gérant",
+        fait_a="El Bayadh",
+        date_declaration="15/02/2026",
+    )
+    return generate_secu01(data)
+
+
+@app.get("/tax/anae/preview", response_class=HTMLResponse)
+def tax_anae_preview():
+    """Preview ANAE auto-entrepreneur declaration with sample data."""
+    data = AnaeData(
+        antenne_anae="Antenne ANAE El Bayadh",
+        wilaya="32-El Bayadh",
+        nom_prenom="Mahi Kamel Abdelghani",
+        nin="199603061234567890",
+        type_activite="Services",
+        secteur="Numérique (développement, design, marketing digital)",
+        description_activite="Développement web et mobile, conseil en transformation numérique",
+        ca_annuel_prevu=1_800_000,
+        casnos_affiliation=True,
+        fait_a="El Bayadh",
+        date_declaration="15/01/2026",
+    )
+    return generate_anae(data)
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────
