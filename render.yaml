@@ -33,3 +33,22 @@ services:
       - key: R2_SECRET_KEY
         sync: false
     healthCheckPath: /health
+
+  # Frontend — Next.js admin dashboard
+  - type: web
+    name: dsc-web
+    env: node
+    region: frankfurt
+    plan: free
+    buildCommand: cd apps/web && npm install && npm run build
+    startCommand: cd apps/web && npx next start -p $PORT
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://dsc-api-vsex.onrender.com"
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+    healthCheckPath: /
