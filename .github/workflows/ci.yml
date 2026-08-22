@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install deps
-        run: pip install -r requirements.txt && pip install sqlalchemy alembic redis rq boto3
+        run: pip install -r requirements.txt && pip install sqlalchemy alembic redis rq boto3 pytest
       - name: Unit tests (55)
         run: python -m pytest tests/test_generators.py tests/test_cross_artifact_integration.py -q --override-ini="addopts="
       - name: Rate checks (38)
