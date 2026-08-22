@@ -195,7 +195,7 @@ def _header_footer(canvas, doc, business_name="DSC Digital Services Center"):
     canvas.line(20*mm, 18*mm, w - 20*mm, 18*mm)
 
     # Footer text
-    canvas.setFont("Latin", 7.5)
+    canvas.setFont(latin_font, 7.5)
     canvas.setFillColor(colors.HexColor("#999999"))
     canvas.drawString(20*mm, 13*mm, "www.dsc-dz.com | contact@dsc-dz.com")
     canvas.drawRightString(w - 20*mm, 13*mm, f"Page {doc.page}")
