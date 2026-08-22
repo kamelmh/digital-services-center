@@ -41,9 +41,33 @@ CLAUDE_DESKTOP_SUMMARY.md
 dsc_data.db
 dsc_data.db-wal
 dsc_data.db-shm
+apps/api/dsc_saas.db
 nul
+*.db-journal
 
 # Training data (per-generation JSONs — keep index.jsonl intent, ignore bulk)
 training_data/gen_*.json
+
+# Debug dumps
+break_even.txt
+collect_out.txt
+fv_detail*.txt
+md_text.txt
+output_page_*.txt
+page_*.raw
+page_*.clean.txt
+dsc_headings.txt
+dsc_links.txt
+dsc_page_content.txt
+dsc_terms.txt
+dsc_homepage.png
+dsc_architecture_map.*
+pdf_*.txt
+pdf_debug_output.txt
+pytest_out.txt
+quality_report.txt
+test_md.txt
+generate_canonical_md.py
+generate_pdf.py
 
 # Fonts are tracked (assets/fonts/*.ttf bundled for exe portability)

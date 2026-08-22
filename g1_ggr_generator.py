@@ -82,7 +82,7 @@ class SalaireData:
     def compute(self) -> None:
         """Auto-compute derived fields."""
         self.abattement_10 = self.salaire_brut * 0.10
-        self.net_imposable = self.salaire_brut - self.abattement_10
+        self.net_imposable = max(0, self.salaire_brut - self.cotisations_salarié - self.abattement_10)
 
 
 @dataclass

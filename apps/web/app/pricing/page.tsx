@@ -1,11 +1,11 @@
+"use client";
+
 const plans = [
   { id: "free", name: "Free", price: "0 DZD", quota: "1 dossier / mois", cta: "Commencer", features: ["1 G12/G50 preview", "Sans PDF download (watermark)", "Guides fiscaux"] },
   { id: "starter", name: "Starter", price: "2 900 DZD/mois", quota: "10 docs / mois", cta: "Choisir Starter", features: ["7 formulaires DGI PDF", "Faisabilité offline", "Export PDF"] },
   { id: "pro", name: "Pro", price: "5 900 DZD/mois", quota: "∞ (fair-use 100)", cta: "Passer Pro — Recommandé", features: ["LLM Groq online", "Batch 10", "AAPI 1500", "Queue prioritaire"], highlight: true },
   { id: "business", name: "Business", price: "12 900 DZD/mois", quota: "∞ (300) + API + whitelabel", cta: "Business", features: ["API access", "Whitelabel PDF", "Webhooks"] },
 ];
-
-"use client";
 import { useState } from "react";
 import { createCheckout } from "@/lib/billing";
 

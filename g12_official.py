@@ -457,7 +457,7 @@ def _ca_table_html(
     ifu_prod = ca_prod_imp * 0.05
     ifu_serv = ca_serv_imp * 0.12
     ifu_auto = ca_auto_imp * 0.005
-    ifu_total = ifu_prod + ifu_serv + ifu_auto
+    ifu_total = calc.ifu_total if calc and calc.ifu_total else (ifu_prod + ifu_serv + ifu_auto)
 
     complementaire_cols = ""
     if show_complementaire and ca_realise:

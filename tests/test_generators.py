@@ -548,7 +548,7 @@ class TestSecu01Generator:
 # ── ANAE Generator ────────────────────────────────────────────────────────────
 
 class TestAnaeGenerator:
-    """ANAE — auto-entrepreneur declaration. IFU 5% services / 12% production."""
+    """ANAE — auto-entrepreneur declaration. IFU 5% production / 12% services."""
 
     def test_import(self):
         from anae_generator import AnaeData, calculate_anae, generate_anae
@@ -556,8 +556,8 @@ class TestAnaeGenerator:
 
     def test_ifu_rates(self):
         from anae_generator import AnaeData, calculate_anae
-        assert calculate_anae(AnaeData(type_activite="Services", ca_annuel_prevu=1_000_000))["ifu_rate"] == 0.05
-        assert calculate_anae(AnaeData(type_activite="Production / Vente", ca_annuel_prevu=1_000_000))["ifu_rate"] == 0.12
+        assert calculate_anae(AnaeData(type_activite="Services", ca_annuel_prevu=1_000_000))["ifu_rate"] == 0.12
+        assert calculate_anae(AnaeData(type_activite="Production / Vente", ca_annuel_prevu=1_000_000))["ifu_rate"] == 0.05
 
     def test_plafonds(self):
         from anae_generator import AnaeData, calculate_anae
@@ -570,9 +570,9 @@ class TestAnaeGenerator:
         from anae_generator import AnaeData, calculate_anae
         c = calculate_anae(AnaeData(type_activite="Services", ca_annuel_prevu=1_800_000))
         assert c["casnos_annual"] == 43_200
-        assert c["ifu_annual"] == 90_000
-        assert abs(c["total_charges"] - 133_200) < 0.01
-        assert abs(c["effective_load"] - 7.4) < 0.01
+        assert c["ifu_annual"] == 216_000  # 1.8M * 12%
+        assert abs(c["total_charges"] - 259_200) < 0.01
+        assert abs(c["effective_load"] - 14.4) < 0.01
 
     def test_html_sections(self):
         from anae_generator import AnaeData, generate_anae

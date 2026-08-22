@@ -173,12 +173,17 @@ def calculate_g13(annual_revenue: float,
 
     effective_rate = round((irg["tax_annual"] / annual_revenue * 100) if annual_revenue > 0 else 0, 2)
 
+    total_deductible = (rent_expenses + equipment_expenses + insurance_expenses
+                          + other_expenses + depreciation
+                          + (cascnos_contribution if cascnos_contribution is not None else annual_revenue * 0.15))
+
     return {
         "net_result": net_result,
         "monthly_average": irg["monthly_average"],
         "tax_annual": irg["tax_annual"],
         "tax_due": tax_due,
         "effective_rate": effective_rate,
+        "total_deductible_expenses": round(total_deductible, 2),
     }
 
 

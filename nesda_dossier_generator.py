@@ -445,7 +445,7 @@ class NESDADossierGenerator:
         net_margin = defaults.get("profit_margin_target", 0.10)
         bank_loan = investment * financing["bank_pct"]
         
-        # Use correct NESDA terms (2% interest, 12y repayment, 1.5y grace)
+        # Use correct NESDA terms (0% interest, 7y repayment, 1.5y grace)
         nesda_result = calculate_nesda_financing(investment)
         interest_rate = nesda_result.interest_rate
         repayment_years = nesda_result.repayment_years

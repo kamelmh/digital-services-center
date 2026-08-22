@@ -43,10 +43,10 @@ ACTIVITE_TYPES = [
 ]
 
 IFU_RATES = {
-    "Services": 0.05,
-    "Prestations intellectuelles": 0.05,
-    "Production / Vente": 0.12,
-    "Artisanat": 0.12,
+    "Services": 0.12,
+    "Prestations intellectuelles": 0.12,
+    "Production / Vente": 0.05,
+    "Artisanat": 0.05,
 }
 
 PLAFONDS = {

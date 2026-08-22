@@ -462,21 +462,21 @@ def calculate_g50(data: G50Data) -> G50Result:
     tva_collectee_9 = tva_9_imposable * TVA_RATE_REDUIT
     tva_collectee = tva_collectee_19 + tva_collectee_9
 
-    tva_deductible = tva_deductions_total
-    tva_a_payer_brut = tva_collectee - tva_deductible
     tva_regularisation_plus = data.tva_regularisation_prorata_plus
     tva_regularisation_acomptes = data.tva_regularisation_acomptes
     tva_reversement = data.tva_reversement_deduction
     tva_a_rappeler = data.tva_a_rappeler
-    tva_total_c = tva_a_payer_brut + tva_regularisation_plus + tva_regularisation_acomptes + tva_reversement + tva_a_rappeler
-
-    tva_deductions_b = tva_deductions_total
-    if tva_total_c >= tva_deductions_b:
-        tva_a_payer = tva_total_c - tva_deductions_b
+    tva_net = tva_collectee + tva_regularisation_plus + tva_regularisation_acomptes + tva_reversement + tva_a_rappeler - tva_deductions_total
+    if tva_net >= 0:
+        tva_a_payer = tva_net
         tva_precompte_report = 0
     else:
         tva_a_payer = 0
-        tva_precompte_report = tva_deductions_b - tva_total_c
+        tva_precompte_report = -tva_net
+    # Compat aliases for HTML
+    tva_a_payer_brut = tva_collectee - tva_deductions_total
+    tva_total_c = tva_net + tva_deductions_total
+    tva_deductions_b = tva_deductions_total
 
     tva_auto_liquidee = data.tva_auto_liquidee
 

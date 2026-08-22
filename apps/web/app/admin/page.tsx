@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/button";
 import { PdfViewer } from "@/components/PdfViewer";
 import { Button } from "@/components/ui/button";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function AdminPage() {
   const [q, setQ] = useState("");
   const [wilaya, setWilaya] = useState("");
@@ -180,16 +182,19 @@ export default function AdminPage() {
       {data && data.dossiers.length > 0 && (
         <Card className="mt-6">
           <h2 className="text-semibold mb-3">Aperçu PDF</h2>
-          <div className="overflow-auto">
-            {data.dossiers.map((d: any) => (
-              <PdfViewer
-                key={d.id}
-                r2Key={d.pdf_r2_key}
-                fallbackText={d.project_name || "Aucun projet"}
-                selected={isSelected(d.id)}
-                onToggle={() => toggleSelect(d.id)}
-              />
-            ))}
+          <div className="overflow-auto space-y-3">
+            {data.dossiers
+              .filter((d: any) => d.pdf_r2_key)
+              .map((d: any) => (
+                <PdfViewer
+                  key={d.id}
+                  url={d.pdf_r2_key}
+                  title={d.project_name || "Aperçu"}
+                />
+              ))}
+            {data.dossiers.filter((d: any) => d.pdf_r2_key).length === 0 && (
+              <p className="text-sm text-gray-500">Aucun PDF disponible — générez un dossier depuis le Dashboard.</p>
+            )}
           </div>
         </Card>
       )}
