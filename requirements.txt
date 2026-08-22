@@ -9,7 +9,9 @@ arabic-reshaper==3.0.1
 python-bidi==0.6.11
 
 # ── Web (Violit + API) ──────────────────────────────────
-violit==0.8.29             # UI framework — pin 0.8.29 (alpha, do not auto-bump)
+# violit==0.8.29           # Desktop UI framework ONLY (main.py/app_instance.py) — NOT used by the
+#                          # Render API. It forces fastapi>=0.135 which conflicts with the API's pin.
+#                          # For desktop builds: pip install violit==0.8.29 separately.
 fastapi==0.110.3           # PINNED DOWN from 0.141.1 — 0.141's _IncludedRouter breaks real-server
                            # routing (all non-/ paths 404 behind gunicorn; fine in TestClient)
 uvicorn[standard]==0.52.1
