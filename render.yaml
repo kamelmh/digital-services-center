@@ -53,3 +53,5 @@ services:
     name: dsc-redis
     plan: free
     maxmemoryPolicy: allkeys-lru
+    # Empty list = private/internal access only (api + worker connect via fromService)
+    ipAllowList: []
