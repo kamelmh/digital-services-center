@@ -752,3 +752,193 @@ class TestG4RentalGenerator:
         ))
         assert "REVENUS DE LOCATION" in html
         assert "LIQUIDATION DE L'IRG" in html
+
+
+# ── CASNOS Affiliation Generator ────────────────────────────────────────────
+
+class TestCASNOSAffiliationGenerator:
+    """CASNOS affiliation request for liberal professionals."""
+
+    def test_import(self):
+        from casnos_affiliation_generator import CasnosAffiliationData, calculate_casnos_affiliation, generate_casnos_affiliation
+        assert callable(calculate_casnos_affiliation)
+
+    def test_contribution_15_percent(self):
+        from casnos_affiliation_generator import CasnosAffiliationData, calculate_casnos_affiliation
+        c = calculate_casnos_affiliation(CasnosAffiliationData(revenu_annuel_previsionnel=2_400_000))
+        assert c["taux"] == 0.15
+        assert c["contribution_annuelle"] == 360_000
+
+    def test_minimum_mensuel(self):
+        from casnos_affiliation_generator import CasnosAffiliationData, calculate_casnos_affiliation
+        # Very low CA → minimum 3,000 DA/month kicks in
+        c = calculate_casnos_affiliation(CasnosAffiliationData(revenu_annuel_previsionnel=100_000))
+        assert c["contribution_mensuelle"] >= 3_000
+
+    def test_high_ca(self):
+        from casnos_affiliation_generator import CasnosAffiliationData, calculate_casnos_affiliation
+        c = calculate_casnos_affiliation(CasnosAffiliationData(revenu_annuel_previsionnel=12_000_000))
+        assert c["contribution_annuelle"] == 1_800_000
+        assert c["contribution_mensuelle"] == 150_000
+
+    def test_frais_affiliation(self):
+        from casnos_affiliation_generator import CasnosAffiliationData, calculate_casnos_affiliation
+        c = calculate_casnos_affiliation(CasnosAffiliationData())
+        assert c["frais_affiliation"] == 5_000
+
+    def test_html_returns_string(self):
+        from casnos_affiliation_generator import CasnosAffiliationData, generate_casnos_affiliation
+        html = generate_casnos_affiliation(CasnosAffiliationData(nom="TEST", prenom="Ahmed"))
+        assert isinstance(html, str)
+        assert len(html) > 500
+        assert "AFFILIATION" in html
+
+    def test_html_contains_nif(self):
+        from casnos_affiliation_generator import CasnosAffiliationData, generate_casnos_affiliation
+        html = generate_casnos_affiliation(CasnosAffiliationData(nif="1234567890", nom="BENALI"))
+        assert "1234567890" in html
+        assert "BENALI" in html
+
+
+# ── CASNOS CA Declaration Generator ──────────────────────────────────────────
+
+class TestCASNOSCAGenerator:
+    """CASNOS annual CA declaration for social security contributions."""
+
+    def test_import(self):
+        from casnos_ca_generator import CasnosCAData, calculate_casnos_ca, generate_casnos_ca
+        assert callable(calculate_casnos_ca)
+
+    def test_contribution_15_percent(self):
+        from casnos_ca_generator import CasnosCAData, calculate_casnos_ca
+        c = calculate_casnos_ca(CasnosCAData(ca_annee_courante=2_400_000))
+        assert c["taux"] == 0.15
+        assert c["contribution_brute"] == 360_000
+
+    def test_charges_deductibles_50_percent(self):
+        from casnos_ca_generator import CasnosCAData, calculate_casnos_ca
+        c = calculate_casnos_ca(CasnosCAData(
+            ca_annee_courante=2_400_000,
+            charges_locatives=360_000, charges_materiel=120_000,
+        ))
+        assert c["total_charges"] == 480_000
+        assert c["deduction_charges"] == 240_000
+        # contribution_nette = 360k - 240k = 120k
+        assert c["contribution_nette"] == 120_000
+
+    def test_minimum_mensuel(self):
+        from casnos_ca_generator import CasnosCAData, calculate_casnos_ca
+        c = calculate_casnos_ca(CasnosCAData(ca_annee_courante=100_000))
+        # 100k * 0.15 = 15k / 12 = 1,250 → minimum 3,000
+        assert c["cotisation_mensuelle"] >= 3_000
+
+    def test_no_negative_contribution(self):
+        from casnos_ca_generator import CasnosCAData, calculate_casnos_ca
+        # High charges can make contribution_nette = 0
+        c = calculate_casnos_ca(CasnosCAData(
+            ca_annee_courante=200_000,
+            charges_locatives=200_000, charges_autres=200_000,
+        ))
+        assert c["contribution_nette"] >= 0
+
+    def test_html_returns_string(self):
+        from casnos_ca_generator import CasnosCAData, generate_casnos_ca
+        html = generate_casnos_ca(CasnosCAData(nom="TEST", ca_annee_courante=2_000_000))
+        assert isinstance(html, str)
+        assert len(html) > 500
+        assert "CHIFFRE" in html
+
+    def test_html_contains_nif(self):
+        from casnos_ca_generator import CasnosCAData, generate_casnos_ca
+        html = generate_casnos_ca(CasnosCAData(nif="9876543210", nom="SARL"))
+        assert "9876543210" in html
+
+
+# ── G12 Bis Generator ────────────────────────────────────────────────────────
+
+class TestG12BisGenerator:
+    """G12 Bis — definitive IFU for auto-entrepreneurs at 0.5%."""
+
+    def test_import(self):
+        from g12_bis_generator import G12BisData, calculate_g12_bis, generate_g12_bis
+        assert callable(calculate_g12_bis)
+
+    def test_ifu_05_percent(self):
+        from g12_bis_generator import G12BisData, calculate_g12_bis
+        c = calculate_g12_bis(G12BisData(ca_previsionnel=2_000_000, ca_realise=2_000_000))
+        assert c["ifu_previsionnel"] == 10_000  # max(10k, 10k)
+        assert c["ifu_realise"] == 10_000
+
+    def test_minimum_10000(self):
+        from g12_bis_generator import G12BisData, calculate_g12_bis
+        # Very low CA → minimum 10,000 DA kicks in
+        c = calculate_g12_bis(G12BisData(ca_previsionnel=500_000, ca_realise=500_000))
+        assert c["ifu_previsionnel"] >= 10_000
+
+    def test_complement_when_realized_exceeds(self):
+        from g12_bis_generator import G12BisData, calculate_g12_bis
+        c = calculate_g12_bis(G12BisData(ca_previsionnel=2_000_000, ca_realise=3_000_000))
+        # 3M * 0.5% = 15k, 2M * 0.5% = 10k → complement = 5k
+        assert c["ifu_complementaire"] == 5_000
+        assert c["ifu_total"] == 15_000
+
+    def test_no_complement_when_below(self):
+        from g12_bis_generator import G12BisData, calculate_g12_bis
+        c = calculate_g12_bis(G12BisData(ca_previsionnel=3_000_000, ca_realise=2_000_000))
+        assert c["ifu_complementaire"] == 0
+
+    def test_revenu_net(self):
+        from g12_bis_generator import G12BisData, calculate_g12_bis
+        c = calculate_g12_bis(G12BisData(ca_previsionnel=2_000_000, ca_realise=2_500_000))
+        assert c["revenu_net"] == 2_500_000 - c["ifu_total"]
+
+    def test_html_returns_string(self):
+        from g12_bis_generator import G12BisData, generate_g12_bis
+        html = generate_g12_bis(G12BisData(nom_prenoms="TEST"))
+        assert isinstance(html, str)
+        assert len(html) > 500
+        assert "12 Bis" in html
+
+    def test_html_contains_name(self):
+        from g12_bis_generator import G12BisData, generate_g12_bis
+        html = generate_g12_bis(G12BisData(nom_prenoms="BENALI Ahmed"))
+        assert "BENALI Ahmed" in html
+
+
+# ── G51 Tax Clearance Generator ──────────────────────────────────────────────
+
+class TestG51Generator:
+    """G51 — attestation de régularité fiscale."""
+
+    def test_import(self):
+        from g51_generator import G51Data, calculate_g51, generate_g51
+        assert callable(calculate_g51)
+
+    def test_fees(self):
+        from g51_generator import G51Data, calculate_g51
+        c = calculate_g51(G51Data())
+        assert c["frais_timbre"] == 1_000
+        assert c["frais_dossier"] == 2_000
+        assert c["total_frais"] == 3_000
+
+    def test_impots_payes_default(self):
+        from g51_generator import G51Data, calculate_g51
+        c = calculate_g51(G51Data())
+        assert c["impots_payes"] is True
+
+    def test_html_returns_string(self):
+        from g51_generator import G51Data, generate_g51
+        html = generate_g51(G51Data(nom="TEST SARL"))
+        assert isinstance(html, str)
+        assert len(html) > 500
+        assert "REGULARITE" in html
+
+    def test_html_contains_nif(self):
+        from g51_generator import G51Data, generate_g51
+        html = generate_g51(G51Data(nif="5566778899", nom="SARL"))
+        assert "5566778899" in html
+
+    def test_html_has_motif(self):
+        from g51_generator import G51Data, generate_g51
+        html = generate_g51(G51Data(motif="Marches publics"))
+        assert "March" in html  # "Marchés" might be accented

@@ -58,6 +58,10 @@ from g15_cessation_generator import G15Data, calculate_g15, generate_g15
 from nis_generator import NisData, calculate_nis, generate_nis
 from cnrc_f2_generator import F2Data, calculate_f2, generate_f2
 from g4_rental_generator import RentalProperty, G4RentalData, calculate_g4_rental, generate_g4_rental
+from casnos_affiliation_generator import CasnosAffiliationData, calculate_casnos_affiliation, generate_casnos_affiliation
+from casnos_ca_generator import CasnosCAData, calculate_casnos_ca, generate_casnos_ca
+from g12_bis_generator import G12BisData, calculate_g12_bis, generate_g12_bis
+from g51_generator import G51Data, calculate_g51, generate_g51
 
 # g12 functions have Unicode names — import via getattr
 _g12 = importlib.import_module("g12_official")
@@ -714,6 +718,54 @@ def tax_g4_rental(req: TaxFormRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
     return TaxFormResponse(form_type="G4_RENTAL", html=html, calculations=calc)
+
+
+@app.post("/tax/casnos_affiliation")
+def tax_casnos_affiliation(req: TaxFormRequest):
+    """Generate CASNOS affiliation request for liberal professionals."""
+    try:
+        form_data = _build_dataclass(CasnosAffiliationData, req.data)
+        html = generate_casnos_affiliation(form_data)
+        calc = calculate_casnos_affiliation(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return TaxFormResponse(form_type="CASNOS_AFFILIATION", html=html, calculations=calc)
+
+
+@app.post("/tax/casnos_ca")
+def tax_casnos_ca(req: TaxFormRequest):
+    """Generate CASNOS CA declaration for social security contributions."""
+    try:
+        form_data = _build_dataclass(CasnosCAData, req.data)
+        html = generate_casnos_ca(form_data)
+        calc = calculate_casnos_ca(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return TaxFormResponse(form_type="CASNOS_CA", html=html, calculations=calc)
+
+
+@app.post("/tax/g12_bis")
+def tax_g12_bis(req: TaxFormRequest):
+    """Generate G12 Bis — definitive IFU declaration for auto-entrepreneurs."""
+    try:
+        form_data = _build_dataclass(G12BisData, req.data)
+        html = generate_g12_bis(form_data)
+        calc = calculate_g12_bis(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return TaxFormResponse(form_type="G12_BIS", html=html, calculations=calc)
+
+
+@app.post("/tax/g51")
+def tax_g51(req: TaxFormRequest):
+    """Generate G51 — tax clearance certificate request."""
+    try:
+        form_data = _build_dataclass(G51Data, req.data)
+        html = generate_g51(form_data)
+        calc = calculate_g51(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return TaxFormResponse(form_type="G51", html=html, calculations=calc)
 
 
 # ── Quality Scoring ───────────────────────────────────────────────────────────
