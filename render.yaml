@@ -1,4 +1,7 @@
 services:
+  # Free plan: no background workers available — jobs run INLINE inside the API
+  # (dossiers router falls back to synchronous generation when Redis is absent).
+  # To scale later: re-add type=worker + type=redis services and upgrade the plan.
   - type: web
     name: dsc-api
     env: python
@@ -10,11 +13,9 @@ services:
       # Set manually in dashboard: Neon connection string (postgresql://…neon.tech/neondb?sslmode=require)
       - key: DATABASE_URL
         sync: false
+      # No Redis on free plan -> enqueue raises -> inline fallback generates directly
       - key: REDIS_URL
-        fromService:
-          name: dsc-redis
-          type: redis
-          property: connectionString
+        value: "disabled"
       - key: DSC_JWT_SECRET
         generateValue: true
       - key: APP_ENV
@@ -32,26 +33,3 @@ services:
       - key: R2_SECRET_KEY
         sync: false
     healthCheckPath: /health
-
-  - type: worker
-    name: dsc-worker
-    env: python
-    region: frankfurt
-    plan: free
-    buildCommand: pip install -r requirements.txt && pip install sqlalchemy alembic redis rq boto3
-    startCommand: python -m rq worker --url $REDIS_URL dsc-queue
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        fromService:
-          name: dsc-redis
-          type: redis
-          property: connectionString
-
-  - type: redis
-    name: dsc-redis
-    plan: free
-    maxmemoryPolicy: allkeys-lru
-    # Empty list = private/internal access only (api + worker connect via fromService)
-    ipAllowList: []
