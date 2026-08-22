@@ -579,4 +579,176 @@ class TestAnaeGenerator:
         html = generate_anae(AnaeData(type_activite="Services"))
         assert "AUTO-ENTREPRENEUR" in html
         assert "ESTIMATION FINANCIÈRE" in html
-  
+
+
+# ── G15 Cessation Generator ───────────────────────────────────────────────────
+
+class TestG15CessationGenerator:
+    """G15 — cessation d'activité declaration."""
+
+    def test_import(self):
+        from g15_cessation_generator import G15Data, calculate_g15, generate_g15
+        assert callable(calculate_g15)
+
+    def test_duration_and_deadline(self):
+        from g15_cessation_generator import G15Data, calculate_g15
+        c = calculate_g15(G15Data(
+            date_debut_activite="01/06/2018", date_cessation="31/12/2026",
+            date_declaration="10/01/2027",
+        ))
+        assert c["duree_annees"] == 8.6
+        assert c["deadline_declaration"] == "30/01/2027"
+        assert c["is_late"] is False
+
+    def test_late_declaration_flag(self):
+        from g15_cessation_generator import G15Data, calculate_g15
+        c = calculate_g15(G15Data(
+            date_debut_activite="01/01/2020", date_cessation="01/01/2026",
+            date_declaration="15/03/2026",
+        ))
+        assert c["is_late"] is True
+
+    def test_final_settlement_by_regime(self):
+        from g15_cessation_generator import G15Data, calculate_g15
+        assert calculate_g15(G15Data(regime_fiscal="Régime réel"))["final_settlement_required"] is True
+        assert calculate_g15(G15Data(regime_fiscal="IFU / Auto-entrepreneur"))["final_settlement_required"] is False
+
+    def test_html_sections(self):
+        from g15_cessation_generator import G15Data, generate_g15
+        html = generate_g15(G15Data(nom_raison_sociale="T", regime_fiscal="Régime réel"))
+        assert "CESSATION D'ACTIVITÉ" in html
+        assert "OBLIGATIONS FISCALES" in html
+
+
+# ── NIS Generator ─────────────────────────────────────────────────────────────
+
+class TestNisGenerator:
+    """NIS — ONS statistical identification request."""
+
+    def test_import(self):
+        from nis_generator import NisData, calculate_nis, generate_nis
+        assert callable(calculate_nis)
+
+    def test_completeness_full(self):
+        from nis_generator import NisData, calculate_nis
+        c = calculate_nis(NisData(
+            nom_raison_sociale="X", nif="1", rc="r", activite_principale="a",
+            adresse="ad", representant_nom="n", commune="c",
+        ))
+        assert c["completeness_pct"] == 100 and c["missing_fields"] == []
+
+    def test_completeness_empty(self):
+        from nis_generator import NisData, calculate_nis
+        c = calculate_nis(NisData())
+        assert c["completeness_pct"] == 0 and len(c["missing_fields"]) == 7
+
+    def test_effectif_tranche(self):
+        from nis_generator import NisData, calculate_nis
+        assert calculate_nis(NisData(effectif_salarie=0))["effectif_tranche"] == "0 salarié"
+        assert calculate_nis(NisData(effectif_salarie=5))["effectif_tranche"] == "1-9"
+        assert calculate_nis(NisData(effectif_salarie=60))["effectif_tranche"] == "50-99"
+        assert calculate_nis(NisData(effectif_salarie=150))["effectif_tranche"] == "100+"
+
+    def test_auto_entrepreneur_flag(self):
+        from nis_generator import NisData, calculate_nis
+        assert calculate_nis(NisData(forme_juridique="Auto-entrepreneur"))["is_auto_entrepreneur"] is True
+        assert calculate_nis(NisData(forme_juridique="SARL"))["is_auto_entrepreneur"] is False
+
+    def test_html_sections(self):
+        from nis_generator import NisData, generate_nis
+        html = generate_nis(NisData())
+        assert "Numéro d'Identification Statistique" in html
+        assert "classification statistique" in html
+
+
+# ── CNRC F2 Generator ─────────────────────────────────────────────────────────
+
+class TestCnrcF2Generator:
+    """CNRC F2 — individual merchant registration."""
+
+    def test_import(self):
+        from cnrc_f2_generator import F2Data, calculate_f2, generate_f2
+        assert callable(calculate_f2)
+
+    def test_identity_and_age(self):
+        from cnrc_f2_generator import F2Data, calculate_f2
+        c = calculate_f2(F2Data(nom="Mahi", prenom="Kamel", date_naissance="06/03/1996",
+                                date_declaration="10/02/2026"))
+        assert c["nom_complet"] == "Mahi Kamel"
+        assert c["age"] == 30 and c["age_ok"] is True
+
+    def test_married_community_needs_conjoint(self):
+        from cnrc_f2_generator import F2Data, calculate_f2
+        c = calculate_f2(F2Data(situation_matrimoniale="Marié(e)", regime_matrimonial="Communauté de biens"))
+        assert c["needs_conjoint_info"] is True
+        # Séparation de biens → no conjoint info needed
+        c2 = calculate_f2(F2Data(situation_matrimoniale="Marié(e)", regime_matrimonial="Séparation de biens"))
+        assert c2["needs_conjoint_info"] is False
+
+    def test_bail_requirements(self):
+        from cnrc_f2_generator import F2Data, calculate_f2
+        c = calculate_f2(F2Data(nature_local="Local loué", duree_bail_annees=5))
+        assert c["needs_bail"] is True
+        c2 = calculate_f2(F2Data(nature_local="Propriété"))
+        assert c2["needs_bail"] is False
+
+    def test_timbre_fiscal(self):
+        from cnrc_f2_generator import F2Data, calculate_f2
+        assert calculate_f2(F2Data())["timbre_cost"] == 4_000
+
+    def test_html_sections(self):
+        from cnrc_f2_generator import F2Data, generate_f2
+        html = generate_f2(F2Data(nom="A", prenom="B"))
+        assert "PERSONNE PHYSIQUE" in html
+        assert "LE FONDS DE COMMERCE" in html
+
+
+# ── G4 Rental Generator ───────────────────────────────────────────────────────
+
+class TestG4RentalGenerator:
+    """G4 — rental income declaration. 30% abattement + annual IRG barème."""
+
+    def test_import(self):
+        from g4_rental_generator import RentalProperty, G4RentalData, calculate_g4_rental, generate_g4_rental
+        assert callable(calculate_g4_rental)
+
+    def test_loyer_annuel_prorated(self):
+        from g4_rental_generator import RentalProperty
+        assert RentalProperty(loyer_mensuel=25_000, mois_loues=12).loyer_annuel == 300_000
+        assert RentalProperty(loyer_mensuel=40_000, mois_loues=9).loyer_annuel == 360_000
+
+    def test_abattement_and_barème(self):
+        from g4_rental_generator import G4RentalData, RentalProperty, calculate_g4_rental
+        c = calculate_g4_rental(G4RentalData(propriétés=[
+            RentalProperty(loyer_mensuel=25_000, mois_loues=12),
+            RentalProperty(loyer_mensuel=40_000, mois_loues=9),
+            RentalProperty(loyer_mensuel=15_000, mois_loues=12),
+        ]))
+        assert c["total_brut"] == 840_000
+        assert c["abattement"] == 252_000          # 30%
+        assert c["net_foncier"] == 588_000
+        # IRG on 588k: 240k×0% + 240k×23% + 108k×27% = 55,200 + 29,160
+        assert abs(c["irg_annuel"] - 84_360) < 0.01
+
+    def test_solde_du_subtracts_acomptes(self):
+        from g4_rental_generator import G4RentalData, RentalProperty, calculate_g4_rental
+        c = calculate_g4_rental(G4RentalData(
+            propriétés=[RentalProperty(loyer_mensuel=50_000)],
+            acomptes_retenus=24_000,
+        ))
+        assert c["solde_du"] == c["irg_annuel"] - 24_000
+
+    def test_first_tranche_zero_tax(self):
+        from g4_rental_generator import G4RentalData, RentalProperty, calculate_g4_rental
+        # 240k brut - 30% = 168k net → 0% tranche
+        c = calculate_g4_rental(G4RentalData(propriétés=[RentalProperty(loyer_mensuel=20_000)]))
+        assert c["net_foncier"] == 168_000
+        assert c["irg_annuel"] == 0
+
+    def test_html_sections(self):
+        from g4_rental_generator import G4RentalData, RentalProperty, generate_g4_rental
+        html = generate_g4_rental(G4RentalData(
+            propriétés=[RentalProperty(adresse="A", loyer_mensuel=10_000)],
+        ))
+        assert "REVENUS DE LOCATION" in html
+        assert "LIQUIDATION DE L'IRG" in html

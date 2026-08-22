@@ -234,3 +234,33 @@ When finishing work, append an entry below.
 
 ### Alerts for other projects
 - If academix-dss or other FastAPI projects use slowapi inside include_router-mounted routers on FastAPI >= 0.141, their routes are silently dropped — same fix applies (dependency-based limiting).
+
+## 2026-08-22 — Batch 3 generators + RLS verified on real Postgres
+
+### What changed
+- **4 new form generators** (Batch 3, KB gaps plan complete for all P1/P2/P3 priorities):
+  - `g15_cessation_generator.py` — cessation d'activité: durée d'exercice calc, 30-day legal deadline + late flag, obligations checklist by regime, successor/reprise block
+  - `nis_generator.py` — ONS statistical ID request: 7-field completeness scorer, ONS section classification checkboxes, effectif tranches, auto-entrepreneur mode (ANAE card instead of RC)
+  - `cnrc_f2_generator.py` — individual merchant RC: marital-status conditional logic (community regime requires conjoint info), bail ≥3y warning, age/majority check, conditional docs checklist
+  - `g4_rental_generator.py` — revenus fonciers: multi-property table with prorated annual rent (loyer_mensuel × mois_loués), 30% abattement forfaitaire, annual IRG barème (same 6-tranche source as G1/G13), retenue à la source deduction
+- **API**: POST + preview for g15, nis, cnrc_f2, g4_rental — now **16/16 tax endpoints** with parity.
+- **RLS migration made portable + VERIFIED on real Neon Postgres**:
+  - Root cause of prior failure: policies used Supabase-only `TO anon` role and `auth.uid()` function — undefined on vanilla Postgres. Also RLS was never ENABLED.
+  - Fix in `e9ed55d79b2f_init_saas_tables.py`: dialect-guarded (`postgresql` only, SQLite skips), `ENABLE ROW LEVEL SECURITY` on dossiers/jobs/checkouts, portable policies keyed on session GUC `app.current_tenant_id`, idempotent `DROP POLICY IF EXISTS`, matching downgrade.
+  - Verified end-to-end on Neon: tables created, version e9ed55d79b2f recorded, RLS enabled ×3, 6 policies present. Tenant isolation proven with restricted role `dsc_app`: tenant A sees only its dossier, tenant B only its own, no-GUC sees nothing. Owner role bypasses RLS by design (application-level `tenant_id ==` filtering stays authoritative).
+  - Note: Neon blocks `SET ROLE` without membership — verify via direct login as the restricted role.
+- **Tests**: +23 Batch 3 tests (duration/deadline/late-flag, completeness scoring, marital/bail conditionals, proration/abattement/barème/solde). **104/104 pass.**
+
+### Files affected
+- New: `g15_cessation_generator.py`, `nis_generator.py`, `cnrc_f2_generator.py`, `g4_rental_generator.py`
+- Modified: `api.py`, `alembic/versions/e9ed55d79b2f_init_saas_tables.py`, `tests/test_generators.py`
+
+### Breaking changes / alerts
+- Migration revision edited in place — safe because no environment had ever applied it successfully (prior attempt rolled back transactionally on Neon). Any DB that somehow has the old policies should re-run downgrade→upgrade.
+- RLS via GUC means a future least-privilege DB role needs the app to `SET app.current_tenant_id = '<uuid>'` per request/connection; current owner-role deployment relies on application-level filtering (unchanged).
+
+### Alerts for other projects
+- None cross-project. Generator pattern unchanged.
+
+### Remaining (not in this commit)
+- Render secrets must be set manually in Dashboard: DATABASE_URL, REDIS_URL, DSC_JWT_SECRET (generate via `python -c "import secrets; print(secrets.token_hex(32))"`), R2_BUCKET/R2_ENDPOINT/R2_ACCESS_KEY/R2_SECRET_KEY, DSC_CHARGILY_KEY/DSC_CHARGILY_SECRET when going live. render.yaml wires DATABASE_URL/REDIS automatically from provisioned services.

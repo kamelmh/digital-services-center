@@ -54,6 +54,10 @@ from cnrc_f1_generator import F1Data, AssocieData, calculate_f1, generate_f1
 from das_cnas_generator import DASData, DASEmployee, calculate_das, generate_das
 from secu01_generator import Secu01Data, calculate_secu01, generate_secu01
 from anae_generator import AnaeData, calculate_anae, generate_anae
+from g15_cessation_generator import G15Data, calculate_g15, generate_g15
+from nis_generator import NisData, calculate_nis, generate_nis
+from cnrc_f2_generator import F2Data, calculate_f2, generate_f2
+from g4_rental_generator import RentalProperty, G4RentalData, calculate_g4_rental, generate_g4_rental
 
 # g12 functions have Unicode names — import via getattr
 _g12 = importlib.import_module("g12_official")
@@ -658,6 +662,60 @@ def tax_anae(req: TaxFormRequest):
     return TaxFormResponse(form_type="ANAE", html=html, calculations=calc)
 
 
+@app.post("/tax/g15")
+def tax_g15(req: TaxFormRequest):
+    """Generate G15 — cessation d'activité declaration."""
+    try:
+        form_data = _build_dataclass(G15Data, req.data)
+        html = generate_g15(form_data)
+        calc = calculate_g15(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="G15", html=html, calculations=calc)
+
+
+@app.post("/tax/nis")
+def tax_nis(req: TaxFormRequest):
+    """Generate ONS NIS request form."""
+    try:
+        form_data = _build_dataclass(NisData, req.data)
+        html = generate_nis(form_data)
+        calc = calculate_nis(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="NIS", html=html, calculations=calc)
+
+
+@app.post("/tax/cnrc_f2")
+def tax_cnrc_f2(req: TaxFormRequest):
+    """Generate CNRC F2 — commercial registration (personne physique)."""
+    try:
+        form_data = _build_dataclass(F2Data, req.data)
+        html = generate_f2(form_data)
+        calc = calculate_f2(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="CNRC_F2", html=html, calculations=calc)
+
+
+@app.post("/tax/g4_rental")
+def tax_g4_rental(req: TaxFormRequest):
+    """Generate G4 — rental income declaration (revenus fonciers)."""
+    try:
+        form_data = _build_dataclass(G4RentalData, req.data)
+        if isinstance(form_data.propriétés, list) and form_data.propriétés and all(isinstance(p, dict) for p in form_data.propriétés):
+            form_data.propriétés = [_build_dataclass(RentalProperty, p) for p in form_data.propriétés]
+        html = generate_g4_rental(form_data)
+        calc = calculate_g4_rental(form_data)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return TaxFormResponse(form_type="G4_RENTAL", html=html, calculations=calc)
+
+
 # ── Quality Scoring ───────────────────────────────────────────────────────────
 
 @app.post("/quality/score", response_model=QualityResponse)
@@ -884,6 +942,105 @@ def tax_anae_preview():
         date_declaration="15/01/2026",
     )
     return generate_anae(data)
+
+
+# ── Previews: Batch 3 ────────────────────────────────────────────────────────
+
+@app.get("/tax/g15/preview", response_class=HTMLResponse)
+def tax_g15_preview():
+    """Preview G15 cessation declaration with sample data."""
+    data = G15Data(
+        wilaya="32-El Bayadh",
+        diw="DIW d'El Bayadh",
+        inspection="Inspection des Impôts d'El Bayadh Centre",
+        nif="123456789012345",
+        rc="32/00-7654321B18",
+        nom_raison_sociale="Entreprise Mahi Travaux",
+        forme_juridique="Personne physique",
+        activite="Travaux de plomberie générale",
+        adresse_activite="Centre-ville, El Bayadh",
+        regime_fiscal="Régime réel simplifié",
+        date_debut_activite="01/06/2018",
+        date_cessation="31/12/2026",
+        fait_a="El Bayadh",
+        date_declaration="10/01/2027",
+    )
+    return generate_g15(data)
+
+
+@app.get("/tax/nis/preview", response_class=HTMLResponse)
+def tax_nis_preview():
+    """Preview ONS NIS request with sample data."""
+    data = NisData(
+        delegation_ons="Délégation ONS El Bayadh",
+        wilaya="32-El Bayadh",
+        nom_raison_sociale="Entreprise Mahi Travaux",
+        forme_juridique="Personne physique",
+        nif="123456789012345",
+        rc="32/00-7654321B18",
+        date_rc="15/06/2018",
+        activite_principale="Travaux de plomberie générale",
+        code_activite_detail="Installation sanitaires bâtiment",
+        adresse="Centre-ville",
+        commune="El Bayadh",
+        phone="+213 661 23 45 67",
+        email="contact@mahitravaux.dz",
+        effectif_salarie=4,
+        representant_nom="Mahi Kamel Abdelghani",
+        representant_nin="199603061234567890",
+        fait_a="El Bayadh",
+        date_declaration="20/06/2018",
+    )
+    return generate_nis(data)
+
+
+@app.get("/tax/cnrc_f2/preview", response_class=HTMLResponse)
+def tax_cnrc_f2_preview():
+    """Preview CNRC F2 individual merchant registration with sample data."""
+    data = F2Data(
+        wilaya="32-El Bayadh",
+        centre_cnrc="CNRC — guichet El Bayadh",
+        nom="Mahi",
+        prenom="Kamel Abdelghani",
+        nin="199603061234567890",
+        date_naissance="06/03/1996",
+        lieu_naissance="El Bayadh",
+        situation_matrimoniale="Marié(e)",
+        regime_matrimonial="Séparation de biens",
+        nom_commercial="Épicerie El Baraka",
+        activite="Commerce de détail alimentaire général",
+        adresse_personnelle="Centre-ville, El Bayadh",
+        adresse_commerce="Rue de la République, El Bayadh",
+        commune_commerce="El Bayadh",
+        nature_local="Local loué",
+        duree_bail_annees=5,
+        fait_a="El Bayadh",
+        date_declaration="10/02/2026",
+    )
+    return generate_f2(data)
+
+
+@app.get("/tax/g4_rental/preview", response_class=HTMLResponse)
+def tax_g4_rental_preview():
+    """Preview G4 rental income declaration with sample data — 3 properties."""
+    data = G4RentalData(
+        wilaya="32-El Bayadh",
+        diw="DIW d'El Bayadh",
+        nif="123456789012345",
+        nin="199603061234567890",
+        nom_prenom="Mahi Kamel Abdelghani",
+        adresse="Centre-ville, El Bayadh",
+        annee=2026,
+        acomptes_retenus=24_000,
+        fait_a="El Bayadh",
+        date_declaration="15/04/2027",
+        propriétés=[
+            RentalProperty(adresse="Appartement A, Rue X", nature="Logement (habitation)", loyer_mensuel=25_000, mois_loues=12),
+            RentalProperty(adresse="Local commercial Rue Y", nature="Local commercial", loyer_mensuel=40_000, mois_loues=9),
+            RentalProperty(adresse="Dépôt zone Z", nature="Local industriel / dépôt", loyer_mensuel=15_000, mois_loues=12),
+        ],
+    )
+    return generate_g4_rental(data)
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────
