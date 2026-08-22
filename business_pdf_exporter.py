@@ -174,8 +174,9 @@ def _header_footer(canvas, doc, business_name="DSC Digital Services Center"):
     canvas.setLineWidth(2)
     canvas.line(20*mm, h - 18*mm, w - 20*mm, h - 18*mm)
 
-    # Header text — left side (Latin)
-    canvas.setFont("Latin", 7.5)
+    # Header text — left side
+    latin_font = FONT if FONT.startswith("Helvetica") else "Latin"
+    canvas.setFont(latin_font, 7.5)
     canvas.setFillColor(colors.HexColor("#999999"))
     canvas.drawString(20*mm, h - 16*mm, "DSC Digital Services Center")
 
@@ -185,7 +186,7 @@ def _header_footer(canvas, doc, business_name="DSC Digital Services Center"):
         reshaped_name = _reshape_arabic(business_name)
         canvas.drawRightString(w - 20*mm, h - 16*mm, reshaped_name)
     else:
-        canvas.setFont("Latin", 7.5)
+        canvas.setFont(latin_font, 7.5)
         canvas.drawRightString(w - 20*mm, h - 16*mm, business_name)
 
     # Footer line
