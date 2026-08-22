@@ -264,3 +264,40 @@ When finishing work, append an entry below.
 
 ### Remaining (not in this commit)
 - Render secrets must be set manually in Dashboard: DATABASE_URL, REDIS_URL, DSC_JWT_SECRET (generate via `python -c "import secrets; print(secrets.token_hex(32))"`), R2_BUCKET/R2_ENDPOINT/R2_ACCESS_KEY/R2_SECRET_KEY, DSC_CHARGILY_KEY/DSC_CHARGILY_SECRET when going live. render.yaml wires DATABASE_URL/REDIS automatically from provisioned services.
+
+## 2026-08-22 — Deep Audit: 7-Lane Swarm + P0 Fixes + Free-Stack Assessment
+
+### What changed
+- **7-lane parallel audit** across file topology, generator math, API/infra, frontend, knowledge base, testing, business model.
+- **5 generator math bugs fixed:**
+  - `anae_generator.py`: IFU rates swapped (Services 0.05→0.12, Production 0.12→0.05, Art.282sexies)
+  - `g50_generator.py`: TVA double-deduction — collapsed `tva_deductions_total` subtracted twice; now `tva_net = collectee+regs-deductions`
+  - `g12_official.py`: CA table total now uses `calc.ifu_total` (minimum-clamped) not raw sum
+  - `g13_bnc_generator.py`: added `total_deductible_expenses` to return dict (was always 0 in HTML)
+  - `g1_ggr_generator.py`: `SalaireData.compute()` now subtracts `cotisations_salarié` before abattement
+- **2 frontend P0 build blockers fixed:**
+  - `apps/web/app/pricing/page.tsx`: `"use client"` moved to line 1 (Next 14 requires top directive)
+  - `apps/web/app/admin/page.tsx`: added `API` const, fixed `PdfViewer` props (`r2Key→url`)
+- **Git hygiene:** `.gitignore` adds `apps/api/dsc_saas.db`, debug dumps, `generate_*.py`; `knowledge_base/` (9 files, core IP) + `alembic/` scaffolding now committed; `FREE_HOSTING_RESEARCH.md` tracked
+- **New doc:** `DSC_DEEP_ASSESSMENT.md` — full audit synthesis, free-only scaling plan (Render free → Oracle free 4 OCPU → $5 VPS), 3 sprints, context for future AIs
+- **Tests:** ANAE tests corrected to new rates; **132/132 pass**
+
+### Files affected
+- Fixed: `anae_generator.py`, `g50_generator.py`, `g12_official.py`, `g13_bnc_generator.py`, `g1_ggr_generator.py`, `tests/test_generators.py`
+- Frontend: `apps/web/app/pricing/page.tsx`, `apps/web/app/admin/page.tsx`
+- Hygiene: `.gitignore`, `knowledge_base/` (9 files), `alembic/README`, `alembic/script.py.mako`, `FREE_HOSTING_RESEARCH.md`
+- New: `DSC_DEEP_ASSESSMENT.md`
+
+### Breaking changes / alerts
+- **ANAE IFU now correct** — Services 12% / Production 5% (was swapped). Any cached ANAE quotes for services will increase ~2.4×.
+- **G50 TVA now correct** — single deduction, not double. TVA à payer figures will increase for dossiers with high deductions.
+- **G1 salary net now correct** — subtracts cotisations before 10% abattement. Salary nets will decrease slightly.
+
+### Alerts for other projects
+- Same `academix-dss` slowapi/FastAPI note still applies — audit confirmed the pattern is documented in UPDATES.md 2026-08-22 Batch 2
+
+### Remaining (not in this commit)
+- **P1 docs:** `knowledge_base/forms/catalog.md` (13 entries still marked None/NEEDED → should be ✅), `README.md` IRG 4-tranche footer, `SKILL.md` 7→20 forms, `PROJECT_MAP.md` 7→20 / 2%→0%
+- **P1 math:** G11 + G29 IRG bareme still on legacy scales (see DSC_DEEP_ASSESSMENT.md §4 P1 table)
+- **SaaS billing:** Chargily env + tenant isolation + mock-pay page (see DSC_DEEP_ASSESSMENT.md §6.2 Sprint 2)
+- Render secrets still need manual dashboard setup as above
