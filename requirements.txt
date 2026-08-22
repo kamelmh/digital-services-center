@@ -17,6 +17,7 @@ fastapi==0.110.3           # PINNED DOWN from 0.141.1 — 0.141's _IncludedRoute
 uvicorn[standard]==0.52.1
 pydantic==2.13.4
 pydantic-settings==2.15.0  # SaaS config (apps/api/app/core/config.py) — was missing, broke Render boot
+psycopg2-binary            # PostgreSQL driver for Neon (was only in buildCommand extras — missing)
 requests==2.34.2
 jinja2==3.1.6              # offline_templates + future prompts/*.j2
 
