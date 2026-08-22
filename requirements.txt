@@ -10,7 +10,8 @@ python-bidi==0.6.11
 
 # ── Web (Violit + API) ──────────────────────────────────
 violit==0.8.29             # UI framework — pin 0.8.29 (alpha, do not auto-bump)
-fastapi==0.141.1
+fastapi==0.110.3           # PINNED DOWN from 0.141.1 — 0.141's _IncludedRouter breaks real-server
+                           # routing (all non-/ paths 404 behind gunicorn; fine in TestClient)
 uvicorn[standard]==0.52.1
 pydantic==2.13.4
 pydantic-settings==2.15.0  # SaaS config (apps/api/app/core/config.py) — was missing, broke Render boot
