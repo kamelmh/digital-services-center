@@ -12,6 +12,7 @@ import os
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Optional
 
 import hashlib
@@ -23,9 +24,42 @@ from fastapi import Depends, HTTPException, Header
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr, Field
 
-# ── Config ───────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────────────────────
 
-JWT_SECRET = os.getenv("DSC_JWT_SECRET", "dsc-dev-secret-32-bytes-min-change-in-prod!")
+def _load_or_create_jwt_secret() -> str:
+    """Resolve the JWT signing secret.
+
+    Cloud (Render etc.): DSC_JWT_SECRET is always set explicitly (render.yaml
+    uses generateValue: true), so that's used as-is.
+
+    Offline .exe: auth is opt-in (DSC_AUTH_REQUIRED=1). If someone turns that
+    on for a distributed .exe without also setting DSC_JWT_SECRET, falling
+    back to a hardcoded string here would mean every install shares the same
+    publicly-known secret in this source file, letting anyone forge valid
+    tokens. Instead, generate a random per-install secret once and persist
+    it next to dsc_data.db so it survives restarts.
+    """
+    env_secret = os.getenv("DSC_JWT_SECRET")
+    if env_secret:
+        return env_secret
+
+    secret_path = Path(__file__).parent / ".dsc-jwt-secret"
+    try:
+        if secret_path.exists():
+            existing = secret_path.read_text(encoding="utf-8").strip()
+            if existing:
+                return existing
+        new_secret = secrets.token_hex(32)
+        secret_path.write_text(new_secret, encoding="utf-8")
+        return new_secret
+    except OSError:
+        # Read-only install or similar — fall back to a per-process random
+        # secret. Tokens won't survive a restart, but that's strictly safer
+        # than a hardcoded secret known to every install.
+        return secrets.token_hex(32)
+
+
+JWT_SECRET = _load_or_create_jwt_secret()
 JWT_ALG = "HS256"
 JWT_EXPIRE_HOURS = int(os.getenv("DSC_JWT_EXPIRE_HOURS", "72"))
 AUTH_REQUIRED = os.getenv("DSC_AUTH_REQUIRED", "0") == "1"

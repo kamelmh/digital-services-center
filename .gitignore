@@ -44,6 +44,7 @@ dsc_data.db-shm
 apps/api/dsc_saas.db
 nul
 *.db-journal
+.dsc-jwt-secret
 
 # Training data (per-generation JSONs — keep index.jsonl intent, ignore bulk)
 training_data/gen_*.json
