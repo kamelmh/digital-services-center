@@ -71,14 +71,14 @@ IRG_RATES = {
 }
 
 # Progressive IRG barème for BIC (annual, 2026)
-# Art. 18 CIDTA — barème progressif applicable aux BIC
+# Art. 104 CIDTA — unified 6-tranche (same as G1/G13/G50)
 IRG_BAREME_BIC = [
-    (200_000, 0.00),
-    (1_200_000, 0.20),
-    (3_600_000, 0.30),
-    (10_000_000, 0.34),
-    (20_000_000, 0.37),
-    (float("inf"), 0.40),
+    (240_000, 0.00),
+    (480_000, 0.23),
+    (960_000, 0.27),
+    (1_920_000, 0.30),
+    (3_840_000, 0.33),
+    (float("inf"), 0.35),
 ]
 
 

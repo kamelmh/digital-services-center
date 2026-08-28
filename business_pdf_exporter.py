@@ -30,32 +30,33 @@ from bidi.algorithm import get_display
 def _register_fonts():
     """Register fonts for Arabic + Latin. Returns (FONT, FONT_BOLD).
 
-    Priority: Tahoma (best Arabic coverage) → Dubai → Majalla → Helvetica.
-    Tahoma handles Arabic presentation forms from bidi.get_display() correctly.
+    Uses shared arabic-fonts library for Tahoma registration,
+    then adds Latin (Cambria) fonts for this module.
     """
+    # Register Tahoma via shared library
     try:
-        # Primary: Tahoma (excellent Arabic glyph coverage)
-        pdfmetrics.registerFont(TTFont('Arabic', 'C:/Windows/Fonts/tahoma.ttf'))
-        pdfmetrics.registerFont(TTFont('ArabicBold', 'C:/Windows/Fonts/tahomabd.ttf'))
-        pdfmetrics.registerFont(TTFont('Latin', 'C:/Windows/Fonts/cambria.ttc'))
-        pdfmetrics.registerFont(TTFont('LatinBold', 'C:/Windows/Fonts/cambriab.ttf'))
-        return 'Arabic', 'ArabicBold'
-    except Exception:
+        from arabic_fonts import register_reportlab_fonts
+        register_reportlab_fonts(font_names=('Arabic', 'ArabicBold'))
+    except ImportError:
+        # Fallback: inline registration
         try:
-            # Fallback: Dubai (professional but limited presentation forms)
-            pdfmetrics.registerFont(TTFont('Arabic', 'C:/Windows/Fonts/DUBAI-REGULAR.TTF'))
-            pdfmetrics.registerFont(TTFont('ArabicBold', 'C:/Windows/Fonts/DUBAI-MEDIUM.TTF'))
-            pdfmetrics.registerFont(TTFont('Latin', 'C:/Windows/Fonts/cambria.ttc'))
-            pdfmetrics.registerFont(TTFont('LatinBold', 'C:/Windows/Fonts/cambriab.ttf'))
-            return 'Arabic', 'ArabicBold'
+            pdfmetrics.registerFont(TTFont('Arabic', 'C:/Windows/Fonts/tahoma.ttf'))
+            pdfmetrics.registerFont(TTFont('ArabicBold', 'C:/Windows/Fonts/tahomabd.ttf'))
         except Exception:
             try:
-                # Last fallback: Arial
                 pdfmetrics.registerFont(TTFont('Arabic', 'C:/Windows/Fonts/arial.ttf'))
                 pdfmetrics.registerFont(TTFont('ArabicBold', 'C:/Windows/Fonts/arialbd.ttf'))
-                return 'Arabic', 'ArabicBold'
             except Exception:
                 return 'Helvetica', 'Helvetica-Bold'
+
+    # Register Latin fonts (Cambria) — domain-specific to this module
+    try:
+        pdfmetrics.registerFont(TTFont('Latin', 'C:/Windows/Fonts/cambria.ttc'))
+        pdfmetrics.registerFont(TTFont('LatinBold', 'C:/Windows/Fonts/cambriab.ttf'))
+    except Exception:
+        pass
+
+    return 'Arabic', 'ArabicBold'
 
 FONT, FONT_BOLD = _register_fonts()
 

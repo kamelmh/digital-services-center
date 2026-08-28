@@ -31,17 +31,18 @@ def _esc(value: object, default: str = "") -> str:
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-# IRG Barème 2026 — monthly thresholds (DA)
+# IRG Barème 2026 — monthly thresholds (DA) = annual barème / 12
+# Annual unified: 240K/480K/960K/1.92M/3.84M at 0/23/27/30/33/35 (Art. 104 CIDTA)
 # Source: mfdgi.gov.dz, CIDTA, Loi de Finances 2026
 # Salaire net imposable = brut - CNAS(9%), then apply 40% abattement (plafonné 1,500 DZD/mois)
-# Exonération: salaire brut ≤ 30,000 DZD/mois
+# Exonération: salaire brut ≤ 30,000 DZD/mois (Art. 68 CIDTA)
 IRG_BAREME_MONTHLY = [
-    (30_000, 0.00),    # 0-30K: 0% (exonéré)
-    (120_000, 0.23),   # 30K-120K: 23%
-    (360_000, 0.27),   # 120K-360K: 27%
-    (1_600_000, 0.30), # 360K-1.6M: 30%
-    (3_200_000, 0.33), # 1.6M-3.2M: 33%
-    (float("inf"), 0.35),  # >3.2M: 35%
+    (20_000, 0.00),    # 0-20K: 0%
+    (40_000, 0.23),    # 20K-40K: 23%
+    (80_000, 0.27),    # 40K-80K: 27%
+    (160_000, 0.30),   # 80K-160K: 30%
+    (320_000, 0.33),   # 160K-320K: 33%
+    (float("inf"), 0.35),  # >320K: 35%
 ]
 
 SITUATION_FAMILIALE = [
@@ -660,10 +661,12 @@ def _bareme_reference_html() -> str:
       </tr>
     </thead>
     <tbody>
-      <tr><td>≤ 30 000</td><td>0%</td></tr>
-      <tr><td>30 001 — 120 000</td><td>23%</td></tr>
-      <tr><td>120 001 — 360 000</td><td>27%</td></tr>
-      <tr><td>&gt; 360 000</td><td>30%</td></tr>
+      <tr><td>≤ 20 000</td><td>0%</td></tr>
+      <tr><td>20 001 — 40 000</td><td>23%</td></tr>
+      <tr><td>40 001 — 80 000</td><td>27%</td></tr>
+      <tr><td>80 001 — 160 000</td><td>30%</td></tr>
+      <tr><td>160 001 — 320 000</td><td>33%</td></tr>
+      <tr><td>&gt; 320 000</td><td>35%</td></tr>
     </tbody>
   </table>
   <div class="note">

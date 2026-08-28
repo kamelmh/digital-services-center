@@ -301,3 +301,63 @@ When finishing work, append an entry below.
 - **P1 math:** G11 + G29 IRG bareme still on legacy scales (see DSC_DEEP_ASSESSMENT.md §4 P1 table)
 - **SaaS billing:** Chargily env + tenant isolation + mock-pay page (see DSC_DEEP_ASSESSMENT.md §6.2 Sprint 2)
 - Render secrets still need manual dashboard setup as above
+
+
+## 2026-08-24 — G29 verification and authenticated SaaS tenant routing
+
+### What changed
+- Corrected `verify_rates.py` G29/G30 expectations to the generator's monthly barème: 20K/40K/80K/160K/320K DZD plus the final open bracket.
+- Changed the verifier CLI to return a nonzero exit status when any check fails, not only when `--strict` is supplied.
+- Updated the stale NESDA comment in `feasibility_generator.py` to the implemented 2026 terms: 0% interest, 7-year repayment, and 1.5-year grace.
+- Added `apps/api/app/core/tenant.py` with JWT UUID validation, authenticated SaaS user lookup, and PostgreSQL transaction-local `app.current_tenant_id` context setup.
+- Wired authenticated tenant resolution into dossier creation, listing, job polling, CSV export, dossier retrieval, billing checkout, and `/billing/me`.
+- Updated entitlement checks to use the authenticated tenant rather than the shared anonymous user.
+- Added tenant ownership filters to job and dossier queries.
+
+### Verification
+- Full test suite: 131 passed, 1 skipped.
+- Rate verification: 38/38 checks passed.
+- Modified Python modules compile successfully.
+
+### Breaking changes / alerts
+- SaaS dossier and billing endpoints now require a valid bearer JWT whose `sub` claim is a UUID matching the SQLAlchemy SaaS `users.id` row.
+- Local anonymous fallback is no longer used by these protected endpoints; legacy offline auth remains separate from SaaS UUID tenants.
+
+### Remaining risks
+- Live webhook hardening and Chargily production configuration remain separate tasks.
+- Integration tests should be added for JWT authentication, tenant cross-access denial, and PostgreSQL RLS behavior using the request dependency path.
+
+
+## 2026-08-24 — SaaS tenancy and billing integration coverage
+
+### What changed
+- Added `tests/test_saas_auth_billing_integration.py` covering missing/malformed JWTs, UUID subject validation, authenticated billing access, checkout tenant binding, unknown-user rejection, and an opt-in PostgreSQL RLS probe.
+- The RLS probe checks that `dossiers`, `jobs`, and `checkouts` have RLS enabled and that the expected tenant policies exist. It requires `DSC_RLS_TEST_DATABASE_URL` to point to a least-privilege PostgreSQL/Neon role.
+
+### Verification
+- Local integration coverage: 5 passed, 1 skipped.
+- The PostgreSQL/Neon test was skipped because no `DATABASE_URL` or `DSC_RLS_TEST_DATABASE_URL` is configured in the attached environment. No database was modified.
+
+### Next implementation priorities
+- Run the opt-in RLS suite using a restricted Neon role and verify cross-tenant reads and writes are denied.
+- Add request-path tests for dossier creation, listing, retrieval, export, and job polling across two JWT tenants.
+- Harden webhook handling so unknown checkout IDs cannot be created from webhook metadata and gateway fallback cannot be mislabeled as live Chargily.
+- Complete the remaining documentation and legacy G11/G29 barème reconciliation noted in the 2026-08-22 audit.
+
+
+## 2026-08-24 — Webhook hardening and multi-tenant endpoint coverage
+
+### What changed
+- Hardened `apps/api/app/routers/billing.py` webhook processing: unknown checkout IDs are rejected, payload currency/amount/plan/tenant metadata are checked against the stored checkout, and paid events remain idempotent.
+- Extended `tests/test_saas_auth_billing_integration.py` with live-mode HMAC validation, metadata mismatch rejection, webhook idempotency, and two-tenant dossier/job isolation across listing, retrieval, CSV export, and job polling.
+- Added an unauthenticated dossier-creation regression test.
+
+### Verification
+- Complete suite: 141 passed, 2 skipped.
+- The skipped tests are the opt-in Neon/RLS checks because `DSC_RLS_TEST_DATABASE_URL` is not configured.
+- No real Neon connection or database mutation was performed.
+
+### Remaining risks
+- Configure a least-privilege Neon test role and run the RLS tests before claiming database-level isolation.
+- Confirm the exact production gateway signature contract and event payload schema with the selected payment provider before enabling live payments.
+- Add a dedicated PostgreSQL transaction-context test to prove `app.current_tenant_id` is set on every request through the production session path.

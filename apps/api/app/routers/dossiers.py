@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from ..core.config import settings
 from ..middleware.rate_limiter import make_rate_limit
 from .entitlements import require_entitlement
+from ..core.tenant import get_current_tenant_id, require_tenant_user
 
 # Rate limits (dependency-based; slowapi decorators break include_router on FastAPI >= 0.141)
 _rl_generate = make_rate_limit("30/minute")   # generation is expensive (LLM + queue)
@@ -60,7 +61,11 @@ def _get_current_user_optional():
     status_code=202,
     dependencies=[Depends(require_entitlement("free")), Depends(_rl_generate)],
 )
-def create_feasibility(req: FeasibilityRequest, db: Session = Depends(_get_db)):
+def create_feasibility(
+    req: FeasibilityRequest,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: Session = Depends(_get_db),
+):
     """Enqueue feasibility generation. Returns job_id for polling."""
     # Entitlement enforced via dependencies — free 1/mo, starter 10, pro/business fair-use
     # Rate limit: 30/min per IP (generation is expensive)
@@ -68,33 +73,7 @@ def create_feasibility(req: FeasibilityRequest, db: Session = Depends(_get_db)):
     from ..models.job import Job
     from ..models.user import User
 
-    # For SaaS, resolve tenant from JWT; for local dev without auth, use first user or create ephemeral
-    tenant_id = "00000000-0000-0000-0000-000000000000"
-    try:
-        # Try to get real user if auth is available
-        from auth import get_current_user_optional
-        from fastapi import Request
-
-        # This router is called without Request injection, so we keep ephemeral tenant for MVP
-        pass
-    except Exception:
-        pass
-
-    # Ensure ephemeral tenant exists for local/dev (default free, upgrade via billing)
-    if tenant_id == "00000000-0000-0000-0000-000000000000":
-        anon = db.get(User, tenant_id)
-        if not anon:
-            from auth import hash_password
-
-            anon = User(
-                id=tenant_id,
-                email="anon@local",
-                name="Local Dev",
-                password_hash=hash_password("local-dev-not-used"),
-                subscription="free",
-            )
-            db.add(anon)
-            db.commit()
+    require_tenant_user(db, tenant_id)
 
     job = Job(tenant_id=tenant_id, type="feasibility", status="queued", progress=0)
     db.add(job)
@@ -139,12 +118,13 @@ def list_dossiers(
     status: str | None = None,
     limit: int = 20,
     offset: int = 0,
+    tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
 ):
-    """List dossiers for current tenant (RLS) with search/filter/pagination."""
+    """List dossiers for the authenticated tenant."""
     from ..models.dossier import Dossier
 
-    tenant_id = "00000000-0000-0000-0000-000000000000"
+    require_tenant_user(db, tenant_id)
     query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id)
     if q:
         like = f"%{q}%"
@@ -178,10 +158,15 @@ def list_dossiers(
 
 
 @router.get("/jobs/{job_id}", dependencies=[Depends(_rl_poll)])
-def get_job(job_id: str, db: Session = Depends(_get_db)):
+def get_job(
+    job_id: str,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: Session = Depends(_get_db),
+):
     from ..models.job import Job
 
-    job = db.get(Job, job_id)
+    require_tenant_user(db, tenant_id)
+    job = db.query(Job).filter(Job.id == job_id, Job.tenant_id == tenant_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return {
@@ -197,7 +182,11 @@ def get_job(job_id: str, db: Session = Depends(_get_db)):
 
 
 @router.get("/export-csv", response_class=Response, dependencies=[Depends(_rl_export)])
-def export_csv(ids: str = "", db: Session = Depends(_get_db)):
+def export_csv(
+    ids: str = "",
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: Session = Depends(_get_db),
+):
     """Export selected dossiers as CSV. Use ?ids=id1,id2…"""
     from ..models.dossier import Dossier
     from fastapi.responses import Response
@@ -205,7 +194,7 @@ def export_csv(ids: str = "", db: Session = Depends(_get_db)):
     id_list = [i.strip() for i in ids.split(",") if i.strip()]
     if not id_list:
         raise HTTPException(status_code=400, detail="Parameter ?ids=id1,id2 required")
-    tenant_id = "00000000-0000-0000-0000-000000000000"
+    require_tenant_user(db, tenant_id)
     query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id).filter(Dossier.id.in_(id_list))
     rows = query.all()
     lines = ["id,project_name,beneficiary_name,total_cost,status,created_at"]
@@ -222,12 +211,16 @@ def export_csv(ids: str = "", db: Session = Depends(_get_db)):
 # NOTE: keep /{dossier_id} LAST — a dynamic single-segment route defined earlier
 # would shadow the static routes above (e.g. /export-csv would match as dossier_id).
 @router.get("/{dossier_id}", dependencies=[Depends(_rl_read)])
-def get_dossier(dossier_id: str, db: Session = Depends(_get_db)):
+def get_dossier(
+    dossier_id: str,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: Session = Depends(_get_db),
+):
     from ..models.dossier import Dossier
 
-    tenant_id = "00000000-0000-0000-0000-000000000000"
-    row = db.get(Dossier, dossier_id)
-    if not row or row.tenant_id != tenant_id:
+    require_tenant_user(db, tenant_id)
+    row = db.query(Dossier).filter(Dossier.id == dossier_id, Dossier.tenant_id == tenant_id).first()
+    if not row:
         raise HTTPException(status_code=404, detail="Dossier not found")
     return {
         "id": row.id,

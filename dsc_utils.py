@@ -12,61 +12,18 @@ from typing import Optional
 sys.path.insert(0, str(Path(__file__).parent))
 
 # ── Arabic Font CSS ──────────────────────────────────────────────────────────
-
-ARABIC_FONT_CSS = """
+# Source of truth: active/libs/arabic-fonts/
+try:
+    from arabic_fonts import ARABIC_FONT_CSS
+except ImportError:
+    # Fallback: inline CSS if arabic-fonts not on path
+    ARABIC_FONT_CSS = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
-
-:root {
-    --font-ar: 'Noto Sans Arabic', 'Tahoma', 'Arial', sans-serif;
-    --font-ar-serif: 'Amiri', 'Traditional Arabic', serif;
-}
-
-[dir="rtl"], .rtl, [lang="ar"] {
-    font-family: var(--font-ar);
-    direction: rtl;
-    text-align: right;
-}
-
-/* Arabic content blocks */
-.ar-text {
-    font-family: var(--font-ar);
-    direction: rtl;
-    text-align: right;
-    line-height: 1.8;
-    font-size: 1.05em;
-}
-
-.ar-serif {
-    font-family: var(--font-ar-serif);
-    direction: rtl;
-    text-align: right;
-    line-height: 2;
-}
-
-/* Bilingual layout */
-.bilingual {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    direction: ltr;
-}
-
-.bilingual .ar-side {
-    direction: rtl;
-    text-align: right;
-    font-family: var(--font-ar);
-    border-right: 3px solid #0A1628;
-    padding-right: 15px;
-}
-
-.bilingual .fr-side {
-    direction: ltr;
-    text-align: left;
-    border-left: 3px solid #ddd;
-    padding-left: 15px;
-}
+:root { --font-ar: 'Noto Sans Arabic', 'Tahoma', 'Arial', sans-serif; }
+[dir="rtl"], .rtl, [lang="ar"] { font-family: var(--font-ar); direction: rtl; text-align: right; }
+.ar-text { font-family: var(--font-ar); direction: rtl; text-align: right; line-height: 1.8; }
 </style>
 """
 
@@ -209,44 +166,46 @@ def generate_pdf(html_content: str, filename: str, output_dir: str = None) -> Pa
 
 
 def _register_pdf_fonts():
-    """Register Tahoma (Arabic) — bundled copy first, then system fallbacks."""
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
-    if 'Tahoma' in pdfmetrics.getRegisteredFontNames():
-        return
-    bundled = Path(__file__).parent / "assets" / "fonts" / "Tahoma.ttf"
-    bundled_b = Path(__file__).parent / "assets" / "fonts" / "Tahoma-Bold.ttf"
-    # Try bundled first (works inside PyInstaller exe via _MEIPASS)
+    """Register Tahoma (Arabic) — delegates to shared arabic-fonts library."""
     try:
-        import sys as _sys
-        import pathlib as _pl
-        meipass = getattr(_sys, '_MEIPASS', None)
-        if meipass:
-            mpass_fonts = _pl.Path(meipass) / "assets" / "fonts"
-            if (mpass_fonts / "Tahoma.ttf").exists():
-                bundled = mpass_fonts / "Tahoma.ttf"
-                bundled_b = mpass_fonts / "Tahoma-Bold.ttf"
-    except Exception:
-        pass
-    for name, path, fallback in [
-        ('Tahoma', bundled, r'C:/Windows/Fonts/tahoma.ttf'),
-        ('Tahoma-Bold', bundled_b, r'C:/Windows/Fonts/tahomabd.ttf'),
-    ]:
+        from arabic_fonts import register_reportlab_fonts
+        register_reportlab_fonts()
+    except ImportError:
+        # Fallback: inline registration if arabic-fonts not on path
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        if 'Tahoma' in pdfmetrics.getRegisteredFontNames():
+            return
+        bundled = Path(__file__).parent / "assets" / "fonts" / "Tahoma.ttf"
+        bundled_b = Path(__file__).parent / "assets" / "fonts" / "Tahoma-Bold.ttf"
         try:
-            if Path(path).exists():
-                pdfmetrics.registerFont(TTFont(name, str(path)))
-            elif Path(fallback).exists():
-                pdfmetrics.registerFont(TTFont(name, fallback))
+            import sys as _sys
+            meipass = getattr(_sys, '_MEIPASS', None)
+            if meipass:
+                mpass_fonts = Path(meipass) / "assets" / "fonts"
+                if (mpass_fonts / "Tahoma.ttf").exists():
+                    bundled = mpass_fonts / "Tahoma.ttf"
+                    bundled_b = mpass_fonts / "Tahoma-Bold.ttf"
         except Exception:
             pass
-    # Fallback aliases so Helvetica requests don't crash if Tahoma missing
-    try:
-        if 'Tahoma' not in pdfmetrics.getRegisteredFontNames():
-            pdfmetrics.registerFont(TTFont('Tahoma', 'Helvetica'))
-        if 'Tahoma-Bold' not in pdfmetrics.getRegisteredFontNames():
-            pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'Helvetica-Bold'))
-    except Exception:
-        pass
+        for name, path, fallback in [
+            ('Tahoma', bundled, r'C:/Windows/Fonts/tahoma.ttf'),
+            ('Tahoma-Bold', bundled_b, r'C:/Windows/Fonts/tahomabd.ttf'),
+        ]:
+            try:
+                if Path(path).exists():
+                    pdfmetrics.registerFont(TTFont(name, str(path)))
+                elif Path(fallback).exists():
+                    pdfmetrics.registerFont(TTFont(name, fallback))
+            except Exception:
+                pass
+        try:
+            if 'Tahoma' not in pdfmetrics.getRegisteredFontNames():
+                pdfmetrics.registerFont(TTFont('Tahoma', 'Helvetica'))
+            if 'Tahoma-Bold' not in pdfmetrics.getRegisteredFontNames():
+                pdfmetrics.registerFont(TTFont('Tahoma-Bold', 'Helvetica-Bold'))
+        except Exception:
+            pass
 
 def export_page_to_pdf(content: str, page_name: str, app_instance=None):
     """Export current page content to PDF with download button."""

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..core.config import settings
 from ..middleware.rate_limiter import make_rate_limit
+from ..core.tenant import get_current_tenant_id, require_tenant_user
 
 # Rate limits (dependency-based; slowapi decorators break include_router on FastAPI >= 0.141)
 _rl_checkout = make_rate_limit("10/minute")   # checkout creation is expensive + abuse-prone
@@ -126,15 +127,17 @@ def list_plans():
 
 
 @router.post("/checkout", response_model=CheckoutResponse, dependencies=[Depends(_rl_checkout)])
-def create_checkout(req: CheckoutRequest, db: Session = Depends(_get_db)):
+def create_checkout(
+    req: CheckoutRequest,
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: Session = Depends(_get_db),
+):
     if req.plan not in PLANS or req.plan == "free":
         raise HTTPException(status_code=400, detail="Invalid plan — choose starter|pro|business")
     if req.billing_cycle not in ("monthly", "yearly"):
         raise HTTPException(status_code=400, detail="Invalid billing_cycle")
 
-    # Resolve tenant (MVP: anon pro for local dev; in prod, require JWT)
-    user = _get_or_create_anon_user(db)
-    tenant_id = user.id
+    user = require_tenant_user(db, tenant_id)
 
     amount = _price_for(req.plan, req.billing_cycle)
     checkout_id = str(uuid.uuid4())
@@ -225,20 +228,31 @@ async def webhook(
 
     from ..models.checkout import Checkout
 
-    # Idempotency: if checkout already marked paid, do nothing
+    # A webhook may only settle a checkout created by this application. Never
+    # trust webhook metadata to create a new tenant/plan/amount record.
     row = db.get(Checkout, checkout_id)
     if not row:
-        # Fallback: lookup by gateway_checkout_id
         row = db.query(Checkout).filter(Checkout.gateway_checkout_id == checkout_id).first()
     if not row:
-        # No checkout row — try to create from webhook data if we have user_id/plan
-        if not user_id or not plan:
-            raise HTTPException(status_code=400, detail="Unknown checkout and no user_id/plan in payload")
-        # Create minimal row for idempotency
-        row = Checkout(id=checkout_id, tenant_id=user_id, plan=plan, amount=0, status="pending", gateway=settings.billing_gateway, gateway_checkout_id=checkout_id)
-        db.add(row)
-        db.commit()
-        db.refresh(row)
+        raise HTTPException(status_code=400, detail="Unknown checkout")
+
+    # Validate fields supplied by the gateway against the original checkout.
+    metadata = data.get("metadata") or {}
+    payload_currency = data.get("currency") or data.get("currency_code")
+    if payload_currency and str(payload_currency).upper() != "DZD":
+        raise HTTPException(status_code=400, detail="Unsupported checkout currency")
+    if plan and plan != row.plan:
+        raise HTTPException(status_code=400, detail="Webhook plan does not match checkout")
+    payload_amount = data.get("amount")
+    if payload_amount is not None:
+        try:
+            if int(payload_amount) != row.amount:
+                raise HTTPException(status_code=400, detail="Webhook amount does not match checkout")
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(status_code=400, detail="Invalid webhook amount") from exc
+    metadata_tenant = metadata.get("user_id") or metadata.get("tenant_id")
+    if metadata_tenant and str(metadata_tenant) != row.tenant_id:
+        raise HTTPException(status_code=400, detail="Webhook tenant does not match checkout")
 
     if row.status == "paid":
         return {"status": "already_processed", "checkout_id": row.id}
@@ -254,8 +268,11 @@ async def webhook(
 
 
 @router.get("/me", dependencies=[Depends(_rl_me)])
-def billing_me(db: Session = Depends(_get_db)):
-    user = _get_or_create_anon_user(db)
+def billing_me(
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: Session = Depends(_get_db),
+):
+    user = require_tenant_user(db, tenant_id)
     return {"tenant_id": user.id, "subscription": user.subscription, "until": user.subscription_until, "quota": PLANS.get(user.subscription, PLANS["free"])["quota"]}
 
 

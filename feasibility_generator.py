@@ -480,7 +480,7 @@ def calculate_real_financials(
     ref = scenarios["reference"]
     loan_payment = financing.annual_payment()
 
-    # NESDA financing details (if applicable) — 2026 verified rates: 2% interest, 12 years, 1.5y grace
+    # NESDA financing details (if applicable) — 2026 verified terms: 0% interest, 7-year repayment, 1.5-year grace
     nesda_result = None
     if total_investment <= 10_000_000:
         nesda_result = calculate_nesda_financing(

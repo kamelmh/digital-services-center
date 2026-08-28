@@ -27,16 +27,29 @@ print('PDF saved')
 
 ## What's Built
 
-### Tax Form Generators (7 forms, template-based, no LLM)
+### Tax Form Generators (20 forms, template-based, no LLM)
 | Form | Purpose | Price Range |
 |------|---------|-------------|
-| G12 | IFU Declaration (Prévisionnelle + Définitive) | 3,000–5,000 DA |
+| G1 | GGR (Personal Income, 6-tranche IRG) | 3,000–6,000 DA |
+| G4 IBS | IBS Annual Corporate Tax | 8,000–15,000 DA |
+| G4 Rental | Revenus Locatifs (rental income, 30% abattement) | 3,000–6,000 DA |
+| G8 | Business Existence (NIF declaration) | 2,000–4,000 DA |
+| G11 | BIC Régime Réel (6-tranche IRG) | 8,000–15,000 DA |
+| G12 | IFU Declaration (Prévisionnelle) | 3,000–5,000 DA |
+| G12 bis | IFU Final Declaration (Définitive) | 3,000–5,000 DA |
+| G13 | IRG Professions Non Commerciales (BNC) | 5,000–10,000 DA |
+| G15 | Cessation d'Activité (business closure) | 2,000–4,000 DA |
+| G29/G30 | IRG Salary Declaration (monthly barème) | 5,000–10,000 DA |
 | G50 | Monthly Multi-Tax (TVA/IRG/IBS/Timbre) | 5,000–8,000 DA |
-| G4 | IBS Annual Corporate Tax | 8,000–15,000 DA |
-| G11 | BIC Régime Réel | 8,000–15,000 DA |
-| G29/G30 | IRG Salary Declaration | 5,000–10,000 DA |
-| G1 | GGR (Personal Income) | 3,000–6,000 DA |
-| G8 | Business Existence | 2,000–4,000 DA |
+| G51 | Attestation Fiscale (tax clearance) | 3,000–5,000 DA |
+| CNRC F1 | Commercial Registration (companies) | 10,000–20,000 DA |
+| CNRC F2 | Commercial Registration (individual traders) | 5,000–10,000 DA |
+| DAS | CNAS Annual Salary Declaration | 5,000–10,000 DA |
+| SECU 01 | CNAS Employer Affiliation | 3,000–5,000 DA |
+| NIS | ONS Statistical Identification | 2,000–4,000 DA |
+| ANAE | Auto-Entrepreneur Declaration | 3,000–5,000 DA |
+| CASNOS Affil. | Self-Employed Social Security Enrollment | 3,000–5,000 DA |
+| CASNOS CA | Self-Employed Annual Turnover Declaration | 2,000–4,000 DA |
 
 ### Business Document Generators
 | Generator | Purpose | LLM Required? |
@@ -90,20 +103,34 @@ digital-services-center/
 ├── feasibility/                 # Research & templates (12 files + 8 sectors)
 ├── tests/                       # Test suite
 │
-├── # Tax Form Generators (no LLM, template-based)
-├── g12_official.py              # G12 IFU (Prévisionnelle + Définitive)
-├── g50_generator.py             # G50 Monthly Multi-Tax
-├── g4_ibs_generator.py          # G4 IBS Annual
+├── # Tax Form Generators (no LLM, template-based) — 20 forms
+├── g1_ggr_generator.py          # G1 GGR Personal Income (6-tranche IRG)
+├── g4_ibs_generator.py          # G4 IBS Annual Corporate Tax
+├── g4_rental_generator.py       # G4 Rental Income (30% abattement)
+├── g8_existence_generator.py    # G8 Business Existence (NIF)
 ├── g11_bic_generator.py         # G11 BIC Régime Réel
-├── g29_irg_salaires_generator.py # G29/G30 IRG Salaires
-├── g1_ggr_generator.py          # G1 GGR Personal Income
-├── g8_existence_generator.py    # G8 Existence
-├── tax_form_pdf_exporter.py     # PDF export for all 7 forms
+├── g12_official.py              # G12 IFU Prévisionnelle
+├── g12_bis_generator.py         # G12 bis IFU Définitive
+├── g13_bnc_generator.py         # G13 Professions Non Commerciales
+├── g15_cessation_generator.py   # G15 Cessation d'Activité
+├── g29_irg_salaires_generator.py # G29/G30 IRG Salaires (monthly barème)
+├── g50_generator.py             # G50 Monthly Multi-Tax
+├── g51_generator.py             # G51 Attestation Fiscale
+├── cnrc_f1_generator.py         # CNRC F1 Commercial Registration (companies)
+├── cnrc_f2_generator.py         # CNRC F2 Commercial Registration (traders)
+├── das_cnas_generator.py        # DAS CNAS Annual Salary Declaration
+├── secu01_generator.py          # SECU 01 CNAS Employer Affiliation
+├── nis_generator.py             # NIS ONS Statistical ID
+├── anae_generator.py            # ANAE Auto-Entrepreneur Declaration
+├── casnos_affiliation_generator.py # CASNOS Self-Employed Enrollment
+├── casnos_ca_generator.py       # CASNOS Annual Turnover Declaration
+├── tax_form_pdf_exporter.py     # PDF export for all 20 forms
 │
-├── # Business Document Generators (some need LLM)
-├── feasibility_generator.py     # 9-part feasibility study
+├── # Business Document Generators (some need LLM) — 12 generators
+├── feasibility_generator.py     # 9-part feasibility study (Decree 26-154)
 ├── business_plan_generator.py   # Full business plan
-├── nesda_dossier_generator.py   # NESDA financing dossier
+├── nesda_dossier_generator.py   # NESDA financing dossier (9-part, 0%/7y/1.5y)
+├── knowledge_base/              # Form catalog, gaps analysis, agency docs
 ├── financial_calculators.py     # VAN/TRI/Seuil (pure math, no LLM)
 ├── projections_engine.py        # Financial projections (math-based)
 ├── financial_projections_generator.py # Projections (LLM narrative)
@@ -165,8 +192,8 @@ All other generators work without any API keys.
 
 ## Legal
 
-- IBS rates: 19% (industry/production), 23% (services) — verified 2026 per WebMinds.dz
-- IRG brackets: 0% ≤120K, 20% 120-360K, 30% 360K-1.44M, 35% >1.44M — verified 2026
+- IBS rates: 19% (industry/production), 23% (BTP/tourism), 26% (commerce/services) — verified 2026 per Art. 150 CIDTA
+- IRG brackets: 0% ≤240K, 23% 240K-480K, 27% 480K-960K, 30% 960K-1.92M, 33% 1.92M-3.84M, 35% >3.84M — verified 2026-08-22 (LF 2026 Art.104 CIDTA, 6-tranche unified)
 - TVA: 19% standard, 9% reduced (taux réduit) — verified 2026
 - CNAS: 25.5% employer contribution (25% + 0.5% œuvres sociales) — verified 2026
 - SMIG: 22,000 DZD/month | SNMG: 24,000 DZD/month (CNAS base) — verified 2026

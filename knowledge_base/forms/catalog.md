@@ -1,7 +1,7 @@
 # Algerian Administrative Forms — Master Catalog
 
 > Knowledge Base for DSC Digital Services Center
-> Last updated: 2026-08-21
+> Last updated: 2026-08-22
 > Sources: DGI, CNAS, CASNOS, CNRC, ONS official sites
 
 ---
@@ -49,10 +49,11 @@ Each form entry contains:
 | Who needs it | Property owners receiving rent |
 | Deadline | With annual return (April 30) |
 | Format | PDF |
-| DSC generator | None |
+| DSC generator | `g4_rental_generator.py` — multi-property prorated rent, 30% abattement, 6-tranche IRG |
 | Complexity | simple |
 | Revenue potential | medium |
 | Fields | Property details, rental income, expenses, net taxable income |
+| Note | Also see `g4_ibs_generator.py` for G4 IBS (corporate tax, separate form) |
 
 ### G8 — Déclaration d'Existence
 | Field | Value |
@@ -70,18 +71,18 @@ Each form entry contains:
 | Fields | Personal info, business type, activity code (APE/NAF), address, NIF request |
 | Note | First form every entrepreneur needs — high demand, gateway to other services |
 
-### G11 — Taxe sur le Patrimoine
+### G11 — BIC Régime Réel
 | Field | Value |
 |-------|-------|
-| Name | Déclaration de la taxe sur le patrimoine / إقرار ضريبة الثروة |
+| Name | Déclaration du résultat des BIC / إقرار بربح البضائع |
 | Agency | DGI |
-| Purpose | Annual wealth/asset tax declaration |
-| Who needs it | Individuals with total assets exceeding threshold |
-| Deadline | With annual return |
+| Purpose | Industrial/commercial profits declaration (regime reel) |
+| Who needs it | Businesses on regime reel (actual profit) |
+| Deadline | With annual return (April 30) |
 | Format | PDF |
-| DSC generator | None |
+| DSC generator | `g11_bic_generator.py` — 6-tranche IRG bareme (Art. 104 CIDTA) |
 | Complexity | moderate |
-| Revenue potential | low |
+| Revenue potential | high |
 
 ### G12 — Déclaration Prévisionnelle du CA (IFU)
 | Field | Value |
@@ -107,7 +108,7 @@ Each form entry contains:
 | Who needs it | Auto-entrepreneurs |
 | Deadline | January 20 of following year |
 | Format | PDF |
-| DSC generator | None (could extend g12_official.py) |
+| DSC generator | `g12_bis_generator.py` — IFU final declaration |
 | Complexity | simple |
 | Revenue potential | high |
 
@@ -121,7 +122,8 @@ Each form entry contains:
 | Who needs it | Lawyers, doctors, consultants, accountants, engineers, teachers, freelancers |
 | Deadline | April 30 annually (or as specified by DGI) |
 | Format | PDF (fillable), Excel (unofficial) |
-| DSC generator | **NEEDED — high priority** |
+| DSC generator | `g13_bnc_generator.py` — IRG professions non commerciales |
+| Note | Previously highest-demand gap; built 2026-08-22 |
 | Complexity | moderate |
 | Revenue potential | very high |
 | Fields | NIF, NIN, activity description, annual revenue, deductible expenses, professional costs, net result, tax calculation |
@@ -135,9 +137,9 @@ Each form entry contains:
 | Agency | DGI |
 | Purpose | Declare business closure |
 | Who needs it | Closing businesses |
-| Deadline | Upon cessation |
+| Deadline | Within 30 days of cessation |
 | Format | PDF |
-| DSC generator | None |
+| DSC generator | `g15_cessation_generator.py` — duration calc, late flag, obligations checklist |
 | Complexity | simple |
 | Revenue potential | low |
 
@@ -177,7 +179,7 @@ Each form entry contains:
 | Who needs it | Businesses needing fiscal clearance (for tenders, contracts) |
 | Deadline | On request |
 | Format | PDF |
-| DSC generator | None |
+| DSC generator | `g51_generator.py` — attestation fiscale generation |
 | Complexity | simple |
 | Revenue potential | medium |
 
@@ -222,7 +224,7 @@ Each form entry contains:
 | Who needs it | ALL employers |
 | Deadline | January 31 |
 | Format | Excel (bulk), PDF |
-| DSC generator | None |
+| DSC generator | `das_cnas_generator.py` — employer 25.5% / employee 9% contributions, masse salariale |
 | Complexity | moderate |
 | Revenue potential | high |
 | Note | Separate from DGI's G29 — both must be filed |
@@ -236,7 +238,7 @@ Each form entry contains:
 | Who needs it | New employers hiring first employee |
 | Deadline | Before first salary payment |
 | Format | PDF |
-| DSC generator | None |
+| DSC generator | `secu01_generator.py` — monthly contribution estimator, first-hire docs checklist |
 | Complexity | moderate |
 | Revenue potential | medium |
 
@@ -251,7 +253,7 @@ Each form entry contains:
 | Who needs it | ALL freelancers, self-employed, liberal professions |
 | Deadline | Within 10 days of starting activity |
 | Format | PDF |
-| DSC generator | None — **NEEDED** |
+| DSC generator | `casnos_affiliation_generator.py` — auto vs explicit contribution modes |
 | Complexity | moderate |
 | Revenue potential | high |
 | Fields | Personal info, activity type, NIF, RC number, estimated turnover |
@@ -265,7 +267,7 @@ Each form entry contains:
 | Who needs it | All CASNOS-affiliated self-employed |
 | Deadline | March 1 annually (payment by June 30) |
 | Format | PDF |
-| DSC generator | None — **NEEDED** |
+| DSC generator | `casnos_ca_generator.py` — annual turnover declaration |
 | Complexity | simple |
 | Revenue potential | high |
 | CASNOS rate | 15% of declared annual turnover |
@@ -283,7 +285,7 @@ Each form entry contains:
 | Who needs it | All companies |
 | Deadline | Before starting commercial activity |
 | Format | Paper + SIDJILCOM online |
-| DSC generator | None — **NEEDED** |
+| DSC generator | `cnrc_f1_generator.py` — partners table, capital validation, timbre fiscal |
 | Complexity | complex |
 | Revenue potential | high |
 | Required docs | Statutes (notarized), NIF, manager ID, lease contract, casier judiciaire n3 |
@@ -298,7 +300,7 @@ Each form entry contains:
 | Who needs it | Individual merchants |
 | Deadline | Before starting commercial activity |
 | Format | Paper + SIDJILCOM |
-| DSC generator | None |
+| DSC generator | `cnrc_f2_generator.py` — marital-status logic, bail/age checks |
 | Complexity | moderate |
 | Revenue potential | medium |
 
@@ -328,7 +330,7 @@ Each form entry contains:
 | Who needs it | ALL businesses (auto-obtained after RC in some cases) |
 | Deadline | After RC registration |
 | Format | PDF |
-| DSC generator | None |
+| DSC generator | `nis_generator.py` — completeness scorer, ONS section checkboxes |
 | Complexity | simple |
 | Revenue potential | medium |
 | Note | Required for: bank accounts, CNAS/CASNOS, public tenders, import/export |
@@ -346,7 +348,7 @@ Each form entry contains:
 | Who needs it | Micro-business owners, freelancers under auto-entrepreneur regime |
 | Deadline | Before starting activity |
 | Format | Online (anae.dz) |
-| DSC generator | None |
+| DSC generator | `anae_generator.py` — IFU 5%/12% (Art.282sexies), plafond checks, CASNOS 43.2k |
 | Complexity | simple |
 | Revenue potential | high |
 
@@ -370,21 +372,24 @@ Each form entry contains:
 
 | Category | Total Forms | DSC Has Generator | Gap |
 |----------|-------------|-------------------|-----|
-| DGI Tax Forms | 13 | 6 | 7 |
-| CNAS (Employees) | 6 | 0 | 6 |
-| CASNOS (Self-Employed) | 3 | 0 | 3 |
-| CNRC (Commercial Reg) | 4 | 0 | 4 |
-| ONS (Statistics) | 1 | 0 | 1 |
-| ANAE (Auto-Entrepreneur) | 1 | 0 | 1 |
+| DGI Tax Forms | 13 | 13 | 0 |
+| CNAS (Employees) | 6 | 2 | 4 |
+| CASNOS (Self-Employed) | 3 | 2 | 1 |
+| CNRC (Commercial Reg) | 4 | 2 | 2 |
+| ONS (Statistics) | 1 | 1 | 0 |
+| ANAE (Auto-Entrepreneur) | 1 | 1 | 0 |
 | NESDA (Financing) | 1 | 1 | 0 |
-| **TOTAL** | **29** | **7** | **22** |
+| **TOTAL** | **29** | **22** | **7** |
 
-## PRIORITY GAPS (High Revenue Potential)
+## PRIORITY GAPS (Remaining)
 
-1. **G13** — IRG non-commercial professions (205+ Facebook likes, massive demand)
-2. **G12 bis** — IFU final declaration (extension of existing G12)
-3. **CASNOS affiliation + declaration** — Every freelancer needs this
-4. **CNRC F1/F2** — Every new business needs commercial registration
-5. **DAS (CNAS)** — Every employer needs this annually
-6. **G51** — Tax clearance certificate (frequently requested)
-7. **ANAE registration** — Growing auto-entrepreneur market
+1. **AS 1** — Medical care claim (low volume)
+2. **AS 8** — Work/salary certificate (medium demand)
+3. **Certificat Négatif** — Company name reservation
+4. **Remaining CNAS forms** — AS1, AS8, plus other employee declarations
+
+## BUILT GENERATORS (as of 2026-08-22)
+
+All P1 and P2 priority gaps have been filled. 22 form/document generators covering 20 DGI/CNAS/CASNOS/CNRC/ONS/ANAE forms plus 2 special forms (NESDA dossier + G4 IBS).
+
+See `gaps_analysis.md` for detailed status.

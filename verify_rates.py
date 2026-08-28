@@ -171,7 +171,10 @@ def verify_g29_salary_bareme() -> list[RateCheck]:
 
     checks = []
 
-    expected = [(30_000, 0.00), (120_000, 0.23), (360_000, 0.27), (1_600_000, 0.30), (3_200_000, 0.33), (float("inf"), 0.35)]
+    # G29/G30 applies the annual salary barème after conversion to monthly values.
+    # The generator's IRG_BAREME_MONTHLY is intentionally 20k / 40k / 80k /
+    # 160k / 320k DZD, then infinity.
+    expected = [(20_000, 0.00), (40_000, 0.23), (80_000, 0.27), (160_000, 0.30), (320_000, 0.33), (float("inf"), 0.35)]
     for i, (exp_tranche, exp_rate) in enumerate(expected):
         if i < len(IRG_BAREME_MONTHLY):
             checks.append(RateCheck(
@@ -232,11 +235,11 @@ def run_all(strict: bool = False) -> bool:
 
     if strict and failures > 0:
         print("\n❌ STRICT MODE: Failing due to discrepancies.")
-        sys.exit(1)
 
     return failures == 0
 
 
 if __name__ == "__main__":
     strict = "--strict" in sys.argv
-    run_all(strict=strict)
+    ok = run_all(strict=strict)
+    raise SystemExit(0 if ok else 1)
