@@ -273,7 +273,29 @@ def billing_me(
     db: Session = Depends(_get_db),
 ):
     user = require_tenant_user(db, tenant_id)
-    return {"tenant_id": user.id, "subscription": user.subscription, "until": user.subscription_until, "quota": PLANS.get(user.subscription, PLANS["free"])["quota"]}
+    plan_info = PLANS.get(user.subscription, PLANS["free"])
+    quota = plan_info["quota"]
+
+    # Count jobs this month
+    from ..models.job import Job
+    from sqlalchemy import func
+
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    used = db.query(func.count(Job.id)).filter(
+        Job.tenant_id == user.id,
+        Job.created_at >= month_start,
+    ).scalar() or 0
+
+    return {
+        "tenant_id": user.id,
+        "subscription": user.subscription,
+        "until": user.subscription_until,
+        "plan_label": plan_info["label"],
+        "quota": quota,
+        "used_this_month": used,
+        "remaining": max(0, quota - used),
+    }
 
 
 @router.get("/mock-pay")

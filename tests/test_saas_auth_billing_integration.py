@@ -323,3 +323,114 @@ def test_dossier_creation_requires_authentication(dossier_client):
         json={"business_type": "centre_services_num", "location": "Alger", "wilaya": "Alger", "investment": 300000},
     )
     assert response.status_code == 401
+
+
+def test_billing_me_includes_quota_usage(billing_client):
+    """Verify /billing/me returns used_this_month and remaining."""
+    client, token, tenant_a, _ = billing_client
+    # tenant_a has "starter" plan (quota=10)
+    with client.app.state.SessionLocal() as db:
+        db.add(Job(tenant_id=tenant_a, type="feasibility", status="done", progress=100))
+        db.add(Job(tenant_id=tenant_a, type="feasibility", status="done", progress=100))
+        db.commit()
+
+    resp = client.get("/billing/me", headers={"Authorization": f"Bearer {token(tenant_a)}"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["quota"] == 10
+    assert data["used_this_month"] == 2
+    assert data["remaining"] == 8
+    assert data["plan_label"] == "Starter"
+
+
+def test_webhook_activates_subscription_and_extends_if_already_active(billing_client):
+    """Verify webhook sets subscription and extends on re-activation."""
+    client, token, tenant_a, _ = billing_client
+    checkout = client.post(
+        "/billing/checkout",
+        headers={"Authorization": f"Bearer {token(tenant_a)}"},
+        json={"plan": "pro", "billing_cycle": "monthly"},
+    ).json()
+
+    # First payment — activates
+    payload = {
+        "checkout_id": checkout["checkout_id"],
+        "status": "paid",
+        "plan": "pro",
+        "amount": checkout["price"],
+        "currency": "DZD",
+        "metadata": {"user_id": tenant_a},
+    }
+    resp1 = client.post("/billing/webhook", json=payload)
+    assert resp1.status_code == 200
+    assert resp1.json()["status"] == "ok"
+
+    with client.app.state.SessionLocal() as db:
+        user = db.get(User, tenant_a)
+        assert user.subscription == "pro"
+        assert user.subscription_until is not None
+        first_until = user.subscription_until
+
+    # Second payment (idempotent) — extends
+    resp2 = client.post("/billing/webhook", json=payload)
+    assert resp2.status_code == 200
+    assert resp2.json()["status"] == "already_processed"
+
+
+def test_webhook_rejects_currency_mismatch(billing_client):
+    """Verify webhook rejects wrong currency."""
+    client, token, tenant_a, _ = billing_client
+    checkout = client.post(
+        "/billing/checkout",
+        headers={"Authorization": f"Bearer {token(tenant_a)}"},
+        json={"plan": "starter", "billing_cycle": "monthly"},
+    ).json()
+
+    payload = {
+        "checkout_id": checkout["checkout_id"],
+        "status": "paid",
+        "plan": "starter",
+        "amount": checkout["price"],
+        "currency": "USD",
+        "metadata": {"user_id": tenant_a},
+    }
+    resp = client.post("/billing/webhook", json=payload)
+    assert resp.status_code == 400
+    assert "currency" in resp.json()["detail"].lower()
+
+
+def test_entitlement_rejects_insufficient_plan(monkeypatch):
+    """Verify entitlement check rejects users below required plan tier."""
+    from fastapi import FastAPI
+    from apps.api.app.routers import entitlements, billing
+
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    SessionLocal = sessionmaker(bind=engine)
+    tenant_id = str(uuid.uuid4())
+    with SessionLocal() as db:
+        db.add(User(id=tenant_id, email="free@test.com", password_hash="x", subscription="free"))
+        db.commit()
+
+    def override_db():
+        db = SessionLocal()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app = FastAPI()
+    app.include_router(billing.router)
+    app.dependency_overrides[billing._get_db] = override_db
+    app.dependency_overrides[entitlements._get_db_billing] = override_db
+    client = TestClient(app)
+
+    token_val = jwt.encode({"sub": tenant_id}, settings.jwt_secret, algorithm=settings.jwt_alg)
+    resp = client.get("/billing/me", headers={"Authorization": f"Bearer {token_val}"})
+    assert resp.status_code == 200
+    assert resp.json()["subscription"] == "free"
+    assert resp.json()["quota"] == 1

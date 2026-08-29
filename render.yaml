@@ -32,6 +32,19 @@ services:
         sync: false
       - key: R2_SECRET_KEY
         sync: false
+      # Billing — Chargily Pay (set in Render dashboard)
+      - key: DSC_BILLING_GATEWAY
+        value: mock  # Switch to 'chargily' when keys are set
+      - key: DSC_CHARGILY_KEY
+        sync: false
+      - key: DSC_CHARGILY_SECRET
+        sync: false
+      - key: DSC_BILLING_WEBHOOK_SECRET
+        sync: false
+      - key: DSC_FRONTEND_URL
+        value: "https://dsc-web-*.onrender.com"  # Update with actual URL
+      - key: DSC_WEBHOOK_URL
+        value: "https://dsc-api-vsex.onrender.com/billing/webhook"
     healthCheckPath: /health
 
   # Frontend — Next.js admin dashboard
