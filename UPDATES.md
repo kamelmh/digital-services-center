@@ -368,4 +368,12 @@ When finishing work, append an entry below.
 - **Impact:** CI now runs 163 tests + RLS policies on every push. Admin users see all dossiers across tenants. Chargily production activation is ready (set keys in Render dashboard).
 - **Breaking changes:** `list_dossiers` returns all rows for admin users (no tenant filter). `GET /v1/dossiers/me` added for frontend admin check.
 - **Alerts for other projects:** None
-- **Tests:** 163 passed, 1 skipped
+- **Tests:** 163 passed, 1 skipped (local; new RLS enforcement suite adds 3 PG-only tests skipped without env)
+
+### 2026-08-29 — Sprint 6: RLS enforcement — least-privilege role + FORCE RLS
+- **What:** Closed the gap flagged 2026-08-24 and left open through Sprints 4-5: RLS was schema-only, not load-bearing — CI tested as superuser (`postgres:postgres`) which bypasses RLS by Postgres design. Added `dsc_app` least-privilege role, scoped `GRANT`s, and `FORCE ROW LEVEL SECURITY` so every role including the owner is bound by policy. CI now connects as `dsc_app` (`DATABASE_URL`/`DSC_RLS_TEST_DATABASE_URL` both point to `dsc_app:dsc_app_local@localhost:5432/neondb`); "Verify RLS" checks `relforcerowsecurity` and `current_user`. New `tests/test_rls_enforcement.py` proves a foreign-tenant dossier is invisible after `SET LOCAL app.current_tenant_id` as `dsc_app`.
+- **Files:** `apps/api/migrations/003_rls_policies.sql` (§0 role/grant + §1 FORCE), `.github/workflows/ci.yml` (DSN swap + `current_user` check + `test_rls_enforcement.py` step), `tests/test_rls_enforcement.py` (new: 3 tests, PG-only), `render.yaml` (comment: production `DATABASE_URL` = `dsc_app` DSN — see `PRODUCTION_CHECKLIST.md`), `DSC_DEEP_ASSESSMENT.md` §8 (9th Critical Invariant).
+- **Impact:** Tenant isolation is now enforced at the DB layer by a non-owner, FORCE-RLS-bound role, verified on every push. Chargily live cutover (Sprint 7) is safe to sequence next.
+- **Breaking changes:** Production `DATABASE_URL` must be re-pointed at `dsc_app` on Neon (one-time `CREATE ROLE` documented in `PRODUCTION_CHECKLIST.md`). Filesystem invariants untouched (IRG 6-tranche 240k/480k/960k/1.92M/3.84M annual + 20k/40k/80k/160k/320k monthly, NESDA 0%/7y/1.5y, Tahoma→fallback font chain).
+- **Tests:** 163 passed, 4 skipped locally (+3 new PG-only tests skipped without env); full 166 expected on CI. Also fixed the stale G11 status row in `DSC_DEEP_ASSESSMENT.md`'s generator table (code already correct at `g11_bic_generator.py:73-81`).
+- **Neon manual step (one-time):** Run the `CREATE ROLE`/`GRANT` preamble of `003_rls_policies.sql` on the Neon branch, then update the API service's `DATABASE_URL` to `postgresql://dsc_app:<password>@<neon-host>/neondb?sslmode=require`.

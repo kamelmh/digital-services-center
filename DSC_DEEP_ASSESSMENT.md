@@ -90,8 +90,8 @@ All follow `dataclass → calculate_*() → generate_*_html()` + `hook_generatio
 | 3 | `g8_existence_generator.py` | G8 Existence | ✅ | — | — |
 | 4 | `g4_ibs_generator.py` | G4 IBS | ✅ | IBS 19/23/26% | — |
 | 5 | `g4_rental_generator.py` | G4 Revenus fonciers | ✅ | 30% abattement | — |
-| 6 | `g11_bic_generator.py` | G11 BIC | ⚠️ | IRG bareme legacy | Needs rate unification |
-| 7 | `g29_irg_salaires_generator.py` | G29 Salaires | ⚠️ | Monthly bareme | Needs threshold fix |
+| 6 | `g11_bic_generator.py` | G11 BIC | ✅ | IRG 6-tranche `g11_bic_generator.py:73-81` | Unified 2026-08-29 (Sprint 6 flagged stale row) |
+| 7 | `g29_irg_salaires_generator.py` | G29 Salaires | ✅ | IRG 6-tranche/12 (`g29_irg_salaires_generator.py:38`) | Unified 2026-08-29 |
 | 8 | `g1_ggr_generator.py` | G1 GGR | ✅ | IRG 6-tranche | Salary calc fix (this session) |
 | 9 | `g50_generator.py` | G50 Mensuelle | ✅ | TVA 19/9, IBS | Double-deduction fix (this session) |
 | 10 | `g15_cessation_generator.py` | G15 Cessation | ✅ | — | — |
@@ -437,17 +437,18 @@ digital-services-center/
 ### Critical Invariants (do not break)
 
 1. **VAN is always 12%** (`FinancialCalculators.van(discount_rate=0.12)`) — not 10%. NESDA dossier was wrong at 10% before 2026-08-19.
-2. **IRG is always 6 tranches** (240K/480K/960K/1.92M/3.84M at 0/23/27/30/33/35) — annual DZD. G11 and G29 still use legacy scales; unify to this.
+2. **IRG is always 6 tranches** (240K/480K/960K/1.92M/3.84M at 0/23/27/30/33/35) — annual DZD; G29 monthly is `annual/12` (20K/40K/80K/160K/320K @ 0/23/27/30/33/35, `g29_irg_salaires_generator.py:38`).
 3. **IFU is 5% production / 12% services / 0.5% auto-entrepreneur** — ANAE had them swapped before this session.
 4. **IBS is 19% production / 23% BTP-tourism / 26% commerce-services** — 3 tiers, not 2.
 5. **CNAS is 25.5% employer + 9% employee = 34.5% total** — not 26% (that includes 0.5% œuvres sociales).
 6. **CASNOS is 15% of CA, min 3,000 DA/month** — not flat 43,200. Flat is ANAE auto-entrepreneur variant.
 7. **NESDA is 0% interest / 7y repayment / 1.5y grace** — not 2%/12y.
 8. **`fastapi==0.110.3` must not be upgraded** without fixing `_IncludedRouter` in SaaS routers.
+9. **Tenant isolation is DB-enforced by `dsc_app` (non-owner) under `FORCE ROW LEVEL SECURITY`, verified against real Postgres** (`003_rls_policies.sql` §§0-1, `ci.yml` `dsc_app:dsc_app_local@localhost:5432/neondb`, `tests/test_rls_enforcement.py` cross-tenant probe). Superuser `postgres:postgres` bypasses every policy by Postgres design — never point `DATABASE_URL` at it, and never drop `FORCE` (Neon production `DATABASE_URL` must be `postgresql://dsc_app:<password>@<host>/neondb?sslmode=require` — see `PRODUCTION_CHECKLIST.md`).
 
 ### Known Gaps (P1, not blocking)
 
-- G11 + G29 IRG bareme still on legacy scales (see §4 P1 table)
+- ~~G11 + G29 IRG bareme still on legacy scales~~ — unified Sprint 6 (see line above)
 - `knowledge_base/forms/catalog.md` still marks 13 entries as `None`/`NEEDED` — should be ✅ (content stale)
 - `README.md` IRG footer still shows pre-2026 4-tranche
 - `SKILL.md` says 7 forms / 47 tests — should be 20 / 132

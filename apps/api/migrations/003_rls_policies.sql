@@ -5,13 +5,39 @@
 BEGIN;
 
 -- ============================================================================
--- 1. Enable RLS on all tenant-scoped tables
+-- 0. Least-privilege application role (no RLS bypass) — idempotent
+--    Production DATABASE_URL should connect as dsc_app; CI's postgres:postgres
+--    superuser bypasses every policy below unless FORCE is set (Step 7).
+--    Neon manual step: create dsc_app there once; see PRODUCTION_CHECKLIST.md.
+-- ============================================================================
+
+DO $$ BEGIN
+    CREATE ROLE dsc_app WITH LOGIN PASSWORD 'dsc_app_local';
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+GRANT USAGE ON SCHEMA public TO dsc_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON users, dossiers, jobs, checkouts TO dsc_app;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO dsc_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO dsc_app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO dsc_app;
+
+-- ============================================================================
+-- 1. Enable RLS + FORCE on all tenant-scoped tables
+--    FORCE closes the owner/superuser bypass; every role including the table
+--    owner is now bound by policy. Application defense-in-depth (.filter(...))
+--    remains in dossiers.py:128 for SQLite and as belt-and-suspenders.
 -- ============================================================================
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dossiers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE checkouts ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE users FORCE ROW LEVEL SECURITY;
+ALTER TABLE dossiers FORCE ROW LEVEL SECURITY;
+ALTER TABLE jobs FORCE ROW LEVEL SECURITY;
+ALTER TABLE checkouts FORCE ROW LEVEL SECURITY;
 
 -- ============================================================================
 -- 2. Users table — tenants can only see their own row

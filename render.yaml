@@ -10,9 +10,10 @@ services:
     buildCommand: pip install -r requirements.txt && pip install sqlalchemy alembic redis rq boto3 gunicorn
     startCommand: gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:$PORT apps.api.app.main:app
     envVars:
-      # Set manually in dashboard: Neon connection string (postgresql://…neon.tech/neondb?sslmode=require)
+      # Production: use Neon least-privilege role dsc_app (not owner). See 003_rls_policies.sql §0
+      # and PRODUCTION_CHECKLIST.md — create role once on Neon, then paste DSN below.
       - key: DATABASE_URL
-        sync: false
+        sync: false  # postgresql://dsc_app:<password>@<neon-host>/neondb?sslmode=require
       # No Redis on free plan -> enqueue raises -> inline fallback generates directly
       - key: REDIS_URL
         value: "disabled"
