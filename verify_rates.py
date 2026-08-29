@@ -259,9 +259,7 @@ def run_all(strict: bool = False) -> bool:
 
     failures = 0
     for check in all_checks:
-        status_icon = "✅" if check.status == "PASS" else "❌"
         if isinstance(check.expected, float) and isinstance(check.actual, (int, float)):
-            # Handle inf comparison: both inf match; nan comparison fails
             if check.expected == float("inf") and check.actual == float("inf"):
                 match = True
             else:
@@ -270,6 +268,10 @@ def run_all(strict: bool = False) -> bool:
             match = check.expected == check.actual
         if not match:
             check.status = "FAIL"
+        else:
+            check.status = "PASS"
+        status_icon = "✅" if check.status == "PASS" else "❌"
+        if check.status == "FAIL":
             failures += 1
             print(f"  {status_icon} {check.name}: expected={check.expected}{check.unit}, actual={check.actual}{check.unit}")
             print(f"      Source: {check.source}")

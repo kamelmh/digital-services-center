@@ -46,8 +46,8 @@ jobs:
           psql "$PG_DSN_DSC_APP" -c "SELECT current_user;"
       - name: Unit tests (132)
         run: python -m pytest tests/test_generators.py tests/test_cross_artifact_integration.py -q --override-ini="addopts="
-      - name: Rate checks (38)
-        run: python verify_rates.py
+      - name: Rate checks (67 — strict)
+        run: python verify_rates.py --strict
       - name: Compile check
         run: python -m compileall -q apps
       - name: SaaS integration tests (15)
