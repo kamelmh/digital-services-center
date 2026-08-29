@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { listDossiers, getDossier } from "@/lib/dossiers";
+import { listDossiers, getMe } from "@/lib/dossiers";
 import { Card } from "@/components/ui/button";
 import { PdfViewer } from "@/components/PdfViewer";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loadingExport, setLoadingExport] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loadingAdmin, setLoadingAdmin] = useState(true);
 
   async function load() {
     setError(null);
@@ -28,6 +30,7 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
+    getMe().then(u => { setIsAdmin(u.is_admin); setLoadingAdmin(false); }).catch(() => setLoadingAdmin(false));
     load();
   }, []);
 
@@ -72,10 +75,16 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <h1 className="text-2xl font-bold text-navy">Admin — Dossiers (RLS: tenant_id)</h1>
-      <p className="text-sm text-gray-600">
-        Filtre <code>q</code> sur <code>project_name/beneficiary/activity</code>, <code>wilaya</code>, <code>status</code>. RLS: `WHERE tenant_id = anon` (0000…). Selectionnez des dossiers pour export CSV ou visualisation PDF.
-      </p>
+      <h1 className="text-2xl font-bold text-navy">Admin — Dossiers{isAdmin ? " (Vue inter-ténants)" : " (RLS: tenant_id)"}</h1>
+      {loadingAdmin ? (
+        <p className="text-sm text-gray-500">Vérification des droits…</p>
+      ) : (
+        <p className="text-sm text-gray-600">
+          {isAdmin
+            ? "Vous êtes administrateur — vous voyez tous les dossiers de tous les tenants."
+            : "Filtre q sur project_name/beneficiaire/activité, wilaya, status. RLS: `WHERE tenant_id = anon` (0000…). Sélectionnez des dossiers pour export CSV ou visualisation PDF."}
+        </p>
+      )}
 
       <Card className="mt-6">
         <div className="flex flex-wrap gap-3">
@@ -111,8 +120,8 @@ export default function AdminPage() {
 
       <Card className="mt-6">
         <div className="flex justify-between text-sm">
-          <span>Total: <b>{data?.total ?? "—"}</b> (tenant_id isolé)</span>
-          <span className="text-gray-500">RLS: WHERE tenant_id = anon</span>
+          <span>Total: <b>{data?.total ?? "—"}</b>{isAdmin ? " (tous tenants)" : " (tenant_id isolé)"}</span>
+          <span className="text-gray-500">{isAdmin ? "RLS: admin bypass" : "RLS: WHERE tenant_id = anon"}</span>
         </div>
         <div className="mt-4 overflow-auto">
           <table className="w-full text-sm">
@@ -177,6 +186,9 @@ export default function AdminPage() {
         <p className="mt-3 text-xs text-gray-500">
           Vérification RLS: tous les `tenant_id` affichés doivent être identiques (`0000…` pour anon). Un `q=Oran` ne doit pas fuiter les dossiers d&apos;un autre tenant.
         </p>
+        {isAdmin && (
+          <p className="mt-2 text-xs text-blue-600">Vue admin: tous les dossiers de tous les tenants sont visibles. RLS: admin bypass actif.</p>
+        )}
       </Card>
 
       {data && data.dossiers.length > 0 && (

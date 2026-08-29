@@ -30,3 +30,9 @@ export async function getDossier(id: string) {
   if (!r.ok) throw new Error(await r.text());
   return r.json();
 }
+
+export async function getMe() {
+  const r = await fetch(`${API}/v1/dossiers/me`, { cache: "no-store" });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json() as Promise<{ id: string; email: string; name: string; subscription: string; is_admin: boolean }>;
+}

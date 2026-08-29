@@ -121,11 +121,15 @@ def list_dossiers(
     tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
 ):
-    """List dossiers for the authenticated tenant."""
+    """List dossiers for the authenticated tenant. Admins see all tenants."""
     from ..models.dossier import Dossier
+    from ..models.user import User
 
-    require_tenant_user(db, tenant_id)
-    query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id)
+    user = require_tenant_user(db, tenant_id)
+    if user.is_admin:
+        query = db.query(Dossier)
+    else:
+        query = db.query(Dossier).filter(Dossier.tenant_id == tenant_id)
     if q:
         like = f"%{q}%"
         query = query.filter((Dossier.project_name.ilike(like)) | (Dossier.beneficiary_name.ilike(like)) | (Dossier.activity_type.ilike(like)))
@@ -150,10 +154,28 @@ def list_dossiers(
                 "status": r.status,
                 "pdf_r2_key": r.pdf_r2_key,
                 "created_at": r.created_at.isoformat() if r.created_at else None,
-                "tenant_id": r.tenant_id,  # exposed for RLS verification in admin
+                "tenant_id": r.tenant_id,
             }
             for r in rows
         ],
+    }
+
+
+@router.get("/me")
+def me(
+    tenant_id: str = Depends(get_current_tenant_id),
+    db: Session = Depends(_get_db),
+):
+    """Return current user info including admin flag."""
+    from ..models.user import User
+
+    user = require_tenant_user(db, tenant_id)
+    return {
+        "id": user.id,
+        "email": user.email,
+        "name": user.name,
+        "subscription": user.subscription,
+        "is_admin": user.is_admin,
     }
 
 
