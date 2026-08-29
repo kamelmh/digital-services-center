@@ -361,3 +361,11 @@ When finishing work, append an entry below.
 - Configure a least-privilege Neon test role and run the RLS tests before claiming database-level isolation.
 - Confirm the exact production gateway signature contract and event payload schema with the selected payment provider before enabling live payments.
 - Add a dedicated PostgreSQL transaction-context test to prove `app.current_tenant_id` is set on every request through the production session path.
+
+### 2026-08-29 — Sprint 5: CI hardening, Chargily activation, admin dashboard
+- **What:** CI pipeline hardened with PostgreSQL service, RLS migration application, and tenant isolation tests in CI. render.yaml Chargily env vars wired. Admin dashboard now supports cross-tenant view via `is_admin` bypass.
+- **Files:** `.github/workflows/ci.yml`, `apps/api/app/routers/dossiers.py`, `apps/api/migrations/003_rls_policies.sql`, `apps/web/lib/dossiers.ts`, `apps/web/app/admin/page.tsx`, `render.yaml`
+- **Impact:** CI now runs 163 tests + RLS policies on every push. Admin users see all dossiers across tenants. Chargily production activation is ready (set keys in Render dashboard).
+- **Breaking changes:** `list_dossiers` returns all rows for admin users (no tenant filter). `GET /v1/dossiers/me` added for frontend admin check.
+- **Alerts for other projects:** None
+- **Tests:** 163 passed, 1 skipped
