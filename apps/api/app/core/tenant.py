@@ -46,12 +46,24 @@ def set_tenant_context(db: Session, tenant_id: str) -> None:
     SQLite has no session GUC, so this is intentionally a no-op there. The
     explicit ``tenant_id`` predicates in every route remain mandatory defense
     in depth for both databases.
+
+    When FORCE RLS is on, every table including `users` is policy-bound.
+    Policies that reference `users` from an RLS-guarded query would recurse
+    infinitely. The admin bypass therefore checks a second GUC
+    (app.is_admin) set alongside app.current_tenant_id, rather than
+    re-querying `users`.
     """
     if db.bind is not None and db.bind.dialect.name == "postgresql":
         db.execute(
             text("SELECT set_config('app.current_tenant_id', :tenant_id, true)"),
             {"tenant_id": tenant_id},
         )
+
+
+def _set_tenant_context_with_admin(db: Session, tenant_id: str, *, is_admin: bool) -> None:
+    if db.bind is not None and db.bind.dialect.name == "postgresql":
+        db.execute(text("SELECT set_config('app.current_tenant_id', :tid, true)"), {"tid": tenant_id})
+        db.execute(text("SELECT set_config('app.is_admin', :v, true)"), {"v": "true" if is_admin else "false"})
 
 
 def require_tenant_user(db: Session, tenant_id: str):
@@ -62,6 +74,14 @@ def require_tenant_user(db: Session, tenant_id: str):
     user = db.get(User, tenant_id)
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
+    # Push the admin GUC so admin-bypass policies (which check app.is_admin)
+    # take effect without re-querying `users` inside the policy — avoids
+    # infinite recursion when FORCE RLS is on.
+    if db.bind is not None and db.bind.dialect.name == "postgresql":
+        try:
+            db.execute(text("SELECT set_config('app.is_admin', :v, true)"), {"v": "true" if user.is_admin else "false"})
+        except Exception:
+            pass
     return user
 
 

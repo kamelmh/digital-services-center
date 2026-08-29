@@ -78,57 +78,35 @@ CREATE POLICY checkouts_tenant_isolation ON checkouts
 -- ============================================================================
 -- 6. Admin bypass policy — allows admin users to access all rows
 --    Requires: users table has is_admin BOOLEAN column (default false)
+--    FORCE RLS makes every table policy-bound, including `users`. A policy
+--    that queries `users` inside its USING would recurse infinitely. The
+--    bypass therefore checks the transaction-local GUC `app.is_admin`
+--    (= 'true' for admins, set by require_tenant_user and _set_tenant_context_with_admin).
+--    `current_setting(..., true)` yields NULL if unset → bypass stays false.
 -- ============================================================================
 
 -- Add is_admin column if not exists
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
 
--- Admin bypass policies (created AFTER tenant isolation policies so they take precedence)
--- PostgreSQL evaluates policies in order; the first matching ALLOW policy grants access.
-
 DROP POLICY IF EXISTS users_admin_bypass ON users;
 CREATE POLICY users_admin_bypass ON users
     FOR ALL
-    USING (
-        EXISTS (
-            SELECT 1 FROM users admin_check
-            WHERE admin_check.id::text = current_setting('app.current_tenant_id', true)
-            AND admin_check.is_admin = true
-        )
-    );
+    USING (current_setting('app.is_admin', true) = 'true');
 
 DROP POLICY IF EXISTS dossiers_admin_bypass ON dossiers;
 CREATE POLICY dossiers_admin_bypass ON dossiers
     FOR ALL
-    USING (
-        EXISTS (
-            SELECT 1 FROM users admin_check
-            WHERE admin_check.id::text = current_setting('app.current_tenant_id', true)
-            AND admin_check.is_admin = true
-        )
-    );
+    USING (current_setting('app.is_admin', true) = 'true');
 
 DROP POLICY IF EXISTS jobs_admin_bypass ON jobs;
 CREATE POLICY jobs_admin_bypass ON jobs
     FOR ALL
-    USING (
-        EXISTS (
-            SELECT 1 FROM users admin_check
-            WHERE admin_check.id::text = current_setting('app.current_tenant_id', true)
-            AND admin_check.is_admin = true
-        )
-    );
+    USING (current_setting('app.is_admin', true) = 'true');
 
 DROP POLICY IF EXISTS checkouts_admin_bypass ON checkouts;
 CREATE POLICY checkouts_admin_bypass ON checkouts
     FOR ALL
-    USING (
-        EXISTS (
-            SELECT 1 FROM users admin_check
-            WHERE admin_check.id::text = current_setting('app.current_tenant_id', true)
-            AND admin_check.is_admin = true
-        )
-    );
+    USING (current_setting('app.is_admin', true) = 'true');
 
 -- ============================================================================
 -- 7. Verification query (run after migration to confirm RLS is active)
