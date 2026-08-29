@@ -63,3 +63,15 @@ def require_tenant_user(db: Session, tenant_id: str):
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+
+def require_admin(db: Session, tenant_id: str):
+    """Load the authenticated user and verify they are an admin.
+
+    Admins can cross tenant boundaries for support operations.
+    Non-admins get 403 Forbidden.
+    """
+    user = require_tenant_user(db, tenant_id)
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user

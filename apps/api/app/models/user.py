@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, DateTime, func
+from sqlalchemy import String, DateTime, Boolean, func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from .base import Base
@@ -16,4 +16,5 @@ class User(Base):
     supabase_auth_id: Mapped[str | None] = mapped_column(String(36), unique=True)
     subscription: Mapped[str] = mapped_column(String(20), default="free")  # free|starter|pro|business
     subscription_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)  # admin bypass for RLS
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
