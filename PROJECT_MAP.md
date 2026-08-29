@@ -2,7 +2,7 @@
 
 **Live-audited:** 2026-08-22, via Desktop Commander direct read + `DSC_DEEP_ASSESSMENT.md` 7-lane swarm (commit `d51d8cf`; prior audit 2026-08-20 `f8f5d61`).
 **Companion files:** `AGENTS.md` (cross-project protocol), `UPDATES.md` (changelog — read first), `DSC_DEEP_ASSESSMENT.md` (full truth, 466 lines), `SKILL.md` (tool mapping).
-**Purpose:** Evidence-backed map of what each generator produces/needs/connects to, and where automation is real vs. aspirational. All rates verified against `verify_rates.py` (38 checks).
+**Purpose:** Evidence-backed map of what each generator produces/needs/connects to, and where automation is real vs. aspirational. All rates verified against `verify_rates.py` (67 checks — non-self-affirming snapshot, Sprint 8 `policy_constants.py`).
 
 ---
 
@@ -32,7 +32,7 @@
 | 5 | G1 salary — `SalaireData.compute()` subtracts `cotisations_salarié` pre-abattement | ✅ | `g1_ggr_generator.py` |
 | 6 | Frontend P0 `pricing` — `"use client"` to line 1 (Next 14) | ✅ | `apps/web/app/pricing/page.tsx:1` — was build-blocking |
 | 7 | Frontend P0 `admin` — `API` const + `PdfViewer r2Key→url` | ✅ | `apps/web/app/admin/page.tsx` |
-| 8 | CI green | ✅ | `ci.yml` — 132/132 `tests/test_generators.py` + `test_cross_artifact` + 38 rate checks (`python -m pytest tests/ -q --override-ini="addopts="`) |
+| 8 | CI green | ✅ | `ci.yml` — 132/132 `tests/test_generators.py` + `test_cross_artifact` + 67 rate checks (`python verify_rates.py --strict`, Sprint 9) |
 | 9 | knowledge_base committed | ✅ | 9 files now tracked: `catalog.md`, `g13_deep_dive.md`, `gaps_analysis.md`, `agencies/{dgi,cnas,casnos,cnrc,ons}.md`, `deadlines/timeline.md`, `README.md` |
 | 10 | 20 form generators live | ✅ | `g12`, `g12bis`, `g13`, `g1`, `g4`, `g4_rental`, `g8`, `g11`, `g29`, `g50`, `g15`, `g51`, `cnrc_f1/f2`, `das`, `secu01`, `nis`, `anae`, `casnos_affiliation/ca` — each `dataclass→calculate→HTML` + `hook_generation()` |
 

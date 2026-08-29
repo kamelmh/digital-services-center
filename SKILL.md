@@ -63,8 +63,8 @@ All generators are in `C:\Users\Admin\projects\active\apps\digital-services-cent
 
 | Tool | File | Purpose |
 |------|------|---------|
-| **Rate Checker** | `verify_rates.py` | 38 automated rate verification checks |
-| **Tests** | `tests/test_generators.py` | 141 generator tests |
+| **Rate Checker** | `verify_rates.py` | 67 automated rate checks (non-self-affirming: `policy_constants` vs `REVIEWED_2026_IRG_ANNUAL` snapshot, Sprint 8) |
+| **Tests** | `tests/test_generators.py` | 164 generator tests (+3 PG-only RLS, 1 skipped) |
 | **Fonts** | `assets/fonts/Tahoma*.ttf` | Bundled for exe portability (no system dependency) |
 
 ## Usage Patterns
@@ -152,8 +152,8 @@ CNAS_EMPLOYER = 0.255    # 25.5% (26% with œuvres sociales)
 
 ## Verification
 ```bash
-python verify_rates.py          # 38 rate checks
-python -m pytest tests/ -v     # 141 generator tests
+python verify_rates.py --strict # 67 rate checks (non-self-affirming: policy_constants vs reviewed snapshot, Sprint 8)
+python -m pytest tests/ -v     # 164 generator tests
 # new: python -c "from offline_templates import feasibility_offline; ..."
 ```
 
