@@ -19,6 +19,8 @@ from training_hook import hook_generation
 from dataclasses import dataclass
 from datetime import datetime
 
+from policy_constants import CASNOS_MIN_MONTHLY, CASNOS_RATE
+
 
 def _esc(value, default=""):
     if value:
@@ -99,20 +101,20 @@ class CasnosAffiliationData:
 
 def calculate_casnos_affiliation(data: CasnosAffiliationData) -> dict:
     """Calculate CASNOS affiliation fees and monthly contributions."""
-    # Contribution = 15% of annual revenue
-    contribution_annuelle = data.revenu_annuel_previsionnel * 0.15
+    # Contribution = CASNOS_RATE of annual revenue
+    contribution_annuelle = data.revenu_annuel_previsionnel * CASNOS_RATE
+    # Minimum: CASNOS_MIN_MONTHLY (15% of SMIG ≈ 20,000 DA/month SMIG) — annualized as CASNOS_MIN_MONTHLY * 12
+    minimum_mensuel = CASNOS_MIN_MONTHLY  # compatibility alias
+    minimum_annuel = CASNOS_MIN_MONTHLY * 12  # keep annualization visible, no flat annual literal
+    contribution_annuelle = max(contribution_annuelle, minimum_annuel)
     contribution_mensuelle = contribution_annuelle / 12
-
-    # Minimum: 15% of SMIG (≈ 20,000 DA/month SMIG → 3,000 DA minimum)
-    minimum_mensuel = 3_000
-    contribution_mensuelle = max(contribution_mensuelle, minimum_mensuel)
 
     # Frais d'affiliation (one-time)
     frais_affiliation = 5_000
 
     return {
         "revenu_annuel": data.revenu_annuel_previsionnel,
-        "taux": 0.15,
+        "taux": CASNOS_RATE,  # compatibility alias
         "contribution_annuelle": round(contribution_annuelle, 2),
         "contribution_mensuelle": round(contribution_mensuelle, 2),
         "minimum_mensuel": minimum_mensuel,

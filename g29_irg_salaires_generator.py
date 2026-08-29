@@ -21,6 +21,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
 
+from policy_constants import IRG_MONTHLY_BRACKETS
+
 
 def _esc(value: object, default: str = "") -> str:
     """HTML-escape a value for safe rendering."""
@@ -36,14 +38,8 @@ def _esc(value: object, default: str = "") -> str:
 # Source: mfdgi.gov.dz, CIDTA, Loi de Finances 2026
 # Salaire net imposable = brut - CNAS(9%), then apply 40% abattement (plafonné 1,500 DZD/mois)
 # Exonération: salaire brut ≤ 30,000 DZD/mois (Art. 68 CIDTA)
-IRG_BAREME_MONTHLY = [
-    (20_000, 0.00),    # 0-20K: 0%
-    (40_000, 0.23),    # 20K-40K: 23%
-    (80_000, 0.27),    # 40K-80K: 27%
-    (160_000, 0.30),   # 80K-160K: 30%
-    (320_000, 0.33),   # 160K-320K: 33%
-    (float("inf"), 0.35),  # >320K: 35%
-]
+# Monthly thresholds derived as annual/12 → 20k/40k/80k/160k/320k @ 0/23/27/30/33/35
+IRG_BAREME_MONTHLY = list(IRG_MONTHLY_BRACKETS)  # Canonical: policy_constants.IRG_MONTHLY_BRACKETS
 
 SITUATION_FAMILIALE = [
     "Célibataire",

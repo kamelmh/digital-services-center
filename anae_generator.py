@@ -26,6 +26,8 @@ from training_hook import hook_generation
 from dataclasses import dataclass
 from datetime import datetime
 
+from policy_constants import IFU_PRODUCTION_RATE, IFU_SERVICES_RATE
+
 
 def _esc(value: object, default: str = "") -> str:
     if value is None:
@@ -43,10 +45,10 @@ ACTIVITE_TYPES = [
 ]
 
 IFU_RATES = {
-    "Services": 0.12,
-    "Prestations intellectuelles": 0.12,
-    "Production / Vente": 0.05,
-    "Artisanat": 0.05,
+    "Services": IFU_SERVICES_RATE,
+    "Prestations intellectuelles": IFU_SERVICES_RATE,
+    "Production / Vente": IFU_PRODUCTION_RATE,
+    "Artisanat": IFU_PRODUCTION_RATE,
 }
 
 PLAFONDS = {
@@ -108,7 +110,7 @@ def calculate_anae(data: AnaeData) -> dict:
     Returns dict with: ifu_rate, ifu_annual, plafond, plafond_ok,
     casnos_monthly, casnos_annual, effective_load.
     """
-    ifu_rate = IFU_RATES.get(data.type_activite, 0.05)
+    ifu_rate = IFU_RATES.get(data.type_activite, IFU_PRODUCTION_RATE)
     plafond = PLAFONDS.get(data.type_activite, 5_000_000)
 
     ca = max(0.0, data.ca_annuel_prevu)

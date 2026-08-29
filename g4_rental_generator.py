@@ -28,6 +28,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List
 
+from policy_constants import IRG_ANNUAL_BRACKETS
+
 
 def _esc(value: object, default: str = "") -> str:
     if value is None:
@@ -37,15 +39,8 @@ def _esc(value: object, default: str = "") -> str:
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-# Annual IRG barème 2026 (DZD) — same as G1/G13 single source.
-IRG_BAREME = [
-    (240_000, 0.00),
-    (480_000, 0.23),
-    (960_000, 0.27),
-    (1_920_000, 0.30),
-    (3_840_000, 0.33),
-    (float("inf"), 0.35),
-]
+# Annual IRG barème 2026 (DZD) — same as G1/G13 single source — canonical annual table
+IRG_BAREME = list(IRG_ANNUAL_BRACKETS)  # compatibility alias
 
 ABATTEMENT_FONCIER_RATE = 0.30   # Forfait charges d'entretien/réparation (revenus fonciers)
 

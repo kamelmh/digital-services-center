@@ -37,6 +37,13 @@ from financial_calculators import (
     generate_3_scenarios,
 )
 from nesda_calculator import calculate_nesda_financing, format_nesda_report
+from policy_constants import (
+    CNAS_EMPLOYER_RATE,
+    IBS_PRODUCTION_RATE,
+    SNMG_MONTHLY,
+    TVA_STANDARD_RATE,
+    VAN_DISCOUNT_RATE,
+)
 
 
 class FeasibilityError(RuntimeError):
@@ -47,12 +54,12 @@ ALGERIA_DATA = {
     "currency": "دج",
     "currency_code": "DZD",
     "population_growth_rate": 0.018,
-    "snmg_monthly": 24_000,
-    "tva_rate": 0.19,
-    "corporate_tax_rate": 0.19,
-    "cnas_employer_rate": 0.255,
+    "snmg_monthly": SNMG_MONTHLY,
+    "tva_rate": TVA_STANDARD_RATE,
+    "corporate_tax_rate": IBS_PRODUCTION_RATE,
+    "cnas_employer_rate": CNAS_EMPLOYER_RATE,
     "loan_interest_rate": 0.09,
-    "discount_rate": 0.12,
+    "discount_rate": VAN_DISCOUNT_RATE,
     "inflation_rate": 0.03,
     "wilayas": {
         # Eastern Algeria
@@ -117,6 +124,9 @@ ALGERIA_DATA = {
         "In Guezzam": {"population": 12_000, "market_index": 0.50},
     },
 }
+
+# Compatibility alias for legacy callers using the old SMIG name
+smig_monthly = SNMG_MONTHLY
 
 BUSINESS_TEMPLATES = {
     "quincaillerie": {

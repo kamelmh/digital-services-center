@@ -31,6 +31,8 @@ from training_hook import hook_generation
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from policy_constants import IRG_ANNUAL_BRACKETS
+
 
 def _esc(value: object, default: str = "") -> str:
     """HTML-escape a value for safe rendering."""
@@ -72,14 +74,7 @@ IRG_RATES = {
 
 # Progressive IRG barème for BIC (annual, 2026)
 # Art. 104 CIDTA — unified 6-tranche (same as G1/G13/G50)
-IRG_BAREME_BIC = [
-    (240_000, 0.00),
-    (480_000, 0.23),
-    (960_000, 0.27),
-    (1_920_000, 0.30),
-    (3_840_000, 0.33),
-    (float("inf"), 0.35),
-]
+IRG_BAREME_BIC = list(IRG_ANNUAL_BRACKETS)  # Canonical: policy_constants.IRG_ANNUAL_BRACKETS
 
 
 # ── Data Classes ──────────────────────────────────────────────────────────────

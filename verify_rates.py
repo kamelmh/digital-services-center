@@ -195,6 +195,53 @@ def verify_g29_salary_bareme() -> list[RateCheck]:
     return checks
 
 
+# ── Non-self-affirming policy_constants verification (Sprint 8, Guide §3) ─────
+# This checks the canonical module against an independently reviewed snapshot so
+# an accidental edit to policy_constants.py cannot make verification pass by
+# construction. Generators are separately checked above — defense in depth.
+
+REVIEWED_2026_IRG_ANNUAL = (
+    (240_000, 0.00),
+    (480_000, 0.23),
+    (960_000, 0.27),
+    (1_920_000, 0.30),
+    (3_840_000, 0.33),
+    (float("inf"), 0.35),
+)
+
+
+def verify_policy_constants() -> list[RateCheck]:
+    """Verify policy_constants.py against the REVIEWED snapshot (Guide §3).
+
+    An edit to policy_constants.py alone cannot self-affirm because the
+    expected side is this snapshot, not the module itself. Subsequent
+    verify_g1/verify_g29 calls separately prove generators == policy_constants.
+    """
+    import policy_constants as pc
+
+    checks: list[RateCheck] = []
+
+    for i, (exp_tr, exp_rate) in enumerate(REVIEWED_2026_IRG_ANNUAL):
+        checks.append(RateCheck(f"pc_irg_annual_tranche_{i}", exp_tr, pc.IRG_ANNUAL_BRACKETS[i][0], "DZD", "reviewed policy snapshot"))
+        checks.append(RateCheck(f"pc_irg_annual_rate_{i}", exp_rate, pc.IRG_ANNUAL_BRACKETS[i][1], "%", "reviewed policy snapshot"))
+
+    # Monthly is derived = annual/12; check derivation, not just literals.
+    for i, (exp_tr, exp_rate) in enumerate(REVIEWED_2026_IRG_ANNUAL):
+        exp_m = exp_tr if exp_tr == float("inf") else exp_tr / 12
+        checks.append(RateCheck(f"pc_irg_monthly_tranche_{i}", exp_m, pc.IRG_MONTHLY_BRACKETS[i][0], "DZD", "derived from reviewed annual table"))
+        checks.append(RateCheck(f"pc_irg_monthly_rate_{i}", exp_rate, pc.IRG_MONTHLY_BRACKETS[i][1], "%", "derived from reviewed annual table"))
+
+    # Shape / invariants (TableCheck-light): monotonic thresholds + inf terminator.
+    checks.append(RateCheck("pc_irg_annual_monotonic", True, all(pc.IRG_ANNUAL_BRACKETS[i][0] < pc.IRG_ANNUAL_BRACKETS[i + 1][0] for i in range(len(pc.IRG_ANNUAL_BRACKETS) - 1)), "bool", "boundary invariant"))
+    checks.append(RateCheck("pc_irg_monthly_monotonic", True, all(pc.IRG_MONTHLY_BRACKETS[i][0] < pc.IRG_MONTHLY_BRACKETS[i + 1][0] for i in range(len(pc.IRG_MONTHLY_BRACKETS) - 1)), "bool", "boundary invariant"))
+    checks.append(RateCheck("pc_irg_annual_terminates_inf", True, pc.IRG_ANNUAL_BRACKETS[-1][0] == float("inf"), "bool", "boundary invariant"))
+
+    checks.append(RateCheck("pc_cnas_combined_rate", 0.345, pc.CNAS_COMBINED_PAYROLL_RATE, "%", "reviewed CNAS convention"))
+    checks.append(RateCheck("pc_van_discount_rate", 0.12, pc.VAN_DISCOUNT_RATE, "%", "reviewed financial policy"))
+
+    return checks
+
+
 def run_all(strict: bool = False) -> bool:
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -204,6 +251,7 @@ def run_all(strict: bool = False) -> bool:
     all_checks.extend(verify_financial_calculators())
     all_checks.extend(verify_g1_ggr_bareme())
     all_checks.extend(verify_g29_salary_bareme())
+    all_checks.extend(verify_policy_constants())
 
     print("=" * 70)
     print(f"2026 Rate Verification Report — {timestamp}")

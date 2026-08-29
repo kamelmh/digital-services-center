@@ -30,6 +30,9 @@ import html as _html_mod
 from training_hook import hook_generation
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Optional
+
+from policy_constants import IRG_ANNUAL_BRACKETS, TVA_REDUCED_RATE, TVA_STANDARD_RATE
 
 
 def _esc(value: object, default: str = "") -> str:
@@ -37,7 +40,6 @@ def _esc(value: object, default: str = "") -> str:
     if value is None:
         return default
     return _html_mod.escape(str(value))
-from typing import Optional
 
 
 # ── Constants ─────────────────────────────────────────────────────────────────
@@ -52,19 +54,12 @@ MONTHS_AR = [
     "جويلية", "أوت", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
 ]
 
-TVA_RATE_STANDARD = 0.19
-TVA_RATE_REDUIT = 0.09
+TVA_RATE_STANDARD = TVA_STANDARD_RATE  # compatibility alias
+TVA_RATE_REDUIT = TVA_REDUCED_RATE  # compatibility alias
 TVA_RATE_ZERO = 0.00
 
-# IRG Brackets 2026 (annual)
-IRG_BRACKETS = [
-    (240_000, 0.00),
-    (480_000, 0.23),
-    (960_000, 0.27),
-    (1_920_000, 0.30),
-    (3_840_000, 0.33),
-    (float("inf"), 0.35),
-]
+# IRG Brackets 2026 (annual) — canonical annual table
+IRG_BRACKETS = list(IRG_ANNUAL_BRACKETS)  # compatibility alias
 
 # IBS Acompte months
 IBS_ACOMPTE_MONTHS = [3, 6, 11]  # mars, juin, nov

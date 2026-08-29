@@ -7,6 +7,8 @@ No LLM guessing — pure Python math.
 import math
 from dataclasses import dataclass, field
 
+from policy_constants import DEFAULT_BANK_LOAN_RATE, IBS_PRODUCTION_RATE, VAN_DISCOUNT_RATE
+
 
 @dataclass
 class CashFlow:
@@ -15,7 +17,7 @@ class CashFlow:
     cogs: float  # Cost of Goods Sold
     operating_costs: float  # Salaries, rent, energy, maintenance
     depreciation: float  # Annual depreciation
-    tax_rate: float = 0.19  # Corporate tax 19% in Algeria
+    tax_rate: float = IBS_PRODUCTION_RATE  # Corporate tax 19% in Algeria
 
     @property
     def gross_margin(self) -> float:
@@ -66,7 +68,7 @@ class InvestmentPlan:
 class FinancingPlan:
     equity: float  # Apports en fonds propres
     bank_loan: float = 0
-    loan_rate: float = 0.09  # 9% Algeria default
+    loan_rate: float = DEFAULT_BANK_LOAN_RATE  # 9% Algeria default
     loan_years: int = 7
 
     @property
@@ -93,7 +95,7 @@ class FinancialCalculators:
     """Real financial calculators for Algerian business studies."""
 
     @staticmethod
-    def van(cash_flows: list[float], discount_rate: float = 0.12) -> float:
+    def van(cash_flows: list[float], discount_rate: float = VAN_DISCOUNT_RATE) -> float:
         """Valeur Actuelle Nette / Net Present Value.
         
         VAN = -Investment + Σ(CF_t / (1+r)^t)
@@ -387,7 +389,7 @@ if __name__ == "__main__":
     financing = FinancingPlan(
         equity=3_000_000,
         bank_loan=1_600_000,
-        loan_rate=0.09,
+        loan_rate=DEFAULT_BANK_LOAN_RATE,
         loan_years=7,
     )
 

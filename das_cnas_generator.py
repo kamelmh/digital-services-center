@@ -25,6 +25,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List
 
+from policy_constants import CNAS_EMPLOYEE_RATE, CNAS_EMPLOYER_RATE
+
 
 def _esc(value: object, default: str = "") -> str:
     if value is None:
@@ -35,6 +37,7 @@ def _esc(value: object, default: str = "") -> str:
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 # CNAS contribution breakdown (2026) — % of gross salary
+# Detailed component table retained for reconciliation; convention rates below are canonical.
 CNAS_RATES = {
     "health_employer": 15.0,
     "health_employee": 5.0,
@@ -56,17 +59,18 @@ EMPLOYER_RATE = round(
     + CNAS_RATES["retirement_employer"]
     + CNAS_RATES["unemployment_employer"]
     + CNAS_RATES["social_works_employer"], 2
-)  # ~25.5% (per ALGERIA_DATA convention: 25.5%)
+)  # ~25.5% (per ALGERIA_DATA convention: 25.5%) — reconciles to CNAS_EMPLOYER_RATE*100
 
 EMPLOYEE_RATE = round(
     CNAS_RATES["health_employee"]
     + CNAS_RATES["retirement_employee"]
     + CNAS_RATES["unemployment_employee"], 2
-)  # 9.25% → rounded convention: 9%
+)  # 9.25% → rounded convention: 9% — reconciles to CNAS_EMPLOYEE_RATE*100
 
 # Convention used across DSC generators (feasibility, G29): employer 25.5%, employee 9%
-EMPLOYER_RATE_CONVENTION = 25.5
-EMPLOYEE_RATE_CONVENTION = 9.0
+# Migrated to canonical policy_constants per Guide §2 CNAS block
+EMPLOYER_RATE_CONVENTION = CNAS_EMPLOYER_RATE * 100  # compatibility alias — 25.5
+EMPLOYEE_RATE_CONVENTION = CNAS_EMPLOYEE_RATE * 100  # compatibility alias — 9.0
 
 
 @dataclass

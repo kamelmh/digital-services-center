@@ -19,6 +19,12 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
+from policy_constants import (
+    IBS_BTP_TOURISM_RATE,
+    IBS_PRODUCTION_RATE,
+    IBS_SERVICES_COMMERCE_RATE,
+)
+
 
 def _esc(value: object, default: str = "") -> str:
     """HTML-escape a value for safe rendering."""
@@ -33,17 +39,17 @@ IBS_RATES = {
     "production": {
         "label_fr": "Production industrielle",
         "label_ar": "الإنتاج الصناعي",
-        "rate": 0.19,
+        "rate": IBS_PRODUCTION_RATE,
     },
     "btp_tourisme": {
         "label_fr": "BTP et Tourisme (sauf agences de voyage)",
         "label_ar": "الأشغال العمومية والسياحة (عدا وكالات الأسفار)",
-        "rate": 0.23,
+        "rate": IBS_BTP_TOURISM_RATE,
     },
     "commerce_services": {
         "label_fr": "Commerce, Services et autres activités",
         "label_ar": "التجارة والخدمات والأنشطة الأخرى",
-        "rate": 0.26,
+        "rate": IBS_SERVICES_COMMERCE_RATE,
     },
 }
 
@@ -213,17 +219,17 @@ def calculate_g4(data: G4Data) -> G4Calculations:
     taux = IBS_RATES.get(data.ibs_type_activite, IBS_RATES["commerce_services"])["rate"]
 
     if data.ibs_type_activite == "production":
-        calc.ibs_19 = ibs_benefice_imposable * 0.19
+        calc.ibs_19 = ibs_benefice_imposable * IBS_RATES["production"]["rate"]
         calc.ibs_23 = 0
         calc.ibs_26 = 0
     elif data.ibs_type_activite == "btp_tourisme":
         calc.ibs_19 = 0
-        calc.ibs_23 = ibs_benefice_imposable * 0.23
+        calc.ibs_23 = ibs_benefice_imposable * IBS_RATES["btp_tourisme"]["rate"]
         calc.ibs_26 = 0
     else:
         calc.ibs_19 = 0
         calc.ibs_23 = 0
-        calc.ibs_26 = ibs_benefice_imposable * 0.26
+        calc.ibs_26 = ibs_benefice_imposable * IBS_RATES["commerce_services"]["rate"]
 
     calc.ibs_total_taux = calc.ibs_19 + calc.ibs_23 + calc.ibs_26
 

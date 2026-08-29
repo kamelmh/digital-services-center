@@ -19,6 +19,8 @@ from training_hook import hook_generation
 from dataclasses import dataclass
 from datetime import datetime
 
+from policy_constants import CASNOS_MIN_MONTHLY, CASNOS_RATE
+
 
 def _esc(value, default=""):
     if value:
@@ -60,8 +62,8 @@ class CasnosCAData:
 
 def calculate_casnos_ca(data: CasnosCAData) -> dict:
     """Calculate CASNOS contribution based on CA declaration."""
-    taux = 0.15
-    contribution_brute = data.ca_annee_courante * taux
+    taux = CASNOS_RATE  # compatibility alias
+    contribution_brute = data.ca_annee_courante * CASNOS_RATE
 
     total_charges = (
         data.charges_locatives + data.charges_materiel
@@ -70,10 +72,10 @@ def calculate_casnos_ca(data: CasnosCAData) -> dict:
 
     deduction_charges = total_charges * 0.5
     contribution_nette = max(0, contribution_brute - deduction_charges)
-    cotisation_annuelle = contribution_nette
+    minimum_mensuel = CASNOS_MIN_MONTHLY
+    minimum_annuel = CASNOS_MIN_MONTHLY * 12  # keep annualization visible, no flat annual literal
+    cotisation_annuelle = max(contribution_nette, minimum_annuel)
     cotisation_mensuelle = cotisation_annuelle / 12
-    minimum_mensuel = 3_000
-    cotisation_mensuelle = max(cotisation_mensuelle, minimum_mensuel)
 
     return {
         "ca_annee": data.ca_annee_courante,

@@ -22,6 +22,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List
 
+from policy_constants import IRG_ANNUAL_BRACKETS
+
 
 # ── G13Input ─────────────────────────────────────────────────────────────────
 # Structured input for the G13 BNC generator — mirrors the deep-dive form fields.
@@ -57,15 +59,8 @@ class G13Input:
 
 # ── IRG 2026 Bareme (6 tranches) ──────────────────────────────────────────────
 # Applied to annual net result. Limits are annual DZD.
-# Source: DGI 2026 rates (same as G1/G29)
-IRG_BAREME = [
-    (240_000, 0.00),    # 0 – 240 000 DA → 0%
-    (480_000, 0.23),    # 240 001 – 480 000 DA → 23%
-    (960_000, 0.27),    # 480 001 – 960 000 DA → 27%
-    (1_920_000, 0.30),  # 960 001 – 1 920 000 DA → 30%
-    (3_840_000, 0.33),  # 1 920 001 – 3 840 000 DA → 33%
-    (float("inf"), 0.35), # 3 840 001+ → 35%
-]
+# Source: DGI 2026 rates (same as G1/G29) — canonical annual table
+IRG_BAREME = list(IRG_ANNUAL_BRACKETS)  # compatibility alias
 
 
 def _fmt_dzd(n: float) -> str:

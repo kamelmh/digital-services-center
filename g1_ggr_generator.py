@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional
 
+from policy_constants import IRG_ANNUAL_BRACKETS
+
 
 def _esc(value: object, default: str = "") -> str:
     """HTML-escape a value for safe rendering."""
@@ -33,14 +35,7 @@ def _esc(value: object, default: str = "") -> str:
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-IRG_BAREME = [
-    (240_000, 0.00),
-    (480_000, 0.23),
-    (960_000, 0.27),
-    (1_920_000, 0.30),
-    (3_840_000, 0.33),
-    (float("inf"), 0.35),
-]
+IRG_BAREME = list(IRG_ANNUAL_BRACKETS)  # Canonical: policy_constants.IRG_ANNUAL_BRACKETS — Art. 104 CIDTA unified 6-tranche
 
 WILAYAS = [
     "01-Adrar", "02-Chlef", "03-Laghouat", "04-Oum El Bouaghi", "05-Batna",

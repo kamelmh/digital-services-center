@@ -21,6 +21,12 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
+from policy_constants import (
+    IFU_AUTO_ENTREPRENEUR_RATE,
+    IFU_PRODUCTION_RATE,
+    IFU_SERVICES_RATE,
+)
+
 
 def _esc(value: object, default: str = "") -> str:
     """HTML-escape a value for safe rendering."""
@@ -34,13 +40,13 @@ def _esc(value: object, default: str = "") -> str:
 IFU_RATES = {
     "production_vente": {"label_fr": "Activités de production ou de vente de marchandises",
                          "label_ar": "أنشطة الإنتاج أو بيع البضائع",
-                         "rate": 0.05, "min": 30_000},
+                         "rate": IFU_PRODUCTION_RATE, "min": 30_000},
     "services": {"label_fr": "Prestations de services ou autres activités",
                   "label_ar": "الخدمات أو الأنشطة الأخرى",
-                  "rate": 0.12, "min": 30_000},
+                  "rate": IFU_SERVICES_RATE, "min": 30_000},
     "auto_entrepreneur": {"label_fr": "Activités exercées sous le statut d'auto-entrepreneur",
                            "label_ar": "أنشطة مؤسسة فردية",
-                           "rate": 0.005, "min": 10_000},
+                           "rate": IFU_AUTO_ENTREPRENEUR_RATE, "min": 10_000},
 }
 
 WILAYAS = [
@@ -161,9 +167,9 @@ def calculate_g12(data: G12FormData, is_definitive: bool = False) -> G12Calculat
     calc = G12Calculations()
 
     # ── Prévisionnel IFU ──
-    calc.ifu_production = data.ca_production_imposable * 0.05
-    calc.ifu_services = data.ca_services_imposable * 0.12
-    calc.ifu_auto = data.ca_auto_entrepreneur_imposable * 0.005
+    calc.ifu_production = data.ca_production_imposable * IFU_RATES["production_vente"]["rate"]
+    calc.ifu_services = data.ca_services_imposable * IFU_RATES["services"]["rate"]
+    calc.ifu_auto = data.ca_auto_entrepreneur_imposable * IFU_RATES["auto_entrepreneur"]["rate"]
     calc.ifu_total = calc.ifu_production + calc.ifu_services + calc.ifu_auto
 
     # Minimum
@@ -195,16 +201,16 @@ def calculate_g12(data: G12FormData, is_definitive: bool = False) -> G12Calculat
 
         # IFU complémentaire (if realized > forecast)
         ifu_realise = (
-            data.ca_realise_production_imposable * 0.05 +
-            data.ca_realise_services_imposable * 0.12 +
-            data.ca_realise_auto_imposable * 0.005
+            data.ca_realise_production_imposable * IFU_RATES["production_vente"]["rate"] +
+            data.ca_realise_services_imposable * IFU_RATES["services"]["rate"] +
+            data.ca_realise_auto_imposable * IFU_RATES["auto_entrepreneur"]["rate"]
         )
         calc.ifu_complementaire = max(0, ifu_realise - calc.ifu_total)
         calc.ifu_total_definitif = calc.ifu_total + calc.ifu_complementaire
 
         # Marge complémentaire
         calc.marge_complementaire = data.marge_realisee - data.marge_previsionnelle
-        calc.ifu_marge = max(0, calc.marge_complementaire * 0.05)
+        calc.ifu_marge = max(0, calc.marge_complementaire * IFU_RATES["production_vente"]["rate"])
 
         # Revenu net = total IFU - IFU marge (simplified)
         calc.revenu_net = calc.ifu_total_definitif
@@ -454,9 +460,9 @@ def _ca_table_html(
     total_global = total_imp + total_exo
 
     # IFU per line
-    ifu_prod = ca_prod_imp * 0.05
-    ifu_serv = ca_serv_imp * 0.12
-    ifu_auto = ca_auto_imp * 0.005
+    ifu_prod = ca_prod_imp * IFU_RATES["production_vente"]["rate"]
+    ifu_serv = ca_serv_imp * IFU_RATES["services"]["rate"]
+    ifu_auto = ca_auto_imp * IFU_RATES["auto_entrepreneur"]["rate"]
     ifu_total = calc.ifu_total if calc and calc.ifu_total else (ifu_prod + ifu_serv + ifu_auto)
 
     complementaire_cols = ""
@@ -468,7 +474,7 @@ def _ca_table_html(
         comp_imp = r_total_imp - total_imp
         comp_exo = r_total_exo - total_exo
         comp_global = r_global - total_global
-        ifu_comp = max(0, r_prod_imp * 0.05 + r_serv_imp * 0.12 + r_auto_imp * 0.005 - ifu_total)
+        ifu_comp = max(0, r_prod_imp * IFU_RATES["production_vente"]["rate"] + r_serv_imp * IFU_RATES["services"]["rate"] + r_auto_imp * IFU_RATES["auto_entrepreneur"]["rate"] - ifu_total)
 
         complementaire_cols = f"""
         <th>CA/Réalisé<br>Imposable</th>
@@ -485,28 +491,28 @@ def _ca_table_html(
         comp_auto = (r_auto_imp + r_auto_exo) - (ca_auto_imp + ca_auto_exo)
         r_total_imp = r_prod_imp + r_serv_imp + r_auto_imp
         comp_total_imp = r_total_imp - total_imp
-        ifu_comp = max(0, r_prod_imp * 0.05 + r_serv_imp * 0.12 + r_auto_imp * 0.005 - ifu_total)
+        ifu_comp = max(0, r_prod_imp * IFU_RATES["production_vente"]["rate"] + r_serv_imp * IFU_RATES["services"]["rate"] + r_auto_imp * IFU_RATES["auto_entrepreneur"]["rate"] - ifu_total)
 
         comp_data = f"""
         <td class="num">{_fmt_cell(r_prod_imp)}</td>
         <td class="num">{_fmt_cell(r_prod_exo)}</td>
         <td class="num">{_fmt_cell(r_prod_imp + r_prod_exo)}</td>
         <td class="num">{_fmt_cell(comp_prod)}</td>
-        <td class="num">{_fmt_cell(max(0, r_prod_imp * 0.05 - ifu_prod))}</td>"""
+        <td class="num">{_fmt_cell(max(0, r_prod_imp * IFU_RATES["production_vente"]["rate"] - ifu_prod))}</td>"""
 
         comp_dataServ = f"""
         <td class="num">{_fmt_cell(r_serv_imp)}</td>
         <td class="num">{_fmt_cell(r_serv_exo)}</td>
         <td class="num">{_fmt_cell(r_serv_imp + r_serv_exo)}</td>
         <td class="num">{_fmt_cell(comp_serv)}</td>
-        <td class="num">{_fmt_cell(max(0, r_serv_imp * 0.12 - ifu_serv))}</td>"""
+        <td class="num">{_fmt_cell(max(0, r_serv_imp * IFU_RATES["services"]["rate"] - ifu_serv))}</td>"""
 
         comp_dataAuto = f"""
         <td class="num">{_fmt_cell(r_auto_imp)}</td>
         <td class="num">{_fmt_cell(r_auto_exo)}</td>
         <td class="num">{_fmt_cell(r_auto_imp + r_auto_exo)}</td>
         <td class="num">{_fmt_cell(comp_auto)}</td>
-        <td class="num">{_fmt_cell(max(0, r_auto_imp * 0.005 - ifu_auto))}</td>"""
+        <td class="num">{_fmt_cell(max(0, r_auto_imp * IFU_RATES["auto_entrepreneur"]["rate"] - ifu_auto))}</td>"""
 
         comp_dataTotal = f"""
         <td class="num">{_fmt_cell(r_total_imp)}</td>
@@ -588,7 +594,7 @@ def _marge_html(data: G12FormData, calc: G12Calculations = None, is_definitive: 
         return ""
 
     marge_comp = data.marge_realisee - data.marge_previsionnelle
-    ifu_marge = max(0, marge_comp * 0.05)
+    ifu_marge = max(0, marge_comp * IFU_RATES["production_vente"]["rate"])
     ifu_total_payer = (calc.ifu_total_definitif + ifu_marge) if calc else 0
 
     return f"""<div class="section">
