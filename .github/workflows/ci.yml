@@ -48,6 +48,8 @@ jobs:
         run: python -m pytest tests/test_generators.py tests/test_cross_artifact_integration.py -q --override-ini="addopts="
       - name: Rate checks (67 — strict)
         run: python verify_rates.py --strict
+      - name: Scan public Pages artifact
+        run: python check_public_site.py docs
       - name: Compile check
         run: python -m compileall -q apps
       - name: SaaS integration tests (15)

@@ -28,6 +28,10 @@ except ImportError:
     raise SystemExit("Missing: requests. Install: python -m pip install requests")
 
 from financial_calculators import FinancialCalculators
+from policy_constants import WILAYAS
+
+# Keep legacy alias without codes for backward compatibility
+ALGERIA_WILAYAS = tuple(w.split("-", 1)[1] for w in WILAYAS)
 
 # ── NESDA Constants ──────────────────────────────────────────────────────────
 
@@ -57,16 +61,7 @@ NESDA_FINANCING = {
     "personnel_employed": {"personal_pct": 0.15, "nesda_pct": 0.15, "bank_pct": 0.70, "label_fr": "Salarié / Assuré"},
 }
 
-ALGERIA_WILAYAS = [
-    "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar",
-    "Blida", "Bouira", "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger",
-    "Djelfa", "Jijel", "Sétif", "Saïda", "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma",
-    "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", "Ouargla", "Oran", "El Bayadh",
-    "Illizi", "Bordj Bou Arréridj", "Boumerdès", "El Tarf", "Tindouf", "Tissemsilt", "El Oued",
-    "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent",
-    "Ghardaïa", "Relizane", "El M'Ghair", "El Meniaa", "Ouled Djellal", "Bordj Badji Mokhtar",
-    "Béni Abbès", "Timimoun", "Touggourt", "Djanet", "In Salah", "In Guezzam",
-]
+
 
 # ── NESDA Dossier Generator ──────────────────────────────────────────────────
 

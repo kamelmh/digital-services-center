@@ -448,15 +448,16 @@ digital-services-center/
 10. **Chargily is the live DZD gateway (BaridiMob/CIB/Dahabiya), always DZD-only, always `payment_url` redirect, always webhook-verified** (`billing.py:99-107` `pay.chargily.dz/test|live/api/v2/checkouts`, `billing.py:171-182` `X-Chargily-Signature` HMAC-sha256, `billing.py:239-258` plan/amount/currency/tenant + idempotency). `mock` remains as `?gateway=mock` local fallback; a live Chargily failure surfaces as 502 (not silent mock fallback) and a webhook with bad/no signature is 401 when `gateway==chargily` (tests: `test_chargily_live_rejects_mock_webhook_bypass`).
 11. **2026 rates have a single source of truth — `policy_constants.py`** (`TAX_YEAR=2026`, `IBS/TVA/IFU/CNAS/CASNOS/SNMG/VAN/NESDA/IRG_ANNUAL→IRG_MONTHLY` with `annual_to_monthly_brackets()`). No regulated literal lives outside the canonical file or the reviewed snapshot in `verify_rates.py:REVIEWED_2026_IRG_ANNUAL` — `verify_rates.py` proves `policy_constants == REVIEWED` (non-self-affirming) and separately that every generator alias equals `policy_constants`; an edit to the canonical file alone cannot self-affirm (Guide `proposed→done` 2026-08-29, boundary: G29 `annual/12` and CNAS component table intentionally unchanged).
 
-### Known Gaps (P1, not blocking)
+### Known Gaps — closed through Sprint 10
 
-- ~~G11 + G29 IRG bareme still on legacy scales~~ — unified Sprint 6 (see line above)
-- `knowledge_base/forms/catalog.md` still marks 13 entries as `None`/`NEEDED` — should be ✅ (content stale)
-- `README.md` IRG footer still shows pre-2026 4-tranche
-- `SKILL.md` says 7 forms / 47 tests — should be 20 / 132
-- `PROJECT_MAP.md` says 7 forms / 2%/12y — should be 20 / 0%/7y
-- `WILAYAS` duplicated ×14 — extract to `constants.py` is P2
-- No `ROADMAP.md` — strategy split across 5 stale docs
+- ~~G11 + G29 IRG bareme still on legacy scales~~ — unified Sprint 1 (`g11:73-81`/`g29:38` `policy_constants.IRG_*_BRACKETS`)
+- ~~`knowledge_base/forms/catalog.md` still marks 13 entries as `None`/`NEEDED`~~ — 3 deliberate `None`'s remain (AS1/AS8/Certificat Négatif, low-priority, intentionally unbuilt); 22/29 Forms cataloged, 29th row fixed in Sprint 10.
+- ~~`README.md` IRG footer still shows pre-2026 4-tranche~~ — already 6-tranche `0/23/27/30/33/35` (`README.md:195-196` verified 2026-08-10).
+- ~~`SKILL.md` says 7 forms / 47 tests~~ — now `20 forms / 164 tests / 67 checks` (`SKILL.md:26-68,155-156`, fixed Sprint 10 `2d4168d`).
+- ~~`PROJECT_MAP.md` says 7 forms / 2%/12y~~ — now `20 forms / 0%/7y/1.5y` (`PROJECT_MAP.md`, fixed Sprint 10 `2d4168d`).
+- ~~`WILAYAS` duplicated ×14~~ — now `policy_constants.WILAYAS` (58-entry canonical, 12 generators + `nesda_dossier.ALGERIA_WILAYAS` compat) — Sprint 10.
+- ~~No `ROADMAP.md`~~ — added `ROADMAP.md` (70 lines, 5 sections: current / S1-9 / S10-12 / 11 invariants / cutover) — Sprint 10.
+- ~~No `check_public_site.py` guard / Pages ships `.`~~ — added `check_public_site.py` (97 lines, dep-free) + `ci.yml:51` scan + `deploy.yml:33` narrowed to `./docs` — Sprint 9-10; `check_public_site.py docs` passes on the live docs/.
 
 ### Where to Start (if you have one task)
 
