@@ -9,16 +9,46 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: neondb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/neondb
+      DSC_RLS_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/neondb
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Install deps
-        run: pip install -r requirements.txt && pip install sqlalchemy alembic redis rq boto3 pytest
+        run: |
+          pip install -r requirements.txt
+          pip install sqlalchemy alembic redis rq boto3 pytest
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Apply migrations
+        run: |
+          alembic upgrade head
+          psql "$DATABASE_URL" -f apps/api/migrations/003_rls_policies.sql
+      - name: Verify RLS is active
+        run: |
+          psql "$DATABASE_URL" -c "SELECT relname, relrowsecurity FROM pg_class WHERE relname IN ('users','dossiers','jobs','checkouts');"
       - name: Unit tests (55)
         run: python -m pytest tests/test_generators.py tests/test_cross_artifact_integration.py -q --override-ini="addopts="
       - name: Rate checks (38)
         run: python verify_rates.py
       - name: Compile check
         run: python -m compileall -q apps
+      - name: SaaS integration tests (5)
+        run: python -m pytest tests/test_saas_auth_billing_integration.py -q --override-ini="addopts="
+      - name: Tenant isolation + RLS tests (17)
+        run: python -m pytest tests/test_tenant_isolation.py -q --override-ini="addopts="
