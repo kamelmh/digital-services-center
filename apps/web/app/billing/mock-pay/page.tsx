@@ -1,86 +1,58 @@
 "use client";
-
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const OPTS = [
+  { id: "starter", label: "Starter", price: 2900, quota: 10 },
+  { id: "pro", label: "Pro", price: 5900, quota: 100 },
+  { id: "business", label: "Business", price: 9900, quota: 300 },
+];
 export default function MockPayPage() {
-  const searchParams = useSearchParams();
-  const checkoutId = searchParams.get("checkout_id") || "unknown";
-  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
-  const [result, setResult] = useState<string | null>(null);
-
-  const simulatePayment = async () => {
-    setStatus("loading");
-    try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const res = await fetch(`${apiBase}/billing/webhook`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Chargily-Signature": "mock-signature",
-        },
-        body: JSON.stringify({
-          checkout_id: checkoutId,
-          status: "paid",
-          amount: 2900,
-          currency: "DZD",
-          plan: "starter",
-          metadata: { checkout_id: checkoutId },
-        }),
-      });
-      const data = await res.json();
-      setResult(JSON.stringify(data, null, 2));
-      setStatus("done");
-    } catch (err) {
-      setResult(`Error: ${err}`);
-      setStatus("done");
-    }
-  };
-
+  const sp = useSearchParams(); const router = useRouter();
+  const checkoutId = sp.get("checkout_id") || "chk_mock";
+  const qPlan = sp.get("plan") as string | null;
+  const [plan, setPlan] = useState(qPlan && OPTS.find(o=>o.id===qPlan) ? qPlan : "starter");
+  const [status, setStatus] = useState<"idle"|"loading"|"done">("idle");
+  const [msg, setMsg] = useState<string | null>(null);
+  const [me, setMe] = useState<any>(null);
+  const cur = OPTS.find(o=>o.id===plan)!;
+  useEffect(()=>{ (async()=>{
+    const tok = typeof window!=="undefined"?localStorage.getItem("token")||localStorage.getItem("access_token")||localStorage.getItem("jwt"):"";
+    const h:Record<string,string>={}; if(tok) h.Authorization=`Bearer ${tok}`;
+    try{ const r=await fetch(`${API}/billing/me`,{headers:h}); if(r.ok) setMe(await r.json()); }catch{}
+  })(); },[]);
+  async function pay(){
+    setStatus("loading"); setMsg(null);
+    const tok = typeof window!=="undefined"?localStorage.getItem("token")||localStorage.getItem("access_token")||localStorage.getItem("jwt"):"";
+    const headers:Record<string,string>={"Content-Type":"application/json","X-Chargily-Signature":"mock-signature"};
+    if(tok) headers.Authorization=`Bearer ${tok}`;
+    // tenant_id optional — backend resolves from JWT/checkout; include when available
+    const tenant_id = me?.tenant_id||me?.user_id||undefined;
+    try{
+      const res=await fetch(`${API}/billing/webhook`,{method:"POST",headers,body:JSON.stringify({checkout_id:checkoutId,status:"paid",plan,currency:"DZD",amount:cur.price,tenant_id})});
+      const data=await res.json();
+      if(!res.ok) throw new Error(JSON.stringify(data));
+      setMsg("✓ Paiement simulé — تم الدفع"); setStatus("done");
+      setTimeout(()=>router.push(`/billing/success?checkout_id=${checkoutId}`),1200);
+    }catch(e:any){ setMsg("✗ "+String(e.message||e).slice(0,180)); setStatus("done"); }
+  }
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          Mock Payment
-        </h1>
-        <p className="text-gray-600 mb-6">
-          This page simulates a Chargily checkout for local testing. In
-          production, this redirects to{" "}
-          <code className="bg-gray-100 px-1 rounded">pay.chargily.dz</code>.
-        </p>
-
-        <div className="bg-gray-50 rounded-md p-4 mb-6">
-          <p className="text-sm text-gray-500">Checkout ID</p>
-          <p className="font-mono text-sm text-gray-900 break-all">
-            {checkoutId}
-          </p>
-        </div>
-
-        <button
-          onClick={simulatePayment}
-          disabled={status === "loading"}
-          className="w-full bg-emerald-600 text-white py-3 px-4 rounded-md font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors"
-        >
-          {status === "loading" ? "Processing..." : "Simulate Payment (Paid)"}
-        </button>
-
-        {result && (
-          <div className="mt-6 bg-gray-50 rounded-md p-4">
-            <p className="text-sm text-gray-500 mb-2">Webhook Response</p>
-            <pre className="text-xs font-mono text-gray-700 whitespace-pre-wrap overflow-auto max-h-48">
-              {result}
-            </pre>
-          </div>
-        )}
-
-        {status === "done" && (
-          <a
-            href="/pricing"
-            className="mt-4 block text-center text-sm text-blue-600 hover:underline"
-          >
-            ← Back to Pricing
-          </a>
-        )}
+    <div className="min-h-[70vh] bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md rounded-xl border bg-white p-6 shadow-sm">
+        <h1 className="text-xl font-bold text-navy">Paiement Mock — الدفع التجريبي</h1>
+        <p className="mt-1 text-xs text-gray-500">Simule Chargily (pay.chargily.dz) en local. Aucun débit réel.</p>
+        <div className="mt-4 rounded bg-gray-50 p-3"><p className="text-xs text-gray-500">Checkout ID</p><p className="font-mono text-xs break-all">{checkoutId}</p></div>
+        <label className="mt-4 block text-sm font-medium">Plan</label>
+        <select value={plan} onChange={e=>setPlan(e.target.value)} className="mt-1 w-full rounded border px-3 py-2 text-sm">
+          {OPTS.map(o=><option key={o.id} value={o.id}>{o.label} — {o.price} DZD — {o.quota}/mois</option>)}
+        </select>
+        <p className="mt-2 text-sm">Prix: <b>{cur.price} DZD</b> · Quota: <b>{cur.quota}/mois</b></p>
+        {me && <p className="mt-2 rounded border bg-navy/5 p-2 text-xs">Utilisé ce mois: <b>{me.used_this_month ?? "—"}</b> / Quota {me.quota} · Restant: <b>{me.remaining ?? "—"}</b></p>}
+        {!me && <p className="mt-2 text-xs text-gray-400">GET /billing/me — connectez-vous pour voir le quota.</p>}
+        <button onClick={pay} disabled={status==="loading"} className="mt-4 w-full rounded bg-navy py-2.5 font-semibold text-white disabled:opacity-50">{status==="loading"?"Traitement...":"Payer (mock) — ادفع"}</button>
+        {msg && <div className={`mt-3 rounded p-3 text-sm ${msg.startsWith("✓")?"bg-emerald-50 text-emerald-700 border border-emerald-200":"bg-red-50 text-red-700 border border-red-200"}`}>{msg}</div>}
+        {status==="done" && msg?.startsWith("✓") && <p className="mt-2 text-center text-xs text-gray-500">Redirection vers /billing/success…</p>}
+        <a href="/pricing" className="mt-4 block text-center text-sm text-gray-600 hover:underline">← Retour tarifs</a>
       </div>
     </div>
   );
