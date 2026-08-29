@@ -23,9 +23,9 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      # App uses dsc_app (non-superuser) so FORCE RLS is load-bearing; migration creates role.
-      DATABASE_URL: postgresql://dsc_app:dsc_app_local@localhost:5432/neondb
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/neondb
       DSC_RLS_TEST_DATABASE_URL: postgresql://dsc_app:dsc_app_local@localhost:5432/neondb
+      PG_DSN_DSC_APP: postgresql://dsc_app:dsc_app_local@localhost:5432/neondb
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -40,10 +40,10 @@ jobs:
         run: |
           alembic upgrade head
           psql "$DATABASE_URL" -f apps/api/migrations/003_rls_policies.sql
-      - name: Verify RLS is active (incl. FORCE)
+      - name: Verify RLS is active (incl. FORCE) as dsc_app
         run: |
-          psql "$DATABASE_URL" -c "SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname IN ('users','dossiers','jobs','checkouts');"
-          psql "$DATABASE_URL" -c "SELECT current_user;"
+          psql "$PG_DSN_DSC_APP" -c "SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class WHERE relname IN ('users','dossiers','jobs','checkouts');"
+          psql "$PG_DSN_DSC_APP" -c "SELECT current_user;"
       - name: Unit tests (132)
         run: python -m pytest tests/test_generators.py tests/test_cross_artifact_integration.py -q --override-ini="addopts="
       - name: Rate checks (38)
