@@ -33,7 +33,7 @@ jobs:
       - name: Install deps
         run: |
           pip install -r requirements.txt
-          pip install sqlalchemy alembic redis rq boto3 pytest
+          pip install sqlalchemy alembic redis rq boto3 pytest httpx
           sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Apply migrations
         run: |
@@ -42,13 +42,13 @@ jobs:
       - name: Verify RLS is active
         run: |
           psql "$DATABASE_URL" -c "SELECT relname, relrowsecurity FROM pg_class WHERE relname IN ('users','dossiers','jobs','checkouts');"
-      - name: Unit tests (55)
+      - name: Unit tests (132)
         run: python -m pytest tests/test_generators.py tests/test_cross_artifact_integration.py -q --override-ini="addopts="
       - name: Rate checks (38)
         run: python verify_rates.py
       - name: Compile check
         run: python -m compileall -q apps
-      - name: SaaS integration tests (5)
+      - name: SaaS integration tests (15)
         run: python -m pytest tests/test_saas_auth_billing_integration.py -q --override-ini="addopts="
       - name: Tenant isolation + RLS tests (17)
         run: python -m pytest tests/test_tenant_isolation.py -q --override-ini="addopts="
