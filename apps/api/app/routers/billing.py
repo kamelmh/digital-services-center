@@ -115,6 +115,10 @@ def _create_chargily_checkout(amount: int, checkout_id: str, user_id: str, plan:
         url = data.get("checkout_url") or data.get("url") or f"{settings.frontend_url}/billing/mock-pay?checkout_id={checkout_id}"
         return gw_id, url
     except Exception as e:
+        # In live mode a failed Chargily call must surface — silent mock fallback hides outages from ops.
+        if settings.billing_gateway == "chargily":
+            print(f"Chargily live call failed — surfacing error (gateway=chargily): {e}")
+            raise HTTPException(status_code=502, detail=f"Chargily checkout failed: {e}")
         print(f"Chargily call failed, falling back to mock: {e}")
         gw_id = f"chk_{uuid.uuid4().hex[:12]}"
         url = f"{settings.frontend_url}/billing/mock-pay?checkout_id={checkout_id}"
@@ -196,15 +200,22 @@ def _activate_subscription(db: Session, tenant_id: str, plan: str, months: int =
 async def webhook(
     request: Request,
     x_chargily_signature: str | None = Header(default=None),
-    x_stripe_signature: str | None = Header(default=None),
+    signature: str | None = Header(default=None),
+    x_signature: str | None = Header(default=None),
     db: Session = Depends(_get_db),
 ):
+    import logging as _logging
+
     raw = await request.body()
-    # Verify HMAC (Chargily: X-Chargily-Signature, Stripe: X-Stripe-Signature)
-    sig = x_chargily_signature or x_stripe_signature
-    if not _verify_hmac(raw, sig):
-        # In mock mode we allow, in live we would 401
-        if settings.billing_gateway != "mock":
+    # Chargily v2 signs with X-Chargily-Signature (hex sha256 of raw body).
+    # Mock bypass is ONLY for gateway==mock — in chargily mode a bad/missing sig is 401.
+    sig = x_chargily_signature or signature or x_signature
+    hmac_ok = _verify_hmac(raw, sig)
+    if not hmac_ok:
+        if settings.billing_gateway == "mock":
+            _logging.getLogger("billing.webhook").warning("webhook HMAC failed but gateway=mock — allowing (dev)")
+        else:
+            _logging.getLogger("billing.webhook").warning("webhook HMAC failed — rejecting (gateway=%s)", settings.billing_gateway)
             raise HTTPException(status_code=401, detail="Invalid webhook signature")
 
     try:

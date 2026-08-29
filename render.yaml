@@ -33,19 +33,21 @@ services:
         sync: false
       - key: R2_SECRET_KEY
         sync: false
-      # Billing — Chargily Pay (set in Render dashboard)
+      # Billing — Chargily Pay v2 (BaridiMob/CIB/Dahabiya, DZD-only). See PRODUCTION_CHECKLIST.md.
+      # Live cutover: set the 3 secrets below in the Render dashboard, then flip DSC_BILLING_GATEWAY mock→chargily.
+      # The API auto-routes test_… keys to pay.chargily.dz/test/api/v2/checkouts (billing.py:96-97).
       - key: DSC_BILLING_GATEWAY
-        value: mock  # Switch to 'chargily' when keys are set
+        value: mock  # Switch to 'chargily' when keys are set (Sprint 7)
       - key: DSC_CHARGILY_KEY
-        sync: false
+        sync: false  # live_… (prod) or test_… (sandbox) from https://pay.chargily.dz
       - key: DSC_CHARGILY_SECRET
-        sync: false
+        sync: false  # API secret, pairs with DSC_CHARGILY_KEY
       - key: DSC_BILLING_WEBHOOK_SECRET
-        sync: false
+        sync: false  # Must match Chargily dashboard → Webhooks → Signing secret
       - key: DSC_FRONTEND_URL
-        value: "https://dsc-web-*.onrender.com"  # Update with actual URL
+        value: "https://dsc-web-*.onrender.com"  # Update with actual dsc-web URL
       - key: DSC_WEBHOOK_URL
-        value: "https://dsc-api-vsex.onrender.com/billing/webhook"
+        value: "https://dsc-api-vsex.onrender.com/billing/webhook"  # Public, Chargily posts here; must be HTTPS
     healthCheckPath: /health
 
   # Frontend — Next.js admin dashboard

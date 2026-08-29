@@ -174,6 +174,24 @@ def test_webhook_validates_amount_and_is_idempotent(billing_client):
         assert user.subscription == "starter"
 
 
+def test_chargily_live_rejects_mock_webhook_bypass(monkeypatch):
+    """HMAC-pinning contract: gateway==chargily must reject a mock webhook signature."""
+    from apps.api.app.core.config import settings as s
+
+    monkeypatch.setattr(s, "billing_gateway", "chargily")
+    monkeypatch.setattr(s, "billing_webhook_secret", "live-secret-32-bytes-for-test-pinning")
+    monkeypatch.setattr(s, "chargily_secret", "live-secret-32-bytes-for-test-pinning")
+    from apps.api.app.routers.billing import _verify_hmac
+
+    assert _verify_hmac(b'{"checkout_id":"x","status":"paid"}', "mock-signature") is False
+    assert _verify_hmac(b'{"checkout_id":"x","status":"paid"}', None) is False
+    # Real sha256 hex of the same body must pass.
+    import hashlib as _hl, hmac as _hm
+
+    sig = _hm.new(b"live-secret-32-bytes-for-test-pinning", b'{"checkout_id":"x","status":"paid"}', _hl.sha256).hexdigest()
+    assert _verify_hmac(b'{"checkout_id":"x","status":"paid"}', sig) is True
+
+
 @pytest.mark.skipif(
     not os.getenv("DSC_RLS_TEST_DATABASE_URL"),
     reason="Set DSC_RLS_TEST_DATABASE_URL to a least-privilege Neon/PostgreSQL test role",

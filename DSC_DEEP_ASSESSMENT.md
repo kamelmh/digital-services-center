@@ -445,6 +445,7 @@ digital-services-center/
 7. **NESDA is 0% interest / 7y repayment / 1.5y grace** — not 2%/12y.
 8. **`fastapi==0.110.3` must not be upgraded** without fixing `_IncludedRouter` in SaaS routers.
 9. **Tenant isolation is DB-enforced by `dsc_app` (non-owner) under `FORCE ROW LEVEL SECURITY`, verified against real Postgres** (`003_rls_policies.sql` §§0-1, `ci.yml` `dsc_app:dsc_app_local@localhost:5432/neondb`, `tests/test_rls_enforcement.py` cross-tenant probe). Superuser `postgres:postgres` bypasses every policy by Postgres design — never point `DATABASE_URL` at it, and never drop `FORCE` (Neon production `DATABASE_URL` must be `postgresql://dsc_app:<password>@<host>/neondb?sslmode=require` — see `PRODUCTION_CHECKLIST.md`).
+10. **Chargily is the live DZD gateway (BaridiMob/CIB/Dahabiya), always DZD-only, always `payment_url` redirect, always webhook-verified** (`billing.py:99-107` `pay.chargily.dz/test|live/api/v2/checkouts`, `billing.py:171-182` `X-Chargily-Signature` HMAC-sha256, `billing.py:239-258` plan/amount/currency/tenant + idempotency). `mock` remains as `?gateway=mock` local fallback; a live Chargily failure surfaces as 502 (not silent mock fallback) and a webhook with bad/no signature is 401 when `gateway==chargily` (tests: `test_chargily_live_rejects_mock_webhook_bypass`).
 
 ### Known Gaps (P1, not blocking)
 
