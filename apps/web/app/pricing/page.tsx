@@ -24,7 +24,7 @@ export default function Pricing() {
   async function onCheckout(plan: string) {
     if (plan === "free") { window.location.href = "/dashboard"; return; }
     setLoading(plan); setErr(null);
-    try { const r = await createCheckout(plan, "monthly"); window.location.href = r.payment_url; }
+    try { const r = await createCheckout(plan, "monthly"); if (r.payment_url && r.payment_url.startsWith("https://")) window.location.href = r.payment_url; else setErr("URL de paiement invalide"); }
     catch (e: any) { setErr(String(e.message || e)); } finally { setLoading(null); }
   }
   async function onQuote() {

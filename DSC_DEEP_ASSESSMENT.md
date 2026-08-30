@@ -10,8 +10,8 @@
 
 | Dimension | Verdict | Evidence |
 |-----------|---------|----------|
-| **Product** | ✅ MVP done, sellable today | 20 form generators, 132 tests, live on Render+Neon, offline exe works |
-| **Math** | ✅ Fixed this session, verified | 5 generator bugs patched, 38 rate checks, unified IRG/IFU/CNAS/CASNOS |
+| **Product** | ✅ MVP done, sellable today | 20 form generators, 164 tests, live on Render+Neon, offline exe works |
+| **Math** | ✅ Fixed this session, verified | 5 generator bugs patched, 67 rate checks, unified IRG/IFU/CNAS/CASNOS |
 | **Frontend** | 🟡 3 P0 build bugs fixed this session, remaining UX wiring gaps | Next.js 14 builds, but no route guards, no JWT propagation |
 | **Infra** | ✅ Deployed, ⚠️ free-tier limits real | dsc-api + dsc-web on Render, Neon Postgres with RLS |
 | **Billing** | 🔴 Wired but blocked | Chargily integration written, never activated (missing env keys + tenant isolation) |
@@ -122,7 +122,7 @@ All follow `dataclass → calculate_*() → generate_*_html()` + `hook_generatio
 | `POST /quality/score` | — | — | 60/min |
 | `GET /health` | — | — | — |
 
-**All 132 tests pass. All 38 rate checks conceptually verified.**
+**All 164 tests pass. All 67 rate checks conceptually verified.**
 
 ### 2.3 Frontend — 8 pages, builds, 3 P0 bugs fixed
 
@@ -411,7 +411,7 @@ All free, all open-source, all self-hostable on a single $5 VPS or old laptop.
 - **Next.js 14**, React 18, Tailwind, Supabase (mock fallback)
 - **Neon Postgres** (0.5GB free) with RLS ×6 policies (GUC `app.current_tenant_id`, portable, verified on real Postgres)
 - **Render** frankfurt free ×2 (api + web), inline jobs (no Redis/worker on free)
-- **132 tests**, 38 rate checks, all green
+- **164 tests**, 67 rate checks, all green
 - **5 math bugs fixed this session** — ANAE, G50, G12, G13, G1 — verify against `tests/test_generators.py` before changing rates
 
 ### File Map (where things live)

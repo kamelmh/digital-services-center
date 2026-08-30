@@ -55,6 +55,19 @@ Each form entry contains:
 | Fields | Property details, rental income, expenses, net taxable income |
 | Note | Also see `g4_ibs_generator.py` for G4 IBS (corporate tax, separate form) |
 
+### G4 IBS — Impôt sur les Bénéfices des Sociétés (IBS)
+| Field | Value |
+|-------|-------|
+| Name | Impôt sur les Bénéfices des Sociétés / الضريبة على أرباح الشركات |
+| Agency | DGI |
+| Purpose | Corporate tax 19/23/26% (production / BTP-tourism / services-commerce) |
+| Who needs it | Companies subject to IBS |
+| Deadline | Annual (April 30) |
+| Format | PDF |
+| DSC generator | `g4_ibs_generator.py` — IBS 19/23/26% |
+| Complexity | moderate |
+| Revenue potential | high |
+
 ### G8 — Déclaration d'Existence
 | Field | Value |
 |-------|-------|
@@ -379,17 +392,16 @@ Each form entry contains:
 | ONS (Statistics) | 1 | 1 | 0 |
 | ANAE (Auto-Entrepreneur) | 1 | 1 | 0 |
 | NESDA (Financing) | 1 | 1 | 0 |
-| **TOTAL** | **29** | **22** | **7** |
+| **TOTAL** | **29** | **21** | **8** |
 
 ## PRIORITY GAPS (Remaining)
 
-1. **AS 1** — Medical care claim (low volume)
-2. **AS 8** — Work/salary certificate (medium demand)
-3. **Certificat Négatif** — Company name reservation
-4. **Remaining CNAS forms** — AS1, AS8, plus other employee declarations
+1. **AS 1** — Medical care claim — S — simple, 2–4h, low willingness-to-pay (low volume, reimbursement form)
+2. **AS 8** — Work/salary certificate — S — simple, 2–4h, low willingness-to-pay (medium demand, bank/visa use)
+3. **Certificat Négatif** — Company name reservation — S — simple, 2–4h, low willingness-to-pay (pre-RC name check)
 
 ## BUILT GENERATORS (as of 2026-08-22)
 
-All P1 and P2 priority gaps have been filled. 22 form/document generators covering 20 DGI/CNAS/CASNOS/CNRC/ONS/ANAE forms plus 2 special forms (NESDA dossier + G4 IBS).
+All P1 and P2 priority gaps have been filled. 21 generators: 20 tax/form + NESDA dossier (G4 IBS is one of the 20, not extra).
 
 See `gaps_analysis.md` for detailed status.

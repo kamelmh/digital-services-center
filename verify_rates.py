@@ -52,9 +52,9 @@ VERIFIED_2026_RATES = {
     "ibs_services": {"expected": 0.26, "unit": "%", "source": "Art. 150 CIDTA, webminds.dz, gbsdz.com"},
 
     "irg_rate_max": {"expected": 0.35, "unit": "%", "source": "WebMinds.dz"},
-    "irg_threshold_0": {"expected": 120_000, "unit": "DZD", "source": "WebMinds.dz"},
-    "irg_threshold_20": {"expected": 360_000, "unit": "DZD", "source": "WebMinds.dz"},
-    "irg_threshold_30": {"expected": 1_440_000, "unit": "DZD", "source": "WebMinds.dz"},
+    "irg_threshold_0": {"expected": 240_000, "unit": "DZD", "source": "WebMinds.dz"},
+    "irg_threshold_20": {"expected": 480_000, "unit": "DZD", "source": "WebMinds.dz"},
+    "irg_threshold_30": {"expected": 960_000, "unit": "DZD", "source": "WebMinds.dz"},
 
     "ifu_threshold": {"expected": 8_000_000, "unit": "DZD", "source": "UpGrowth.dz"},
     "ifu_benefits": {"expected": 0.05, "unit": "%", "source": "UpGrowth.dz"},
@@ -62,15 +62,14 @@ VERIFIED_2026_RATES = {
     "ifu_auto_min": {"expected": 10_000, "unit": "DZD", "source": "upgrowth.dz"},
     "ifu_min": {"expected": 30_000, "unit": "DZD", "source": "upgrowth.dz"},
 
-    "tap_production": {"expected": 0.01, "unit": "%", "source": "WebMinds.dz"},
-    "tap_services_commerce": {"expected": 0.02, "unit": "%", "source": "WebMinds.dz"},
+    "tap_production": {"expected": 0.01, "unit": "%", "source": "WebMinds.dz"},  # obsolete LF2024 TAP supprimée — rate still verified but form inactive
+    "tap_services_commerce": {"expected": 0.02, "unit": "%", "source": "WebMinds.dz"},  # obsolete LF2024 TAP supprimée — rate still verified but form inactive
 
     # --- CNAS / Social Security ---
     "snmg_monthly": {"expected": 24_000, "unit": "DZD", "source": "macalculatriceenligne.com"},
-    "snmg_monthly": {"expected": 24_000, "unit": "DZD", "source": "macalculatriceenligne.com"},
     "cnas_salaried_pct": {"expected": 0.09, "unit": "%", "source": "macalculatriceenligne.com"},
     "cnas_employer_pct": {"expected": 0.255, "unit": "%", "source": "macalculatriceenligne.com"},
-    "cnas_total_pct": {"expected": 0.35, "unit": "%", "source": "macalculatriceenligne.com"},
+    "cnas_total_pct": {"expected": 0.345, "unit": "%", "source": "macalculatriceenligne.com"},
 
     # --- Discount Rate ---
     "van_discount_rate": {"expected": 0.12, "unit": "%", "source": "Industry standard Algeria"},

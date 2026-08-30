@@ -1,7 +1,8 @@
 """Dossiers router — POST /v1/dossiers/feasibility (queued) + GET /jobs/{id}."""
 from datetime import datetime, timezone
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -46,6 +47,7 @@ def _get_db():
         db.close()
 
 
+# dead code — optional-auth path not yet wired; see ROADMAP.md §3 admin tooling
 def _get_current_user_optional():
     # Reuse existing auth.py logic if available; fallback to anonymous when AUTH_REQUIRED=0
     try:
@@ -108,7 +110,7 @@ def create_feasibility(
             db.commit()
             raise HTTPException(status_code=500, detail=f"Enqueue + inline fallback failed: {e} / {ie}")
 
-    return {"job_id": job.id, "status": job.status, "message": "Queued — poll GET /v1/jobs/{job_id}"}
+    return {"job_id": job.id, "status": job.status, "message": "Queued — poll GET /v1/dossiers/jobs/{job_id}"}
 
 
 @router.get("", dependencies=[Depends(_rl_read)])
@@ -116,8 +118,8 @@ def list_dossiers(
     q: str | None = None,
     wilaya: str | None = None,
     status: str | None = None,
-    limit: int = 20,
-    offset: int = 0,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
 ):
@@ -181,14 +183,14 @@ def me(
 
 @router.get("/jobs/{job_id}", dependencies=[Depends(_rl_poll)])
 def get_job(
-    job_id: str,
+    job_id: UUID,
     tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
 ):
     from ..models.job import Job
 
     require_tenant_user(db, tenant_id)
-    job = db.query(Job).filter(Job.id == job_id, Job.tenant_id == tenant_id).first()
+    job = db.query(Job).filter(Job.id == str(job_id), Job.tenant_id == tenant_id).first()
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     return {
@@ -234,14 +236,14 @@ def export_csv(
 # would shadow the static routes above (e.g. /export-csv would match as dossier_id).
 @router.get("/{dossier_id}", dependencies=[Depends(_rl_read)])
 def get_dossier(
-    dossier_id: str,
+    dossier_id: UUID,
     tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
 ):
     from ..models.dossier import Dossier
 
     require_tenant_user(db, tenant_id)
-    row = db.query(Dossier).filter(Dossier.id == dossier_id, Dossier.tenant_id == tenant_id).first()
+    row = db.query(Dossier).filter(Dossier.id == str(dossier_id), Dossier.tenant_id == tenant_id).first()
     if not row:
         raise HTTPException(status_code=404, detail="Dossier not found")
     return {

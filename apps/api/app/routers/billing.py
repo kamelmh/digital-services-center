@@ -3,6 +3,8 @@ import hashlib
 import hmac
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -29,8 +31,8 @@ PLANS = {
 
 
 class CheckoutRequest(BaseModel):
-    plan: str  # starter|pro|business
-    billing_cycle: str = "monthly"  # monthly|yearly (yearly = 10×)
+    plan: Literal["starter", "pro", "business"]
+    billing_cycle: Literal["monthly", "yearly"] = "monthly"
 
 
 class CheckoutResponse(BaseModel):
@@ -136,6 +138,8 @@ def create_checkout(
     tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
 ):
+    # Literal enum on CheckoutRequest already rejects bad plan/cycle with 422;
+    # these explicit 400s are kept for a clearer error message than Pydantic's default.
     if req.plan not in PLANS or req.plan == "free":
         raise HTTPException(status_code=400, detail="Invalid plan — choose starter|pro|business")
     if req.billing_cycle not in ("monthly", "yearly"):

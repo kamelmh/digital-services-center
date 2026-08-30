@@ -72,3 +72,11 @@ generate_canonical_md.py
 generate_pdf.py
 
 # Fonts are tracked (assets/fonts/*.ttf bundled for exe portability)
+
+# Next.js (apps/web)
+apps/web/node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/.turbo/
+.next/
+node_modules/

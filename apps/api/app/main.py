@@ -55,6 +55,7 @@ except Exception as e:
 
 @app.get("/health")
 def health():
+    # intentionally exposes env for Render health check routing — no secrets
     return {"status": "ok", "env": settings.app_env, "storage": settings.storage_backend, "queue": settings.rq_queue_name}
 
 
