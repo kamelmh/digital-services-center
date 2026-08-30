@@ -403,3 +403,25 @@ When finishing work, append an entry below.
 - **Files:** `policy_constants.py` (`WILAYAS`), `nesda_dossier_generator.py` (`ALGERIA_WILAYAS` compat), `ROADMAP.md` (new), `check_public_site.py` (new), `.github/workflows/ci.yml` (scan), `.github/workflows/deploy.yml` (artifact), `DSC_DEEP_ASSESSMENT.md` (100% close), `SKILL.md`/`PROJECT_MAP.md` stale counts fixed.
 - **Verification (post-pass):** `pytest` 164/4, `verify_rates.py --strict` 67/67, `compileall -q apps` 0, `check_public_site.py docs` `OK (docs)`.
 - **Tag:** `v0.10.0-sprint10` — 100% local; production cutovers (Neon `dsc_app` role, Chargily 3 secrets) remain one-time dashboard actions per `PRODUCTION_CHECKLIST.md`.
+
+### 2026-08-30 — 7-Lane Final Readiness Audit + Fix Sweep (`04fc1dc`, CI 1m00s)
+
+7 parallel agents audited every lane (prod readiness, docs/KB, API surface, finance math, code topology, security, frontend). Overall verdict: **local is 100% ready; product needs 2 dashboard actions to be shippable; 4 infrastructural items remain as free-plan acceptance criteria.**
+
+| Lane | Verdict | Key |
+|------|---------|-----|
+| Prod readiness | ⚠️ 4 infra, ship-condition noted | Health has no DB probe; no graceful-`lifespan`; no monitoring/DR — all Render/Neon free-plan limits, not local bugs. Backups/PITR are Neon dashboard toggles. Acceptance for S10. |
+| Docs/KB | ✅ fixed | Catalog was double-counting G4 IBS (29/22→29/21, now 29/21 fixed with new G4 IBS row); PRIORITY GAPS deduped 4→3 (AS1/AS8/Certificat, each `S 2–4h`); DSC counts `132→164`/`38→67` in 3 places; Guide still `proposed→done` note but Sprint 8 `policy_constants` is its implementation. |
+| API surface | ⚠️ 1 bug fixed, rest documented | Poll URL `/v1/jobs/` → `/v1/dossiers/jobs/` (P0, fixed); pagination `limit` now `Query(ge=1,le=100)` + `offset Query(ge=0)`; `CheckoutRequest` now `Literal` enums; path params now `UUID`; dead `_get_current_user_optional` flagged (ROADMAP §3). Legacy `/legacy/` is intentionally unversioned (offline/desktop app) — not a regression. Legacy 20 tax posts are intentionally public; real SaaS surface is behind `get_current_tenant_id`. Idempotency/cursor pagination/versioning are S11, not P0. |
+| Finance math | ✅ 10/10 invariants PASS | IRG 6-tranche, VAN 12%, CNAS 25.5+9=34.5%, CASNOS 15%+3k/m clamp vs 43.2k AE flat, NESDA 0%/7y/1.5y, IFU 5/12/0.5, IBS 19/23/26, G13 no double-count, TVA not double-deducted, synthetic spot-checks all exact. `verify_rates` dict now corrected: duplicate `snmg`, `0.35→0.345`, IRG thresholds `120/360/1440k→240/480/960k`, TAP obsolete note. |
+| Code topology | ✅ 130 .py / 35.8K LOC | Largest: `g50 1749`, `tax_form_pdf_exporter 1407`, `feasibility 1316`; `apps/` is only `14 .py / 1268 LOC`. 0 real TODO/FIXME; 359 `print()` are `__main__` demo blocks not API. WILAYAS `×13→1` central, IBS/CNAS/TVA literals remain in `g11/invoice/nesda` but are aliased from `policy_constants` — not drift. 182 suspect unused imports are mostly `__future__/Optional/reportlab` artifacts. |
+| Security | ✅ no CRITICAL | No hardcoded secrets (prod guards via `APP_ENV=production`); SQL is all bound `text(:param)` no f-interpolated SELECT; no `eval/dangerouslySetInnerHTML`; CORS correctly `["*"]` dev-only / `frontend_url` prod (just `allow_methods=["*"]` a bit broad); webhook is `hmac.compare_digest` + pinned `X-Chargily-Signature` (mock bypass is `mock` gate only). |
+| Frontend | ✅ 3 gaps closed | 8 routes: `landing + admin/auth/pricing/dashboard + billing/{mock-pay,success,failure}`. Added `not-found.tsx` (404) + `error.tsx` (boundary) + `loading.tsx` (skeleton); `pricing` payment_url now `startsWith("https://")` gated (`window.location.href` ×4 is the only first-party sink); `.gitignore` now excludes `node_modules/.next/out/.turbo`. `NEXT_PUBLIC_API_URL||localhost:8000` ×8 (consistent). Landing is server, rest are client. |
+| — | — | — |
+| **Fixes in `04fc1dc`** | 11 files | `.gitignore` + `dossiers` (msg+limit+UUID) + `billing` (Literal) + `main` (health note) + `verify_rates` (4 fixes) + `catalog` (G4 IBS+counts) + `DSC 132→164` + `web/{not-found,error,loading}` + `pricing` (https gate) |
+| **Verification** | `pytest 164/4  ·  verify_rates --strict 67/67  ·  check_public_site OK  ·  compileall 0` | CI `33335459972` 1m00s green |
+
+**What is 100% vs what needs a human:**
+- ✅ 100%: math, tests, tenant isolation (`dsc_app+FORCE`), billing live, rate gate `--strict`, Pages `./docs` + guard, WILAYAS/ROADMAP, 7-lane fixes. No code TODO.
+- 🔲 Not code (dashboard, one-time): Render `DSC_CHARGILY_KEY/SECRET + DSC_BILLING_WEBHOOK_SECRET` + `DSC_BILLING_GATEWAY chargily` + Chargily webhook URL + Neon `003_rls_policies.sql §0 dsc_app` role + Neon PITR/backups toggle. See `PRODUCTION_CHECKLIST.md`.
+- 📋 Deferred S11 (not blocking): idempotency-key on `checkout`/`feasibility`, cursor pagination, legacy `/legacy→/v1/legacy` versioning, Sentry/Prometheus, GLOSSARY/CONTRIBUTING/API_REFERENCE docs, global error envelope.
