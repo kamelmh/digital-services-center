@@ -5,6 +5,7 @@ Auto-opens browser, runs on localhost.
 """
 import sys
 import os
+import socket
 import time
 import webbrowser
 import threading
@@ -14,6 +15,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 PORT = 8000
+for p in (8000, 8001, 8002):
+    try:
+        s = socket.socket()
+        s.bind(("", p))
+        s.close()
+        PORT = p
+        break
+    except Exception:
+        continue
 URL = f"http://localhost:{PORT}"
 
 
@@ -24,6 +34,8 @@ def open_browser():
 
 
 def main():
+    if PORT != 8000:
+        print(f"Port 8000 occupied, using {PORT}")
     print("=" * 60)
     print("  DSC — Digital Services Center")
     print("  مركز الخدمات الرقمية")

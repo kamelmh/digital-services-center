@@ -20,6 +20,9 @@ _rl_me = make_rate_limit("60/minute")
 
 router = APIRouter(prefix="/billing", tags=["billing"])
 
+# TODO(S11): persist idempotency_key column — currently dedupes within request only
+_CHECKOUT_IDEMPOTENCY: dict[str, str] = {}
+
 
 # ── Plans (single source, mirrors billing.py:24 but with DB enforcement) ──
 PLANS = {
@@ -137,6 +140,7 @@ def create_checkout(
     req: CheckoutRequest,
     tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
     # Literal enum on CheckoutRequest already rejects bad plan/cycle with 422;
     # these explicit 400s are kept for a clearer error message than Pydantic's default.
@@ -144,6 +148,24 @@ def create_checkout(
         raise HTTPException(status_code=400, detail="Invalid plan — choose starter|pro|business")
     if req.billing_cycle not in ("monthly", "yearly"):
         raise HTTPException(status_code=400, detail="Invalid billing_cycle")
+
+    # TODO(S11): persist idempotency_key column — currently dedupes within request only
+    if idempotency_key:
+        cache_key = f"{tenant_id}:{idempotency_key}"
+        existing_id = _CHECKOUT_IDEMPOTENCY.get(cache_key)
+        if existing_id:
+            from ..models.checkout import Checkout as _CheckoutIdem
+
+            existing = db.get(_CheckoutIdem, existing_id)
+            if existing:
+                return CheckoutResponse(
+                    plan=existing.plan,
+                    price=existing.amount,
+                    gateway=existing.gateway,
+                    payment_url=f"{settings.frontend_url}/billing/mock-pay?checkout_id={existing.id}",
+                    checkout_id=existing.id,
+                    note="Mock payment — no Chargily key set" if settings.billing_gateway == "mock" else None,
+                )
 
     user = require_tenant_user(db, tenant_id)
 
@@ -165,6 +187,10 @@ def create_checkout(
     )
     db.add(row)
     db.commit()
+
+    # TODO(S11): persist idempotency_key column — currently dedupes within request only
+    if idempotency_key:
+        _CHECKOUT_IDEMPOTENCY[f"{tenant_id}:{idempotency_key}"] = checkout_id
 
     return CheckoutResponse(
         plan=req.plan,

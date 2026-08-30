@@ -2,7 +2,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -19,6 +19,9 @@ _rl_poll = make_rate_limit("120/minute")      # job polling is cheap
 _rl_export = make_rate_limit("10/minute")
 
 router = APIRouter(prefix="/v1/dossiers", tags=["dossiers"])
+
+# TODO(S11): persist idempotency_key column — currently dedupes within request only
+_FEASIBILITY_IDEMPOTENCY: dict[str, str] = {}
 
 
 class FeasibilityRequest(BaseModel):
@@ -67,6 +70,7 @@ def create_feasibility(
     req: FeasibilityRequest,
     tenant_id: str = Depends(get_current_tenant_id),
     db: Session = Depends(_get_db),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
     """Enqueue feasibility generation. Returns job_id for polling."""
     # Entitlement enforced via dependencies — free 1/mo, starter 10, pro/business fair-use
@@ -77,10 +81,25 @@ def create_feasibility(
 
     require_tenant_user(db, tenant_id)
 
+    # TODO(S11): persist idempotency_key column — currently dedupes within request only
+    if idempotency_key:
+        cache_key = f"{tenant_id}:{idempotency_key}"
+        existing_id = _FEASIBILITY_IDEMPOTENCY.get(cache_key)
+        if existing_id:
+            from ..models.job import Job as _JobIdem
+
+            existing = db.get(_JobIdem, existing_id)
+            if existing and existing.tenant_id == tenant_id:
+                return {"job_id": existing.id, "status": existing.status, "message": "Queued — poll GET /v1/dossiers/jobs/{job_id}"}
+
     job = Job(tenant_id=tenant_id, type="feasibility", status="queued", progress=0)
     db.add(job)
     db.commit()
     db.refresh(job)
+
+    # TODO(S11): persist idempotency_key column — currently dedupes within request only
+    if idempotency_key:
+        _FEASIBILITY_IDEMPOTENCY[f"{tenant_id}:{idempotency_key}"] = job.id
 
     # Enqueue RQ if Redis available, else run inline (sync fallback for local dev without Redis)
     try:
@@ -145,6 +164,8 @@ def list_dossiers(
         "total": total,
         "limit": limit,
         "offset": offset,
+        "has_more": len(rows) == limit and (offset + len(rows) < total),
+        "pages": (total + limit - 1) // limit if limit else 0,
         "dossiers": [
             {
                 "id": r.id,

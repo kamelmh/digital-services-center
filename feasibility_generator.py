@@ -389,6 +389,16 @@ BUSINESS_TEMPLATES = {
         "area_sqm": (20, 50),
         "products": "تركيب تكييف، صيانة دورية، إصلاح أعطال، تبريد صناعي، قطع غيار",
     },
+    "electricite_generale": {
+        "name_ar": "متجر الكهرباء العامة — نظام ألماسة للمخزون",
+        "name_en": "General Electrical Supplies Store — Almasse Inventory System",
+        "category": "تجارة",
+        "investment": (1_500_000, 6_000_000),
+        "margin": (0.18, 0.30),
+        "staff": (2, 5),
+        "area_sqm": (40, 120),
+        "products": "كابلات وأسلاك، قواطع ولوحات توزيع، مفاتيح ومقابس، إنارة LED، تجهيزات كهربائية، قنوات وتمديدات، أدوات كهربائي، أجهزة قياس — مع إدارة مخزون ألماسة (باركود، تنبيه نفاد، جرد دوري، نقطة بيع)",
+    },
 }
 
 # ── Regulatory checklists per business type ────────────────────────────────────
@@ -431,6 +441,14 @@ REGULATORY_CHECKLISTS = {
         {"item": "رخصة استعمال الحواسيب", "authority": "مديرية الاتصالات", "cost_range": "10,000–20,000 دج", "deadline": "قبل الافتتاح"},
         {"item": "التصريح بالأنشطة الرقمية", "authority": "وزارة الاتصالات", "cost_range": "مجاني", "deadline": "قبل الافتتاح"},
         {"item": "شهادة حماية البيانات الشخصية", "authority": "CNDC", "cost_range": "حسب النشاط", "deadline": "إذا كان النشاط يتطلب ذلك"},
+    ],
+    "electricite_generale": [
+        {"item": "السجل التجاري — تجارة التجزئة للتجهيزات الكهربائية (CNRC 607-003)", "authority": "CNRC — المركز الوطني للسجل التجاري", "cost_range": "4,000–8,000 دج", "deadline": "قبل بدء النشاط"},
+        {"item": "شهادة تأهيل كهربائي — للتركيب والصيانة إن وجدت", "authority": "مديرية الطاقة / APAVE", "cost_range": "10,000–25,000 دج", "deadline": "قبل تقديم خدمات التركيب"},
+        {"item": "شهادة المطابقة IANOR — للتجهيزات الكهربائية", "authority": "IANOR", "cost_range": "حسب المنتجات", "deadline": "للمعدات المستوردة"},
+        {"item": "شهادة السلامة من الحريق — مخزون كهربائي", "authority": "الحماية المدنية", "cost_range": "5,000–15,000 دج", "deadline": "قبل الافتتاح"},
+        {"item": "التصريح بالنشاط + NIF", "authority": "مصلحة الضرائب", "cost_range": "مجاني", "deadline": "خلال 30 يومًا"},
+        {"item": "التصريح بالعمال (CNAS) + CASNOS للمؤسس", "authority": "CNAS / CASNOS", "cost_range": "حسب الأجور", "deadline": "قبل التوظيف"},
     ],
 }
 

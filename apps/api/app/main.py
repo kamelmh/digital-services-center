@@ -1,5 +1,6 @@
 """SaaS API main — mounts v1 dossiers router alongside legacy api.py routes."""
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
@@ -14,9 +15,32 @@ app = FastAPI(title=settings.app_name, version="1.0.0")
 app.state.limiter = limiter
 app.add_exception_handler(
     RateLimitExceeded,
-    lambda request: JSONResponse(status_code=429, content={"detail": "Rate limit exceeded"}),
+    lambda request, exc: JSONResponse(status_code=429, content={"detail": "Rate limit exceeded"}),
 )
 app.add_middleware(SlowAPIMiddleware)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"error": {"code": "validation_error", "message": "Validation failed", "detail": exc.errors()}},
+    )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    if isinstance(exc, HTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": {"code": "http_error", "message": exc.detail}},
+        )
+    import logging
+
+    logging.getLogger("dsc").exception("Unhandled: %s %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=500, content={"error": {"code": "internal_error", "message": "Internal server error"}}
+    )
 
 # CORS — tighten in prod (allow only frontend origin)
 app.add_middleware(
